@@ -63,4 +63,7 @@
     #bgvid {
         display: none;
     }
+    #jumbo {
+        background-image: url('https://vitalmindmedia.com/img/fallback-mobile.jpg');
+    }
 }
