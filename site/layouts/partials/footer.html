@@ -4,50 +4,43 @@
 
 		<div class="measure-narrow center mb4">
 
-			<img src="/img/logo.svg" alt="Kaldi logo" class="db w4 center mb4 br0">
-			<p class="f3 lh-title light-gray b tc mb2">Newsletter subscribe</p>
-			<p>Get awesome news from us in your inbox every two weeks. Be the first to learn about new products.</p>
-
-			{{ partial "newsletter-form" . }}
-
-		</div>
-
-		<div class="flex-ns justify-between">
-
-			<div>
-				<h3 class="f4 b lh-title mb1 primary">Kaldi</h3>
-				<ul class="mb3">
-					<li><a href="/" class="link">Home</a></li>
-					<li><a href="/products" class="link">Our products</a></li>
-					<li><a href="/values" class="link">About</a></li>
-					<li><a href="/post" class="link">Blog</a></li>
-					<li><a href="/contact" class="link">Contact</a></li>
-				</ul>
-			</div>
-
-			<div>
-				<h3 class="f4 b lh-title mb1 primary">Find out more</h3>
-				<ul class="mb3">
-					<li><a href="/post/jamaica-blue/" class="link">Latest offers</a></li>
-					<li><a href="/contact" class="link">Schedule and appointment</a></li>
-				</ul>
-			</div>
-
-			<div>
-				<h3 class="f4 b lh-title mb2 primary">Social media</h3>
-				<ul class="mhn2">
-					{{ partial "social-icon" (dict "link" "#" "svg" "icons-facebook") }}
-					{{ partial "social-icon" (dict "link" "#" "svg" "icons-twitter") }}
-					{{ partial "social-icon" (dict "link" "#" "svg" "icons-instagram") }}
-					{{ partial "social-icon" (dict "link" "#" "svg" "icons-vimeo") }}
-				</ul>
-			</div>
+			<img src="/img/logo.svg" alt="Vital Mind Media logo" class="db w4 center mb3 br0">
+			<a name="contact">&nbsp;</a>
+			
+			{{ partial "contact-form" . }}
 
 		</div>
+
+		
 	</div>
 
 </footer>
 
 {{ partial "svg" . }}
 
-<script src="/app.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript" src="/app.js"></script>
+<script type="text/javascript" src="/js/scrollto.js"></script>
+<script type="text/javascript">
+	function detectmob() {
+	    if( navigator.userAgent.match(/Android/i)
+	    || navigator.userAgent.match(/webOS/i)
+	    || navigator.userAgent.match(/iPhone/i)
+	    || navigator.userAgent.match(/iPod/i)
+	    || navigator.userAgent.match(/BlackBerry/i)
+	    || navigator.userAgent.match(/Windows Phone/i)
+	    ){
+
+	        // If mobile, then we do all this
+
+	    }
+	    else {
+
+	        // If not mobile then do this
+	document.getElementById("bgvid").innerHTML = '<source src="/video/VMM_BG.mp4" type="video/mp4">';
+
+	    }
+	}
+	detectmob();
+
+</script>

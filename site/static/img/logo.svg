@@ -1,1 +1,84 @@
-<svg viewBox="0 0 109 24" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:figma="http://www.figma.com/figma/ns"><title>Logo</title><g transform="translate(-1470)" figma:type="canvas"><g style="mix-blend-mode:normal" figma:type="vector" transform="translate(1470)" fill="#f40"><use xlink:href="#b" style="mix-blend-mode:normal"/><use xlink:href="#c" style="mix-blend-mode:normal"/><use xlink:href="#d" style="mix-blend-mode:normal"/><use xlink:href="#e" style="mix-blend-mode:normal"/><use xlink:href="#f" style="mix-blend-mode:normal"/></g></g><defs><path id="b" d="M22.735 23.171c.283.323.053.829-.376.829h-5.907c-.285 0-.556-.121-.745-.333l-9.414-10.526v10.36c0 .276-.224.5-.5.5h-5.293c-.276 0-.5-.224-.5-.5v-23c0-.276.224-.5.5-.5h5.293c.276 0 .5.224.5.5v9.815l9.141-9.99c.19-.207.457-.325.738-.325h5.762c.437 0 .664.521.366.841l-9.851 10.563 10.287 11.767z"/><path id="c" d="M45.991 24c-.199 0-.38-.118-.459-.301l-2.024-4.669h-10.67l-2.024 4.669c-.079.183-.259.301-.459.301h-5.212c-.366 0-.608-.381-.453-.712l10.782-23c.082-.176.259-.288.453-.288h4.358c.194 0 .37.112.453.287l10.815 23c.156.332-.086.713-.452.713h-5.108zm-11.135-9.668h6.635l-3.317-7.694-3.317 7.694z"/><path id="d" d="M55.525 24c-.276 0-.5-.224-.5-.5v-23c0-.276.224-.5.5-.5h5.293c.276 0 .5.224.5.5v18.428h9.759c.276 0 .5.224.5.5v4.072c0 .276-.224.5-.5.5h-15.552z"/><path id="e" d="M75.279.5c0-.276.224-.5.5-.5h9.315c2.667 0 4.959.477 6.874 1.43 1.938.953 3.42 2.338 4.446 4.153 1.026 1.793 1.539 3.926 1.539 6.4 0 2.496-.513 4.652-1.539 6.468-1.003 1.793-2.474 3.166-4.412 4.119-1.915.953-4.218 1.43-6.908 1.43h-9.315c-.276 0-.5-.224-.5-.5v-23zm9.37 18.462c2.371 0 4.138-.579 5.301-1.736 1.163-1.157 1.744-2.905 1.744-5.242 0-2.338-.581-4.074-1.744-5.209-1.163-1.157-2.93-1.736-5.301-1.736h-3.078v13.923h3.078z"/><path id="f" d="M102.913 24c-.276 0-.5-.224-.5-.5v-23c0-.276.224-.5.5-.5h5.293c.276 0 .5.224.5.5v23c0 .276-.224.5-.5.5h-5.293z"/></defs></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns:figma="http://www.figma.com/figma/ns"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 25.8 24"
+	 style="enable-background:new 0 0 25.8 24;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:url(#SVGID_1_);}
+	.st1{fill:url(#SVGID_00000018207266670695365570000014805474589480632494_);}
+	.st2{fill:url(#SVGID_00000075869112770244897630000014411608667681954189_);}
+	.st3{fill:url(#SVGID_00000041275513350971249200000001078051359078853534_);}
+	.st4{display:none;}
+	.st5{display:inline;fill:url(#SVGID_00000098929087160515328720000011098262247064648884_);}
+	.st6{display:inline;fill:url(#SVGID_00000070808592433421786230000013556531475291761826_);}
+	.st7{display:inline;fill:url(#SVGID_00000104678941876289298860000014056335055386740914_);}
+	.st8{display:inline;fill:url(#SVGID_00000158027561595795642070000001108414807819566761_);}
+	.st9{fill:url(#SVGID_00000015319018550403019410000008717286011269289346_);}
+</style>
+<g>
+	
+		<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="4.6501" y1="10.8779" x2="15.191" y2="10.8779" gradientTransform="matrix(1 0 0 -1 0 26)">
+		<stop  offset="0" style="stop-color:#2FB45C"/>
+		<stop  offset="1" style="stop-color:#2E4FA2"/>
+	</linearGradient>
+	<polygon class="st0" points="14.4,13.6 15.2,12.1 8,12.1 4.7,18.1 6.2,18.1 9,13.6 	"/>
+	
+		<linearGradient id="SVGID_00000137834969206862962830000010132150893095283844_" gradientUnits="userSpaceOnUse" x1="1.0644" y1="15.0819" x2="17.4476" y2="15.0819" gradientTransform="matrix(1 0 0 -1 0 26)">
+		<stop  offset="0" style="stop-color:#2FB45C"/>
+		<stop  offset="1" style="stop-color:#2E4FA2"/>
+	</linearGradient>
+	<polyline style="fill:url(#SVGID_00000137834969206862962830000010132150893095283844_);" points="12.9,16.8 13.7,18 17.4,12 14,6 
+		13.2,7.3 14.9,10.3 8.7,10.3 13.6,1.8 11.8,1.8 1.1,20 10.3,20 9.3,18.4 4.1,18.4 7.8,11.8 15.7,11.8 	"/>
+	
+		<linearGradient id="SVGID_00000158739729468478690920000009030600538472877194_" gradientUnits="userSpaceOnUse" x1="9.3796" y1="9.0078" x2="20.0441" y2="9.0078" gradientTransform="matrix(1 0 0 -1 0 26)">
+		<stop  offset="0" style="stop-color:#2FB45C"/>
+		<stop  offset="1" style="stop-color:#2E4FA2"/>
+	</linearGradient>
+	<polyline style="fill:url(#SVGID_00000158739729468478690920000009030600538472877194_);" points="10.8,13.9 9.4,13.9 12.9,20.1 
+		20,20.1 19.1,18.4 13.6,18.4 	"/>
+	
+		<linearGradient id="SVGID_00000035505546287687087930000004052406375602402704_" gradientUnits="userSpaceOnUse" x1="1.0953" y1="7.864" x2="23.5063" y2="7.864" gradientTransform="matrix(1 0 0 -1 0 26)">
+		<stop  offset="0" style="stop-color:#2FB45C"/>
+		<stop  offset="1" style="stop-color:#2E4FA2"/>
+	</linearGradient>
+	<polygon style="fill:url(#SVGID_00000035505546287687087930000004052406375602402704_);" points="18,15.7 20.6,20.4 12.7,20.4 
+		9.1,14.1 8.1,15.7 10.9,20.4 1.1,20.4 2.1,22.2 23.5,22.2 19,14.1 	"/>
+	<g class="st4">
+		
+			<linearGradient id="SVGID_00000182501340053621006930000010400866508436594561_" gradientUnits="userSpaceOnUse" x1="16.4558" y1="8.9459" x2="18.9762" y2="8.9459" gradientTransform="matrix(1 0 0 -1 0 26)">
+			<stop  offset="0" style="stop-color:#2FB45C"/>
+			<stop  offset="1" style="stop-color:#2E4FA2"/>
+		</linearGradient>
+		<polygon style="display:inline;fill:url(#SVGID_00000182501340053621006930000010400866508436594561_);" points="16.5,18.1 
+			19,18.1 17.8,16 		"/>
+		
+			<linearGradient id="SVGID_00000183951192786439957230000005816028067657400239_" gradientUnits="userSpaceOnUse" x1="11.5034" y1="17.1994" x2="14.3197" y2="17.1994" gradientTransform="matrix(1 0 0 -1 0 26)">
+			<stop  offset="0" style="stop-color:#2FB45C"/>
+			<stop  offset="1" style="stop-color:#2E4FA2"/>
+		</linearGradient>
+		<polygon style="display:inline;fill:url(#SVGID_00000183951192786439957230000005816028067657400239_);" points="11.5,9.9 
+			14.3,9.9 12.9,7.7 		"/>
+		
+			<linearGradient id="SVGID_00000012467594196822304030000016384848316112794504_" gradientUnits="userSpaceOnUse" x1="6.5621" y1="8.9459" x2="9.1649" y2="8.9459" gradientTransform="matrix(1 0 0 -1 0 26)">
+			<stop  offset="0" style="stop-color:#2FB45C"/>
+			<stop  offset="1" style="stop-color:#2E4FA2"/>
+		</linearGradient>
+		<polygon style="display:inline;fill:url(#SVGID_00000012467594196822304030000016384848316112794504_);" points="7.9,16 6.6,18.1 
+			9.2,18.1 		"/>
+		
+			<linearGradient id="SVGID_00000081630433851750166440000016661573300451840934_" gradientUnits="userSpaceOnUse" x1="11.1973" y1="10.8161" x2="14.158" y2="10.8161" gradientTransform="matrix(1 0 0 -1 0 26)">
+			<stop  offset="0" style="stop-color:#2FB45C"/>
+			<stop  offset="1" style="stop-color:#2E4FA2"/>
+		</linearGradient>
+		<polygon style="display:inline;fill:url(#SVGID_00000081630433851750166440000016661573300451840934_);" points="14.2,13.9 
+			11.2,13.9 12.7,16.4 		"/>
+	</g>
+	
+		<linearGradient id="SVGID_00000043442403349391184940000006486836555499812536_" gradientUnits="userSpaceOnUse" x1="9.2869" y1="14.0155" x2="24.7427" y2="14.0155" gradientTransform="matrix(1 0 0 -1 0 26)">
+		<stop  offset="0" style="stop-color:#2FB45C"/>
+		<stop  offset="1" style="stop-color:#2E4FA2"/>
+	</linearGradient>
+	<polygon style="fill:url(#SVGID_00000043442403349391184940000006486836555499812536_);" points="9.3,9.9 11.1,9.9 14,5.3 17.8,12 
+		14,18.1 16.1,18.1 19,13.4 23.8,22 24.7,20.2 13.9,2 	"/>
+</g>
+</svg>
