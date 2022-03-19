@@ -3,9 +3,9 @@
 		{{ if .heading }}<h2 class="f2 b lh-title mb2">{{.heading}}</h2>{{ end }}
 		{{ if .description }}<p class="mb4 mw6">{{.description}}</p>{{ end }}
 
-		<div class="flex-ns flex-wrap mhn2-ns mb3">
+		<div class="flex flex-wrap mhn2 mb3">
 			{{ range .items }}
-				<div class="ph2-ns w-33-ns mb4">
+				<div class="ph2 w-33 mb4">
 					<img src="{{ .image }}" alt="" class="center db mb3 w-100" style="max-width: 240px">
 					<p>{{ .text }}</p>
 				</div>
