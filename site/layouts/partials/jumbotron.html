@@ -1,12 +1,13 @@
 
 
-<div class="bg-black pv5 pv6-l ph3 bg-center center cover" id="jumbo" style="/*background-image: url('{{.imageUrl}}');*/ height:100vh;">
+<div class="bg-black pv5 pv6-l ph3 bg-center center cover" style="/*background-image: url('{{.imageUrl}}');*/ height:100vh;">
   <div class="fullscreen-bg z-1">
-      <video muted preload="metadata" class="fullscreen-bg-video" autoplay playsinline poster="/img/fallback-image.jpg" loop id="bgvid" style="filter: blur(0.2rem);">
+      <video muted preload="metadata" class="fullscreen-bg-video" autoplay playsinline poster="/img/fallback-image.jpg" loop id="bgvid">
       </video>
+      <div id="jumbo" class="fullscreen-bg-video"></div>
     </div>
 
-  <div class="mw7 center fullscreen-bg-text ph3 z-2 tc">
+  <div class="mw7 center fullscreen-bg-text ph3 tc">
     <div class="mw7 relative pa4 ma3 center br1">
 
         <img src="/img/logo.svg" alt="Vital Mind Media logo" class="mw4 br0 mb0 fade-1"/><br />
