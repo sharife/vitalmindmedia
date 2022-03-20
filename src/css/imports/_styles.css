@@ -64,6 +64,6 @@
         display: none;
     }
     #jumbo {
-        background-image: url('https://vitalmindmedia.com/video/vmm-bg.gif');
+        background-image: url('https://vitalmindmedia.com/img/fallback-mobile.jpg');
     }
 }
