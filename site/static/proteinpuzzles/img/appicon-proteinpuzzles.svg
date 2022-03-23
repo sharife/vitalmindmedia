@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#005dcc"/>
+      <stop offset="1" stop-color="#621ea9"/>
+    </linearGradient>
+  </defs>
+  <g id="Group_1419" data-name="Group 1419" transform="translate(-5977 -3760)">
+    <g id="Rectangle_28" data-name="Rectangle 28" transform="translate(5977 3760)" stroke="#707070" stroke-width="1" fill="url(#linear-gradient)">
+      <rect width="512" height="512" rx="40" stroke="none"/>
+      <rect x="0.5" y="0.5" width="511" height="511" rx="39.5" fill="none"/>
+    </g>
+    <g id="Group_1418" data-name="Group 1418" transform="translate(5977 3760)">
+      <g id="Group_1410" data-name="Group 1410">
+        <g id="Group_1408" data-name="Group 1408" style="isolation: isolate">
+          <path id="Path_1645" data-name="Path 1645" d="M117.152,121.676l34.878,34.6V350.756L117.152,315.6ZM269.5,152.367H155.936l-34.6-34.878H234.621Zm-111.887,5.582H232.95V273.742H157.612Zm80.919,0H273.41v76.732l-34.879,35.155Z" fill="#fff"/>
+        </g>
+        <g id="Group_1409" data-name="Group 1409" style="isolation: isolate">
+          <path id="Path_1646" data-name="Path 1646" d="M273.473,354.051H238.6V277.319l34.878-35.155ZM242.5,359.633H356.064l34.6,34.878H277.379Zm111.887-5.582H279.05V238.258h75.338Zm40.46,36.273-34.878-34.6V161.244l34.878,35.16Z" fill="#fff"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
