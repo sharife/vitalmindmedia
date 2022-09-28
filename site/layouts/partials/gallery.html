@@ -1,0 +1,59 @@
+{{ if .projects.items }}
+
+{{ if gt (len .projects.items) 1 }}
+<div class="pt0 pb3">
+  <div class="mw7 center">
+    {{ if .projects.heading }}
+      <h2 class="f3 b lh-title mb2 tc">{{.projects.heading}}</h2>
+    {{ end }}
+    {{ if .projects.text }}
+      <div class="f5 cms mb4 tc">{{.projects.text | markdownify }}</div>
+    {{ end }}
+
+    {{ $len := (len .projects.items) }}
+
+    <div class="flex-ns flex-wrap mhn2-ns">
+      {{ range $index, $e := .projects.items }}
+
+        {{ $next_img := add $index 1 }}
+        {{ $prev_img := sub $index 1 }}
+
+        <div class="w-30-ns mb4 mr3">
+          <div class="perfundo">
+            <a class="perfundo__link js-perfundo-link" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $index }}">
+              <!-- <img src="{{.image}}" alt="{{ if .caption }}{{.caption}}{{ end }}" class="mb3"> -->
+              <div class="perfundo__image db" style="width: 800px; padding-top: 66.25%; background-image: url({{.image}});"></div>
+            </a>
+            <div id="perfundo-{{ $.galleryID }}-{{ $index }}" class="perfundo__overlay js-perfundo-overlay">
+              <figure class="perfundo__content perfundo__figure mw7 bg-white">
+                <!-- <img src="{{.image}}" alt="{{ if .caption }}{{.caption}}{{ end }}"> -->
+                
+                <div class="perfundo__image fadein tc cover" style="padding-top: 66.25%; background-image: url({{.image}});">
+                </div>
+                <div class="mw7 ph3 fadein">
+                  <div class="f5 b mb0 mt2"><a href="{{.link}}">{{.title}}</a></div>
+                  <div class="cms f6 mb3">{{ .caption | markdownify }}</div>
+                </div>
+              </figure>
+              <a href="{{$.pageUrl}}#perfundo-untarget" class="perfundo__close perfundo__control js-perfundo-close">Close</a>
+              {{ if eq (add $index 1) $len}}
+              {{ else }}
+
+                <!-- <a class="perfundo__next perfundo__control js-perfundo-next" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $next_img }}">Next</a> -->
+              {{ end }}
+              {{ if $index}}
+                <!-- <a class="perfundo__prev perfundo__control js-perfundo-prev" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $prev_img }}">Prev</a> -->
+              {{ end }}
+            </div>
+          </div>
+
+        </div>
+
+
+      {{ end }}
+    </div>
+  </div>
+</div>
+{{ end }}
+
+{{ end }}
