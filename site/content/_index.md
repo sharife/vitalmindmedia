@@ -21,7 +21,7 @@ projects:
     text: A selection of interactive games, apps, and websites.
     items:
       - image: /img/portfolio-01.jpg
-        title: Superstruct
+        title: SuperStruct
         link: https://playsuperstruct.com
         caption: Collaborating with scientists at UT Austin, we designed and produced this new citizen science game which challenges players to fit 3D models of proteins together to form protein complexes. Players then share their solutions with researchers to collectively find the optimal configuration. Each puzzle represents a different biological mechanism important to human health.
       - image: /img/portfolio-06.jpg
