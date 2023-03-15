@@ -7,7 +7,7 @@
       <h2 class="f3 b lh-title mb2 tc">{{.projects.heading}}</h2>
     {{ end }}
     {{ if .projects.text }}
-      <div class="f5 cms mb4 tc">{{.projects.text | markdownify }}</div>
+      <div class="f5 cms mb4 tc ph4">{{.projects.text | markdownify }}</div>
     {{ end }}
 
     {{ $len := (len .projects.items) }}
@@ -31,7 +31,7 @@
                 <div class="perfundo__image fadein tc cover" style="padding-top: 66.25%; background-image: url({{.image}});">
                 </div>
                 <div class="mw7 ph3 fadein">
-                  <div class="f5 b mb0 mt2"><a href="{{.link}}">{{.title}}</a></div>
+                  <div class="f5 b mb0 mt2">{{ if .link }}<a href="{{.link}}" class="link">{{ end }}{{.title}}{{ if .link }}</a>{{ end }}</div>
                   <div class="cms f6 mb3">{{ .caption | markdownify }}</div>
                 </div>
               </figure>
@@ -39,10 +39,10 @@
               {{ if eq (add $index 1) $len}}
               {{ else }}
 
-                <!-- <a class="perfundo__next perfundo__control js-perfundo-next" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $next_img }}">Next</a> -->
+                <a class="perfundo__next perfundo__control js-perfundo-next" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $next_img }}">Next</a>
               {{ end }}
               {{ if $index}}
-                <!-- <a class="perfundo__prev perfundo__control js-perfundo-prev" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $prev_img }}">Prev</a> -->
+                <a class="perfundo__prev perfundo__control js-perfundo-prev" href="{{$.pageUrl}}#perfundo-{{ $.galleryID }}-{{ $prev_img }}">Prev</a>
               {{ end }}
             </div>
           </div>
