@@ -1,11 +1,20 @@
 ---
-title: "We design unique digital media for science, health, and education."
-cta: Contact us
-link: "#contact"
+title: "Design for science, health, and education"
+cta: Watch our reel
+link: "#about"
 image: /img/fallback-mobile.jpg
 approach:
-    heading: About us
-    text: "Vital Mind Media is a San Francisco-based digital agency that collaborates with leading researchers and communications teams in academia and the biotech industry to create digital media which engages people through storytelling and experience design. We are designers, developers, writers, researchers, scientists, strategists, and multimedia production experts with decades of experience in science communication."
+    heading: Transform your complex ideas into digital experiences that people can understand, use, and enjoy.
+    text: "Vital Mind Media is a digital agency that collaborates with leading researchers and communications teams in academia and the biotech industry. We are designers, developers, writers, researchers, scientists, strategists, and multimedia production experts with decades of experience in science and health communication."
+story:
+  title: We create media that matters.
+  text: Our team works with you to communicate your ideas effectively across platforms, helping you connect with your audience wherever they are. Whether you're looking for a new way to express your brand or an intuitive interface for complex tasks, we've got you covered.
+  images:
+    - image: /img/still-01.jpg
+    - image: /img/still-02.jpg
+    - image: /img/still-05.png
+    - image: /img/still-03.jpg
+    - image: /img/still-04.jpg
 clients: 
     - image: /img/logo_buck.png
     - image: /img/logo_gene.png
@@ -17,8 +26,8 @@ clients:
     - image: /img/logo_utaustin.png
     - image: /img/logo_yale.png
 projects:
-    heading: Featured work
-    text: A selection of interactive games, apps, and media.
+    heading: Featured Projects
+    text: View a selection of interactive games, apps, and media we've developed.
     items:
       - image: /img/portfolio-08.jpg
         title: attune

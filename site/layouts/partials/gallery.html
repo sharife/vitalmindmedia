@@ -4,10 +4,10 @@
 <div class="pt0 pb3">
   <div class="mw7 center">
     {{ if .projects.heading }}
-      <h2 class="f3 b lh-title mb2 tc">{{.projects.heading}}</h2>
+      <h2 class="f3 b lh-title mb2 tc hideme">{{.projects.heading}}</h2>
     {{ end }}
     {{ if .projects.text }}
-      <div class="f5 cms mb4 tc ph4">{{.projects.text | markdownify }}</div>
+      <div class="f5 cms mb4 tc ph4 hideme">{{.projects.text | markdownify }}</div>
     {{ end }}
 
     {{ $len := (len .projects.items) }}

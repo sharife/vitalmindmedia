@@ -1,32 +1,38 @@
 
 
-<div class="bg-black pv5 pv6-l ph3 bg-center center cover" style="/*background-image: url('{{.imageUrl}}');*/ height:100vh;">
+<div class="pv5 pv6-l ph3 bg-center center cover" style="/*background-image: url('{{.imageUrl}}');*/ background: black; height:100vh;">
   <div class="fullscreen-bg z-1">
-      <video muted preload="metadata" class="fullscreen-bg-video" autoplay playsinline poster="/img/fallback-image.jpg" loop id="bgvid">
-      </video>
-      <div id="jumbo" class="fullscreen-bg-video"></div>
-    </div>
+    <video muted preload="metadata" class="fullscreen-bg-video" autoplay playsinline poster="/img/vector-map-bg.png" loop id="bgvid">
+    </video>
+    <div id="jumbo" class="fullscreen-bg-video"></div>
+  </div>
 
-  <div class="mw7 center fullscreen-bg-text ph3 tc">
-    <div class="mw7 relative pa4 ma3 center br1">
-
-        <img src="/img/logo.svg" alt="Vital Mind Media logo" class="mw4 br0 mb0 fade-1"/><br />
+  <div class="mw8 center fullscreen-bg-text ph3">
+    <div class="mw8 relative pa4 ma3 center br1 fadein">
+      <div class="tc">
+        <div class="tc mt3 mb1">
+          <img src="/img/logo.svg" alt="Vital Mind Media logo" class="mw3 br0 mb0 fade-1"/><br />
           <nobr><h2 class="f3 white ttu b fade-1">Vital Mind Media</h2></nobr>
-        <br />
-
-        <h1 class="f3 f2-l b di lh-title mb3 white mw6 fade-2">
-          {{.title}}
-        </h1>
-        {{ if .subtitle }}
-        <div class="b f4 di lh-title mb3 white mw6 fade-2">
-          {{.subtitle}}
         </div>
-        {{ end }}
-        {{ if .cta }}
-        <div class="ma2 fade-2">
-          <a href="{{.link}}" class="btn raise bg-primary white" style="box-shadow:none;">{{.cta}}</a>
+        <div class="mb3">
+          <div>
+          <h1 class="f3 b di lh-title mb3 white mw6 fade-2">
+            <!-- <div class="typing-wrapper"><div class="typing-text">{{.title}}</div></div> -->
+            {{.title}}
+          </h1>
         </div>
-        {{ end }}
+          {{ if .subtitle }}
+          <div class="b f6 ttu di lh-title mb3 white mw6 fade-3">
+            {{.subtitle}}
+          </div>
+          {{ end }}
+          {{ if .cta }}
+          <div class="mt2 fade-4">
+            <a href="{{.link}}" class="btn raise bg-primary white" style="box-shadow:none;">{{.cta}}</a>
+          </div>
+          {{ end }}
+        </div>
       </div>
+    </div>
   </div>
 </div>

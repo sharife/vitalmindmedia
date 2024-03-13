@@ -1,0 +1,28 @@
+<div class="white bg-black pv5">
+	<div class="ph3 mw8 center">
+
+		<div class="flex-l mhn2-l">
+
+			<div class="w-50-l ph2-l hideme">
+				<a name="reel"></a>
+				
+				<div>
+					<video width="100%" height="100%" controls preload="auto" poster="/img/video-poster.jpg">
+					  <source src="/video/VMM-Reel-2024.webm" type="video/webm">
+					  Your browser does not support the video tag.
+					</video>
+				</div>
+			</div>
+
+			<div class="w-50-l ph3-l mb4">
+				<h2 class="mt2 f3 b lh-title mb2 hideme">{{.heading}}</h2>
+
+				<p class="hideme">{{.text}}</p>
+
+				{{if .buttonText}}<a href="{{.buttonLink}}" class="btn raise hideme">{{.buttonText}}</a>{{ end }}
+			</div>
+		</div>
+
+
+	</div>
+</div>

@@ -1,0 +1,21 @@
+<div class="bg-grey-1 pv4">
+	<div class="ph3 mw8 center">
+
+		<div class="story">
+    		<div class="story-content">
+		      <p class="hideme">
+		      	<span class="f3 b lh-title">{{ .story.title | markdownify }}</span><br />
+		      	{{ .story.text | markdownify }}
+		      </span>
+		      	<br /><a href="#contact" class="mt3 btn white bg-primary raise">Get in touch</a>
+		      </p>
+		      
+		      <div class="story-images">
+		      	{{ range .story.images }}
+		        	<img src="{{ .image }}" class="hideme"/>
+		        {{ end }}
+		      </div>
+		    </div>
+		</div>
+	</div>
+</div>

@@ -4,7 +4,11 @@
 
 
 <div class="pb3 bg-black"><a name="about">&nbsp;</a></div>
-{{ partial "short-text" (dict "heading" .Params.approach.heading "text" .Params.approach.text) }}
+{{ partial "text-and-video" (dict "heading" .Params.approach.heading "text" .Params.approach.text) }}
+
+
+{{ partial "story" (dict "story" .Params.story) }}
+
 
 <div class="pb3 bg-white"><a name="portfolio">&nbsp;</a></div>
 {{ partial "gallery" (dict "projects" .Params.projects "pageUrl" .Permalink "galleryID" "1") }}

@@ -10,7 +10,7 @@
 			{{ partial "contact-form" . }}
 
 		</div>
-
+		<div class="tc w-100 ttu small">Copyright &copy; 2024 Vital Mind Media // San Francisco, CA // info@vitalmindmedia.com</div>
 		
 	</div>
 
@@ -19,6 +19,14 @@
 {{ partial "svg" . }}
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script type="text/javascript">
+	$(function(){  // $(document).ready shorthand
+	  $('.fade-1').delay(10).animate({'opacity':'1'},700);
+	  $('.fade-2').delay(1200).animate({'opacity':'1'},700);
+	  $('.fade-3').delay(3000).animate({'opacity':'1'},700);
+	  $('.fade-4').delay(3500).animate({'opacity':'1'},700);
+	});
+</script>
 <script type="text/javascript" src="/app.js"></script>
 <script type="text/javascript" src="/js/scrollto.js"></script>
 <script type="text/javascript">
