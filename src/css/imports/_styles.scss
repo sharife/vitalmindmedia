@@ -78,7 +78,17 @@ body {
 }
 
 
-
+@media screen and (max-device-width: 760px) {
+    #bgvid {
+        display: none;
+    }
+    #jumbo {
+        background-image: url('https://vitalmindmedia.com/video/vmm-bg.gif');
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+    }
+}
 
 .fade-1, .fade-2, .fade-3, .fade-4 {
     opacity: 0;
