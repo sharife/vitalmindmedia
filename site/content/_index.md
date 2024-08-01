@@ -31,7 +31,6 @@ projects:
     items:
       - image: /img/portfolio-08.jpg
         title: attune
-        link: https://attunerx.com
         caption: We worked with clinical experts and cancer survivors to adapt a validated Cognitive Behavioral Therapy program for anxiety and depression into a self-guided mobile app. The resulting product from Blue Note Therapeutics, attune, received the FDA's breakthrough designation and met its primary endpoint in a randomized controlled trial.
       - image: /img/portfolio-05.jpg
         title: Eterna
@@ -51,11 +50,11 @@ projects:
       - image: /img/portfolio-01.jpg
         title: SuperStruct
         link: https://playsuperstruct.com
-        caption: Collaborating with scientists at UT Austin, we designed and produced this new citizen science game which challenges players to fit 3D models of proteins together to form protein complexes. Players then share their solutions with researchers to collaboratively find the optimal configuration. Each puzzle represents a different biological mechanism important to human health.
-      - image: /img/portfolio-03.jpg
-        title: Mantra Bio
-        link: https://mantrabio.com
-        caption: We designed and developed a new website for this biotech startup focused on exosome therapeutics, including an explainer video and a unique design language.
+        caption: Collaborating with scientists at UT Austin, we designed and produced this prototype science game which challenges players to fit 3D models of proteins together to form protein complexes. Each puzzle represents a different biological mechanism important to human health.
+      - image: /img/portfolio-03b.jpg
+        title: Ansa Bio
+        link: https://ansabio.com
+        caption: We designed and developed a new website for this biotech startup focused on an innovative enzymatic DNA synthesis technology, including an explainer video and a unique design language.
       - image: /img/portfolio-02.jpg
         title: Phage Invaders
         link: https://innovativegenomics.org/phage-invaders/
