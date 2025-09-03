@@ -14,6 +14,9 @@ story:
     - image: /img/still-02.jpg
     - image: /img/slow-carbon-cycle.png
     - image: /img/still-03.jpg
+    - image: /img/ACE-2223-MOA-MOD-v2.png
+    - image: /img/ansa-synthetic-DNA.jpg
+    - image: /img/rna-structure.png
     - image: /img/still-04.jpg
 clients: 
     - image: /img/logo_buck.png
