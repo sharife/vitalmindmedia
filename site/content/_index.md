@@ -12,7 +12,7 @@ story:
   images:
     - image: /img/still-01.jpg
     - image: /img/still-02.jpg
-    - image: /img/still-05.png
+    - image: /img/slow-carbon-cycle.png
     - image: /img/still-03.jpg
     - image: /img/still-04.jpg
 clients: 

@@ -1,0 +1,9 @@
+{{ define "main" }}
+
+{{ partial "banner" (dict "imageUrl" .Params.image "icon" .Params.icon "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
+
+<div class="pv4 center mb4 mw6 cms">
+	{{ .Content}}
+</div>
+
+{{ end }}

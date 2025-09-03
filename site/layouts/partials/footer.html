@@ -10,7 +10,7 @@
 			{{ partial "contact-form" . }}
 
 		</div>
-		<div class="tc w-100 ttu small">Copyright &copy; 2024 Vital Mind Media // San Francisco, CA // info@vitalmindmedia.com</div>
+		<div class="tc w-100 ttu small">Copyright &copy; 2025 Vital Mind Media // San Francisco, CA // info@vitalmindmedia.com</div>
 		
 	</div>
 
@@ -45,7 +45,10 @@
 	    else {
 
 	        // If not mobile then do this
-	document.getElementById("bgvid").innerHTML = '<source src="/video/new.mp4" type="video/mp4">';
+	    	var myElem = document.getElementById('bgvid');
+if (myElem != null){
+	    		document.getElementById("bgvid").innerHTML = '<source src="/video/new.mp4" type="video/mp4">';
+	    	}
 
 	    }
 	}
