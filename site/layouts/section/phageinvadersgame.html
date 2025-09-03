@@ -1,6 +1,6 @@
 {{ define "main" }}
 
-{{ partial "banner" (dict "imageUrl" .Params.image "icon" .Params.icon "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
+{{ partial "banner" (dict "imageUrl" .Params.image "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
 
 {{ partial "text-and-image" (dict "heading" .Params.intro.heading "text" .Params.intro.text "image" .Params.intro.image) }}
 

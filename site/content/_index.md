@@ -57,7 +57,7 @@ projects:
         caption: We designed and developed a new website for this biotech startup focused on an innovative enzymatic DNA synthesis technology, including an explainer video and a unique design language.
       - image: /img/portfolio-02.jpg
         title: Phage Invaders
-        link: https://innovativegenomics.org/phage-invaders/
+        link: /phageinvadersgame/
         caption: Working closely with UC Berkeley’s Innovative Genomics Institute, we designed and produced this mobile game which teaches kids (and adults!) about CRISPR gene editing. Players defend their bacterial cellular home from invading viral phages by cutting injected viral DNA before it can make more copies of phages.
       - image: /img/portfolio-04.jpg
         title: Buck Academy

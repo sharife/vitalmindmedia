@@ -2,6 +2,7 @@
 title: "Phage Invaders"
 subtitle: "A CRISPR Game"
 image: /img/phage-invaders-banner.jpg
+icon: /img/phageinvaders-appicon.webp
 cta: Download Now
 link: "https://apps.apple.com/us/app/phage-invaders/id1460866913"
 intro:
