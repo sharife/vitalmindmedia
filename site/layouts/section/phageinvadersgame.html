@@ -1,0 +1,16 @@
+{{ define "main" }}
+
+{{ partial "banner" (dict "imageUrl" .Params.image "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
+
+
+<div class="pb3 bg-black"><a name="about">&nbsp;</a></div>
+{{ partial "text-and-video" (dict "heading" .Params.approach.heading "text" .Params.approach.text) }}
+
+{{ partial "screenshots" (dict "items" .Params.screenshots.images "heading" "Screenshots") }}
+
+{{ partial "short-text" (dict "heading" .Params.screenshots.heading) }}
+
+{{ partial "4-up" (dict "heading" .Params.howtoplay.heading "images" .Params.howtoplay.images) }}
+
+
+{{ end }}

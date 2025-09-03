@@ -1,0 +1,32 @@
+
+
+<div class="pv5 pv6-l ph3 bg-center center cover" style="background-image: url('{{.imageUrl}}');">
+  <div class="mw8 center ph3">
+    <div class="mw8 relative pa4-ns ma3 center br1 fadein">
+      <div class="tc">
+        <div class="tc mt3 mb1">
+          <img src="/img/phageinvaders-appicon.webp" alt="Phage Invaders app icon" class="mw3 br1 mb0 fade-1"/><br />
+          <nobr><h2 class="f4 f3-ns white ttu b fade-1">Phage Invaders</h2></nobr>
+        </div>
+        <div class="mb3">
+          <div>
+          <h1 class="f3 b di lh-title mb3 white mw6 fade-2">
+            <!-- <div class="typing-wrapper"><div class="typing-text">{{.title}}</div></div> -->
+            {{.title}}
+          </h1>
+        </div>
+          {{ if .subtitle }}
+          <div class="b f6 ttu di lh-title mb3 white mw6 fade-3">
+            {{.subtitle}}
+          </div>
+          {{ end }}
+          {{ if .cta }}
+          <div class="mt2 fade-4">
+            <a href="{{.link}}" class="btn raise bg-primary white" style="box-shadow:none;">{{.cta}}</a>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
