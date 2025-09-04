@@ -1,20 +1,9 @@
-<div class="white bg-black pv5">
+<div class="bg-grey-1 pv5">
 	<div class="ph3 mw8 center">
 
 		<div class="flex-l mhn2-l">
 
-			<div class="w-50-l ph2-l">
-				<a name="reel"></a>
-				
-				<div>
-					<!-- <video width="100%" height="100%" controls preload="auto" poster="/img/video-poster.jpg">
-					  <source src="/video/VMM-Reel-2024.webm" type="video/webm">
-					  <source src="/video/VMM-Reel-2024.mp4" type="video/mp4">
-					  <source src="/video/VMM-Reel-2024.ogg" type="video/ogg">
-					</video> -->
-					<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/925115636?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Vital Mind Media Reel"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
-				</div>
-			</div>
+			
 
 			<div class="w-50-l ph3-l mb4">
 				<h2 class="mt2 f3 b lh-title mb2">{{.heading}}</h2>
@@ -22,6 +11,13 @@
 				<p class="">{{.text}}</p>
 
 				{{if .buttonText}}<a href="{{.buttonLink}}" class="btn raise">{{.buttonText}}</a>{{ end }}
+			</div>
+
+			<div class="w-50-l ph2-l">
+				
+				<div>
+					{{ partial "youtube" (dict "id" .videoID) }}
+				</div>
 			</div>
 		</div>
 

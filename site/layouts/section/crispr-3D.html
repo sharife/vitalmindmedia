@@ -1,0 +1,31 @@
+{{ define "main" }}
+
+{{ partial "banner" (dict "imageUrl" .Params.image "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
+
+{{ partial "text-and-video" (dict "heading" .Params.intro.heading "text" .Params.intro.text "videoID" .Params.intro.videoID) }}
+
+
+<div class="bg-black pt4 white">
+	<div class="tc center mb4 mw8">
+		<a href="{{.Params.link}}"><img class="w-100 mw3 mb2 br1" src="{{.Params.icon}}" /></a>
+		<h3 class="f3 b">Download for Free</h3>
+		<p class="center cms">Bring stunning structures to life on iPhone and iPad!</p>
+		<a href="{{.Params.link}}"><img class="w-100 mw4 mb4" src="/img/btn_download_ios.svg" /></a>
+	</div>
+</div>
+
+{{ partial "screenshots" (dict "items" .Params.screenshots.images "heading" "Screenshots" "pageUrl" .Permalink "galleryID" "1") }}
+
+<div class="bg-grey-1 pt4 black center">
+<div class="center mb4 mw6">
+{{ partial "media-block-reverse" (dict "heading" .Params.blurb.heading "text" .Params.blurb.text "imageUrl" .Params.blurb.image) }}
+</div>
+</div>
+
+<div class="tc center mb4 mw8">
+	<h3 class="f3 b">Credits</h3>
+	<p class="center cms"><strong>CRISPR-3D</strong> was created by <a class="b" href="/">Vital Mind Media</a> in collaboration with scientists at the <a class="b" href="https://innovativegenomics.org">Innovative Genomics Institute</a>.</p>
+	<p class="center cms"><a href="/privacy" class="b f6">Privacy Policy</a></p>
+</div>
+
+{{ end }}
