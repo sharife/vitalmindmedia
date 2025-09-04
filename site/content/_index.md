@@ -14,7 +14,6 @@ story:
     - image: /img/still-02.jpg
     - image: /img/slow-carbon-cycle.png
     - image: /img/still-03.jpg
-    - image: /img/ansa-synthetic-DNA.jpg
     - image: /img/rna-structure.png
     - image: /img/still-04.jpg
 clients: 
@@ -53,7 +52,7 @@ projects:
         title: SuperStruct
         link: https://playsuperstruct.com
         caption: Collaborating with scientists at UT Austin, we designed and produced this prototype science game which challenges players to fit 3D models of proteins together to form protein complexes. Each puzzle represents a different biological mechanism important to human health.
-      - image: /img/portfolio-03b.jpg
+      - image: /img/ansa-screens.jpg
         title: Ansa Bio
         link: https://ansabio.com
         caption: We designed and developed a new website for this biotech startup focused on an innovative enzymatic DNA synthesis technology, including an explainer video and a unique design language.
