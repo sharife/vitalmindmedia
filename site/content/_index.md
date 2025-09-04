@@ -47,7 +47,7 @@ projects:
         caption: We produced this podcast from the Buck Institute in which celebrated scientist Gordon Lithgow explores cutting-edge research and ideas on aging with some of the brightest minds in the field.
       - image: /img/portfolio-06.jpg
         title: CRISPR-3D
-        link: https://innovativegenomics.org/crispr-3d/
+        link: /crispr-3d/
         caption: This unique app displays CRISPR protein systems using augmented reality to allow students, educators, and scientists to investigate the 3D structure of these increasingly important but often complex biological mechanisms. The app includes a feature that displays 3D models using custom playing cards designed by the Innovative Genomics Institute.
       - image: /img/portfolio-01.jpg
         title: SuperStruct
