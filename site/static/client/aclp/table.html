@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Pricing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic Styling */
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        /* Pricing Table Container */
+        .pricing-table {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allows tiers to stack on smaller screens */
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Individual Pricing Tier */
+        .pricing-tier {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            padding: 2.5rem 2rem;
+            flex: 1; /* Each tier takes up equal space */
+            min-width: 280px; /* Minimum width for each tier */
+            display: flex;
+            flex-direction: column;
+            border-top: 5px solid #00a79d;
+        }
+
+        /* Tier Header */
+        .pricing-tier h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-top: 0;
+            color: #1a1a1a;
+            margin-bottom:0;
+        }
+
+        /* Price Styling */
+        .price {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #333;
+            margin: 1rem 0;
+        }
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        /* Feature List */
+        .features {
+            list-style: none;
+            padding: 0;
+            margin: 1.1rem 0;
+            flex-grow: 1; /* Pushes the button to the bottom */
+        }
+        .features li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        .features li:last-child {
+            border-bottom: none;
+        }
+
+        /* Call-to-Action Button */
+        .cta-button {
+            display: inline-block;
+            background-color: #00a79d; /* Primary Teal */
+            color: #fff;
+            text-decoration: none;
+            padding: 0.85rem 1.75rem;
+            border-radius: 5px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .cta-button:hover {
+            background-color: #008a7e; /* Slightly darker teal for hover */
+        }
+        
+        /* Highlighted "Supported" Tier */
+        .tier-supported {
+            border-top-color: #f58220; /* Vibrant Orange for highlight */
+            transform: scale(1.05); /* Makes it slightly larger */
+        }
+        .tier-supported .cta-button {
+            background-color: #f58220;
+        }
+        .tier-supported .cta-button:hover {
+            background-color: #d9701c; /* Darker orange for hover */
+        }
+    </style>
+</head>
+<body>
+    <div style="display:flex;width:100vw;justify-content:center;">
+        <div style="max-width: 700px;text-align: center; margin-bottom: 40px;">
+            <img src="https://cdn-temp2.gurucan.com/images/9039e2dc-b734-42de-b894-a2ff4fe3f4e9285bac83-6480-47db-827f-62b533808c12a53df31e-63d3-4118-b322-d51eb788903a2a4b0d7b-2816-4a9d-a6e4-3ef1af56b197/9039e2dc-b734-42de-b894-a2ff4fe3f4e9285bac83-6480-47db-827f-62b533808c12a53df31e-63d3-4118-b322-d51eb788903a2a4b0d7b-2816-4a9d-a6e4-3ef1af56b197.png" style="max-width:200px;margin:0;">  
+            <h1 style="font-size:3rem; margin:0;">Learn Your Way</h1>
+            <p style="font-size:1.2rem; margin-bottom:0;">Choose the level of support and resources that best suits your learning style. </p>
+            <p>Note: If you are experiencing financial hardship, please contact us at info@anticancerlifestyle.org to discuss your options. We are committed to ensuring that no one is turned away for inability to pay.</p>
+        </div>
+    </div>
+    <div class="pricing-table">
+
+
+        <div class="pricing-tier">
+            <h2>Basic</h2>
+            <div class="price">Free</div>
+            <ul class="features">
+                <li>Access to All Courses</li>
+                <li>Web &amp; Mobile App</li>
+                <li>Resource Library</li>
+                <li>Self-guided</li>
+            </ul>
+            <a href="#" class="cta-button">Sign Up</a>
+        </div>
+
+        <div class="pricing-tier tier-supported">
+            <h2>Supported</h2>
+            <div class="price">$100</div>
+            <ul class="features">
+                <li>Access to All Courses</li>
+                <li>Web &amp; Mobile App</li>
+                <li>Resource Library</li>
+                <li>Join a Cohort of Learners</li>
+                <li>Community Discussion</li>
+                <li>Access to Certified Health Coach</li>
+            </ul>
+            <a href="#" class="cta-button">Get Started</a>
+        </div>
+
+        <div class="pricing-tier">
+            <h2>Premium</h2>
+            <div class="price">$200</div>
+            <ul class="features">
+                <li>Access to All Courses</li>
+                <li>Web &amp; Mobile App</li>
+                <li>Resource Library</li>
+                <li>Join a Cohort of Learners</li>
+                <li>Community Discussion</li>
+                <li>Access to Certified Health Coach</li>
+                <li>Weekly Zoom meetings</li>
+                <li>Peer Counseling</li>
+                <li>Real-time Support</li>
+            </ul>
+            <a href="#" class="cta-button">Contact Us</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

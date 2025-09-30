@@ -1,11 +1,14 @@
 {{ define "main" }}
 
+{{ partial "banner" (dict "imageUrl" .Params.image "icon" .Params.icon "title" .Title "subtitle" .Params.subtitle "cta" .Params.cta "link" .Params.link) }}
+
+
   <div class="mw6 center ph3 pv4">
-    <h1 class="f2 lh-title b mb3">{{.Title}}</h1>
-    <div class="flex justify-between grey-3">
+    <!-- <h1 class="f2 lh-title b mb3">{{.Title}}</h1> -->
+    <!-- <div class="flex justify-between grey-3">
       <p>{{ .Date.Format "Mon, Jan 2, 2006" }}</p>
       <p>Read in {{ .ReadingTime }} minutes</p>
-    </div>
+    </div> -->
     <div class="cms mw6">
       <p>{{ .Description }}</p>
       {{ if .Params.image }}<img src="{{ .Params.image }}" alt="{{ .Title }}" />{{ end }}
@@ -13,3 +16,4 @@
     </div>
   </div>
 {{ end }}
+
