@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Algebra & Trig</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- KaTeX for Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <div id="root" class="flex-1 flex flex-col w-full"></div>
+
+    <script>
+        // --- Data Bank ---
+        const courseData = [
+          {
+            id: 'functions',
+            title: 'Functions & Relations',
+            description: 'Understanding domains, ranges, inverse functions, and compositions.',
+            questions: [
+              { id: 'f1_1', level: 1, text: 'What is the domain of $f(x) = \\frac{1}{x-2}$?', options: ['$x = 2$', '$x \\neq 2$', 'All real numbers', '$x > 0$'], correct: 1, explanation: 'Division by zero is undefined, so the denominator $x-2$ cannot be equal to $0$. Therefore, $x \\neq 2$.', searchQuery: 'how to find the domain of a rational function' },
+              { id: 'f1_2', level: 1, text: 'Which statement best describes a mathematical function?', options: ['Any relation between $x$ and $y$', 'A relation where each $x$ has exactly one $y$', 'A relation where each $y$ has exactly one $x$', 'A curve that crosses the x-axis twice'], correct: 1, explanation: 'By definition, a function pairs every input ($x$) with exactly one output ($y$).', searchQuery: 'definition of a mathematical function relation' },
+              { id: 'f2_1', level: 2, text: 'Find $f(g(x))$ if $f(x) = 2x$ and $g(x) = x + 3$.', options: ['$2x + 3$', '$x + 6$', '$2x + 6$', '$3x + 3$'], correct: 2, explanation: 'Substitute $g(x)$ into $f(x)$: $f(x+3) = 2(x+3) = 2x + 6$.', searchQuery: 'composition of functions f(g(x))' },
+              { id: 'f2_2', level: 2, text: 'Find the inverse function $f^{-1}(x)$ for $f(x) = 3x - 1$.', options: ['$\\frac{x - 1}{3}$', '$\\frac{x + 1}{3}$', '$-3x + 1$', '$\\frac{1}{3x-1}$'], correct: 1, explanation: 'Swap $x$ and $y$, then solve for $y$: $x = 3y - 1 \\implies x + 1 = 3y \\implies y = \\frac{x + 1}{3}$.', searchQuery: 'how to find the inverse of a linear function' },
+              { id: 'f3_1', level: 3, text: 'What is the range of $f(x) = -x^2 + 4$?', options: ['$y \\geq 4$', '$y \\leq 4$', 'All real numbers', '$y \\neq 4$'], correct: 1, explanation: 'The function represents a downward-opening parabola with its vertex at $(0, 4)$. Thus, the maximum value is $4$, making the range $y \\leq 4$.', searchQuery: 'how to find the range of a quadratic function parabola' },
+              { id: 'f3_2', level: 3, text: 'Determine the domain of $f(x) = \\sqrt{x - 5}$.', options: ['$x \\leq 5$', '$x \\neq 5$', 'All real numbers', '$x \\geq 5$'], correct: 3, explanation: 'The expression inside a square root must be non-negative for the function to return a real number. So, $x - 5 \\geq 0 \\implies x \\geq 5$.', searchQuery: 'domain of a square root function' },
+            ]
+          },
+          {
+            id: 'systems',
+            title: 'Linear Functions & Systems',
+            description: 'Slopes, linear equations, and systems of multiple variables.',
+            questions: [
+              { id: 's1_1', level: 1, text: 'What is the slope of the line passing through $(1, 2)$ and $(4, 8)$?', options: ['$2$', '$\\frac{1}{2}$', '$-2$', '$6$'], correct: 0, explanation: 'Slope $m = \\frac{y_2 - y_1}{x_2 - x_1} = \\frac{8 - 2}{4 - 1} = \\frac{6}{3} = 2$.', searchQuery: 'how to find the slope between two points' },
+              { id: 's1_2', level: 1, text: 'Solve for $x$: $3x - 4 = 11$', options: ['$4$', '$5$', '$\\frac{7}{3}$', '$15$'], correct: 1, explanation: 'Add $4$ to both sides: $3x = 15$. Divide by $3$: $x = 5$.', searchQuery: 'solving basic two step linear equations' },
+              { id: 's2_1', level: 2, text: 'Solve the system: $x + y = 10$ and $x - y = 2$', options: ['$x=4, y=6$', '$x=8, y=2$', '$x=6, y=4$', '$x=5, y=5$'], correct: 2, explanation: 'Add the two equations: $(x+y) + (x-y) = 10 + 2 \\implies 2x = 12 \\implies x = 6$. Substituting back gives $y = 4$.', searchQuery: 'solving a system of linear equations by elimination' },
+              { id: 's2_2', level: 2, text: 'Write the equation of the line perpendicular to $y = \\frac{1}{2}x + 3$ passing through $(0, 0)$.', options: ['$y = 2x$', '$y = -\\frac{1}{2}x$', '$y = -2x$', '$y = \\frac{1}{2}x$'], correct: 2, explanation: 'Perpendicular lines have negative reciprocal slopes. The original slope is $\\frac{1}{2}$, so the new slope is $-2$. The y-intercept is $0$, so $y = -2x$.', searchQuery: 'equation of a perpendicular line passing through a point' },
+              { id: 's3_1', level: 3, text: 'Evaluate the determinant of the $2 \\times 2$ matrix with top row $(3, 4)$ and bottom row $(1, 2)$.', options: ['$10$', '$2$', '$-2$', '$5$'], correct: 1, explanation: 'Determinant $= (ad - bc) = (3)(2) - (4)(1) = 6 - 4 = 2$.', searchQuery: 'how to evaluate the determinant of a 2x2 matrix' },
+              { id: 's3_2', level: 3, text: 'Solve the system: $2x + 3y = 12$ and $x - y = 1$', options: ['$x=3, y=2$', '$x=4, y=3$', '$x=2, y=3$', '$x=3, y=-2$'], correct: 0, explanation: 'From the second equation, $x = y + 1$. Substitute into the first: $2(y+1) + 3y = 12 \\implies 5y + 2 = 12 \\implies 5y = 10 \\implies y = 2$. Then $x = 3$.', searchQuery: 'solving a system of linear equations by substitution' }
+            ]
+          },
+          {
+            id: 'quadratics',
+            title: 'Quadratic Functions',
+            description: 'Factoring, the quadratic formula, and parabolic behavior.',
+            questions: [
+              { id: 'q1_1', level: 1, text: 'What are the roots of $(x-3)(x+4)=0$?', options: ['$x=3, -4$', '$x=-3, 4$', '$x=3, 4$', '$x=-3, -4$'], correct: 0, explanation: 'Set each factor to zero: $x-3=0 \\implies x=3$ and $x+4=0 \\implies x=-4$.', searchQuery: 'finding roots of a factored quadratic equation' },
+              { id: 'q1_2', level: 1, text: 'Identify the vertex of the parabola $y = (x-1)^2 + 5$.', options: ['$(-1, 5)$', '$(1, 5)$', '$(1, -5)$', '$(0, 5)$'], correct: 1, explanation: 'For vertex form $y = a(x-h)^2 + k$, the vertex is $(h, k)$. Here, $h=1$ and $k=5$.', searchQuery: 'finding the vertex of a parabola in vertex form' },
+              { id: 'q2_1', level: 2, text: 'Factor the expression completely: $x^2 - 7x + 12$.', options: ['$(x-3)(x-4)$', '$(x+3)(x+4)$', '$(x-2)(x-6)$', '$(x-1)(x-12)$'], correct: 0, explanation: 'We need two numbers that multiply to $12$ and add to $-7$. These are $-3$ and $-4$.', searchQuery: 'factoring a quadratic expression trinomial' },
+              { id: 'q2_2', level: 2, text: 'Find the discriminant of $x^2 + 4x + 5 = 0$.', options: ['$36$', '$4$', '$-4$', '$-16$'], correct: 2, explanation: 'The discriminant is $\\Delta = b^2 - 4ac = (4)^2 - 4(1)(5) = 16 - 20 = -4$.', searchQuery: 'how to find the discriminant of a quadratic equation' },
+              { id: 'q3_1', level: 3, text: 'Solve using the quadratic formula: $2x^2 - 5x + 2 = 0$.', options: ['$x = 2, \\frac{1}{2}$', '$x = -2, -\\frac{1}{2}$', '$x = 5, 2$', '$x = 1, 2$'], correct: 0, explanation: '$x = \\frac{5 \\pm \\sqrt{25 - 16}}{4} = \\frac{5 \\pm 3}{4}$. This gives $\\frac{8}{4}=2$ and $\\frac{2}{4}=\\frac{1}{2}$.', searchQuery: 'solving quadratic equations using the quadratic formula' },
+              { id: 'q3_2', level: 3, text: 'Write the quadratic function with vertex $(0, 0)$ passing through $(2, 8)$.', options: ['$y = 4x^2$', '$y = 2x^2$', '$y = x^2 + 4$', '$y = 8x^2$'], correct: 1, explanation: 'Vertex $(0,0)$ means $y = ax^2$. Substitute $(2,8)$: $8 = a(2)^2 \\implies 8 = 4a \\implies a = 2$. So $y = 2x^2$.', searchQuery: 'finding the equation of a parabola given the vertex and a point' }
+            ]
+          },
+          {
+            id: 'exponentials',
+            title: 'Exponential & Logarithmic Functions',
+            description: 'Properties of logs, solving exponential equations, and natural logs.',
+            questions: [
+              { id: 'e1_1', level: 1, text: 'Evaluate $\\log_3(9)$.', options: ['$3$', '$2$', '$27$', '$\\frac{1}{2}$'], correct: 1, explanation: 'We ask: $3$ to what power equals $9$? Since $3^2 = 9$, the answer is $2$.', searchQuery: 'evaluating basic logarithms' },
+              { id: 'e1_2', level: 1, text: 'Simplify using exponent rules: $x^3 \\cdot x^5$.', options: ['$x^{15}$', '$x^2$', '$x^8$', '$2x^8$'], correct: 2, explanation: 'When multiplying like bases, add the exponents: $3 + 5 = 8$.', searchQuery: 'exponent rules multiplying like bases' },
+              { id: 'e2_1', level: 2, text: 'Solve for $x$: $2^x = 32$.', options: ['$4$', '$5$', '$6$', '$16$'], correct: 1, explanation: 'Rewrite $32$ as a power of $2$: $32 = 2^5$. Therefore, $x = 5$.', searchQuery: 'solving exponential equations with common bases' },
+              { id: 'e2_2', level: 2, text: 'Condense the expression: $\\log(x) + \\log(y)$.', options: ['$\\log(x+y)$', '$\\log(x \\cdot y)$', '$\\log(x^y)$', '$\\log(\\frac{x}{y})$'], correct: 1, explanation: 'By the product property of logarithms, the sum of logs is the log of their product.', searchQuery: 'properties of logarithms product rule condensing' },
+              { id: 'e3_1', level: 3, text: 'Solve for $x$: $\\log_2(x-1) = 3$.', options: ['$9$', '$7$', '$10$', '$8$'], correct: 0, explanation: 'Rewrite in exponential form: $2^3 = x - 1 \\implies 8 = x - 1 \\implies x = 9$.', searchQuery: 'solving logarithmic equations converting to exponential form' },
+              { id: 'e3_2', level: 3, text: 'If $e^{\\ln(x)} = 5$, what is the value of $x$?', options: ['$1$', '$e^5$', '$5$', '$\\ln(5)$'], correct: 2, explanation: 'The exponential function $e^x$ and the natural log $\\ln(x)$ are inverse functions. They cancel out, leaving $x = 5$.', searchQuery: 'natural logarithm and e inverse properties' }
+            ]
+          },
+          {
+            id: 'trig',
+            title: 'Trigonometry',
+            description: 'Unit circle, trigonometric identities, and equations.',
+            questions: [
+              { id: 't1_1', level: 1, text: 'Convert $90^{\\circ}$ to radians.', options: ['$\\pi$', '$\\frac{\\pi}{2}$', '$\\frac{\\pi}{4}$', '$2\\pi$'], correct: 1, explanation: 'Multiply by $\\frac{\\pi}{180^{\\circ}}$: $90 \\cdot \\frac{\\pi}{180} = \\frac{\\pi}{2}$.', searchQuery: 'converting degrees to radians' },
+              { id: 't1_2', level: 1, text: 'What is the exact value of $\\sin(30^{\\circ})$?', options: ['$\\frac{1}{2}$', '$\\frac{\\sqrt{3}}{2}$', '$\\frac{\\sqrt{2}}{2}$', '$1$'], correct: 0, explanation: 'Based on the unit circle or special right triangles, $\\sin(30^{\\circ}) = \\frac{1}{2}$.', searchQuery: 'exact values of trigonometric functions unit circle' },
+              { id: 't2_1', level: 2, text: 'Simplify the fundamental identity: $\\sin^2(\\theta) + \\cos^2(\\theta)$.', options: ['$\\tan^2(\\theta)$', '$0$', '$1$', '$-1$'], correct: 2, explanation: 'This is the Pythagorean Identity in trigonometry, which always equals $1$.', searchQuery: 'pythagorean trigonometric identities' },
+              { id: 't2_2', level: 2, text: 'What is the period of the function $y = \\cos(2x)$?', options: ['$2\\pi$', '$\\pi$', '$\\frac{\\pi}{2}$', '$4\\pi$'], correct: 1, explanation: 'The period of $y = \\cos(bx)$ is $\\frac{2\\pi}{|b|}$. Here, $b=2$, so the period is $\\frac{2\\pi}{2} = \\pi$.', searchQuery: 'finding the period of a cosine function' },
+              { id: 't3_1', level: 3, text: 'Find the exact value of $\\tan(\\frac{\\pi}{4})$.', options: ['$\\frac{\\sqrt{3}}{3}$', '$\\sqrt{3}$', '$1$', 'Undefined'], correct: 2, explanation: 'At $\\frac{\\pi}{4}$ ($45^{\\circ}$), both sine and cosine are $\\frac{\\sqrt{2}}{2}$. Since $\\tan = \\frac{\\sin}{\\cos}$, it equals $1$.', searchQuery: 'evaluating tangent on the unit circle' },
+              { id: 't3_2', level: 3, text: 'Solve for $x$ in the interval $[0, 2\\pi]$: $2\\sin(x) - 1 = 0$.', options: ['$x = \\frac{\\pi}{3}, \\frac{2\\pi}{3}$', '$x = \\frac{\\pi}{6}, \\frac{5\\pi}{6}$', '$x = \\frac{\\pi}{4}, \\frac{3\\pi}{4}$', '$x = \\frac{7\\pi}{6}, \\frac{11\\pi}{6}$'], correct: 1, explanation: 'Isolate sine: $\\sin(x) = \\frac{1}{2}$. Sine is positive in Quadrants I and II, at reference angle $\\frac{\\pi}{6}$.', searchQuery: 'solving basic trigonometric equations' }
+            ]
+          }
+        ];
+
+        // --- App State ---
+        let gameState = 'intro'; // intro, topic_intro, playing, feedback, completed
+        let currentTopicIndex = 0;
+        let mastery = 0;
+        let currentLevel = 1;
+        let askedQuestions = [];
+        let currentQuestion = null;
+        let selectedAnswer = null;
+        let isCorrect = null;
+        let totalScore = 0;
+        const MASTERY_TARGET = 5;
+
+        // --- Math Rendering Logic ---
+        function renderMathText(text) {
+            if (!text) return '';
+            const parts = text.split('$');
+            return parts.map((part, index) => {
+                if (index % 2 !== 0) {
+                    if (window.katex) {
+                        try {
+                            return window.katex.renderToString(part, { throwOnError: false });
+                        } catch (e) {
+                            return part;
+                        }
+                    }
+                    return part; // Fallback if KaTeX isn't loaded
+                }
+                return part;
+            }).join('');
+        }
+
+        // --- Core Functions ---
+        function startGame() {
+            gameState = 'topic_intro';
+            render();
+        }
+
+        function startTopic() {
+            mastery = 0;
+            currentLevel = 1;
+            askedQuestions = [];
+            pickNextQuestion(1, []);
+            gameState = 'playing';
+            render();
+        }
+
+        function pickNextQuestion(targetLevel, currentAsked) {
+            const currentTopic = courseData[currentTopicIndex];
+            let availableQuestions = currentTopic.questions.filter(q => !currentAsked.includes(q.id));
+
+            if (availableQuestions.length === 0) {
+                currentAsked = [];
+                availableQuestions = currentTopic.questions;
+            }
+
+            let candidates = availableQuestions.filter(q => q.level === targetLevel);
+            
+            if (candidates.length === 0) {
+                candidates = availableQuestions.sort((a, b) => Math.abs(a.level - targetLevel) - Math.abs(b.level - targetLevel));
+            }
+
+            currentQuestion = candidates[Math.floor(Math.random() * candidates.length)];
+            selectedAnswer = null;
+            isCorrect = null;
+        }
+
+        function handleAnswerSubmit(optionIndex) {
+            if (gameState === 'feedback') return; // Prevent clicking during feedback
+
+            selectedAnswer = optionIndex;
+            isCorrect = (optionIndex === currentQuestion.correct);
+            
+            let pointsEarned = 0;
+            let nextLevel = currentLevel;
+
+            if (isCorrect) {
+                pointsEarned = currentQuestion.level;
+                nextLevel = Math.min(3, currentLevel + 1);
+                totalScore += (currentQuestion.level * 10);
+            } else {
+                nextLevel = Math.max(1, currentLevel - 1);
+            }
+
+            mastery += pointsEarned;
+            currentLevel = nextLevel;
+            askedQuestions.push(currentQuestion.id);
+            
+            gameState = 'feedback';
+            render();
+        }
+
+        function handleNext() {
+            if (mastery >= MASTERY_TARGET) {
+                if (currentTopicIndex + 1 < courseData.length) {
+                    currentTopicIndex++;
+                    gameState = 'topic_intro';
+                } else {
+                    gameState = 'completed';
+                }
+            } else {
+                pickNextQuestion(currentLevel, askedQuestions);
+                gameState = 'playing';
+            }
+            render();
+        }
+
+        function resetGame() {
+            currentTopicIndex = 0;
+            totalScore = 0;
+            gameState = 'intro';
+            render();
+        }
+
+        // --- UI Rendering ---
+        function render() {
+            const root = document.getElementById('root');
+            let html = '';
+
+            if (gameState === 'intro') {
+                html = `
+                    <div class="flex-1 flex items-center justify-center p-6">
+                        <div class="max-w-2xl bg-white p-10 rounded-2xl shadow-xl text-center border border-slate-100 w-full">
+                            <div class="flex justify-center mb-6">
+                                <div class="bg-blue-100 p-4 rounded-full text-blue-600">
+                                    <i data-lucide="book-open" class="w-12 h-12"></i>
+                                </div>
+                            </div>
+                            <h1 class="text-4xl font-bold mb-4 text-slate-900">Adaptive Algebra & Trig</h1>
+                            <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+                                Based on the curriculum of Paul A. Foerster. This intelligent system assesses your fundamental understanding, adapts to your skill level, and guides you through core mathematical concepts.
+                            </p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 text-left">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <i data-lucide="brain" class="text-purple-500 mb-2 w-6 h-6"></i>
+                                    <h3 class="font-semibold text-slate-800">Adaptive Difficulty</h3>
+                                    <p class="text-sm text-slate-500">Questions get harder as you prove your mastery.</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                    <i data-lucide="graduation-cap" class="text-emerald-500 mb-2 w-6 h-6"></i>
+                                    <h3 class="font-semibold text-slate-800">Mastery Based</h3>
+                                    <p class="text-sm text-slate-500">Earn points to unlock the next chapter.</p>
+                                </div>
+                            </div>
+                            <button onclick="startGame()" class="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl">
+                                Start Assessment
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (gameState === 'topic_intro') {
+                const currentTopic = courseData[currentTopicIndex];
+                html = `
+                    <div class="flex-1 flex items-center justify-center p-6">
+                        <div class="max-w-xl w-full bg-white p-10 rounded-2xl shadow-xl text-center border-t-8 border-t-blue-500">
+                            <h3 class="text-blue-500 font-bold uppercase tracking-widest text-sm mb-2">Chapter ${currentTopicIndex + 1} of ${courseData.length}</h3>
+                            <h2 class="text-3xl font-bold text-slate-900 mb-4">${currentTopic.title}</h2>
+                            <p class="text-slate-600 mb-8 text-lg">${currentTopic.description}</p>
+                            <button onclick="startTopic()" class="w-full bg-slate-900 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-slate-800 transition-colors flex items-center justify-center">
+                                Begin Chapter <i data-lucide="chevron-right" class="ml-2 w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (gameState === 'completed') {
+                html = `
+                    <div class="flex-1 flex items-center justify-center p-6">
+                        <div class="max-w-xl w-full bg-white p-10 rounded-2xl shadow-xl text-center">
+                            <div class="flex justify-center mb-6">
+                                <div class="bg-yellow-100 p-6 rounded-full text-yellow-500">
+                                    <i data-lucide="trophy" class="w-16 h-16"></i>
+                                </div>
+                            </div>
+                            <h1 class="text-4xl font-bold text-slate-900 mb-4">Course Completed!</h1>
+                            <p class="text-lg text-slate-600 mb-8">
+                                You've demonstrated a strong fundamental understanding of Algebra & Trigonometry across all core topics.
+                            </p>
+                            <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 mb-8">
+                                <p class="text-sm text-slate-500 font-bold uppercase mb-1">Total Score</p>
+                                <p class="text-4xl font-black text-slate-800">${totalScore}</p>
+                            </div>
+                            <button onclick="resetGame()" class="w-full bg-blue-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors">
+                                Restart Assessment
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (gameState === 'playing' || gameState === 'feedback') {
+                const currentTopic = courseData[currentTopicIndex];
+                const progress = Math.min(100, (mastery / MASTERY_TARGET) * 100);
+                
+                let optionsHtml = currentQuestion.options.map((option, idx) => {
+                    const isSelected = selectedAnswer === idx;
+                    const isCorrectOption = idx === currentQuestion.correct;
+                    
+                    let btnStyle = "bg-white border-2 border-slate-200 hover:border-blue-400 text-slate-700 cursor-pointer";
+                    let iconHtml = "";
+
+                    if (gameState === 'feedback') {
+                        btnStyle = "bg-white border-2 border-slate-200 text-slate-400 opacity-50 cursor-not-allowed"; // default inactive
+                        if (isCorrectOption) {
+                            btnStyle = "bg-emerald-50 border-2 border-emerald-500 text-emerald-800 font-medium cursor-default";
+                            iconHtml = `<i data-lucide="check-circle-2" class="text-emerald-500 w-6 h-6"></i>`;
+                        } else if (isSelected && !isCorrectOption) {
+                            btnStyle = "bg-red-50 border-2 border-red-500 text-red-800 cursor-default";
+                            iconHtml = `<i data-lucide="x-circle" class="text-red-500 w-6 h-6"></i>`;
+                        }
+                    } else if (isSelected) {
+                        btnStyle = "bg-blue-50 border-2 border-blue-500 text-blue-800 font-medium";
+                    }
+
+                    return `
+                        <button 
+                            ${gameState === 'feedback' ? 'disabled' : ''} 
+                            onclick="handleAnswerSubmit(${idx})"
+                            class="w-full text-left px-6 py-4 rounded-xl transition-all flex justify-between items-center text-lg ${btnStyle}"
+                        >
+                            <span>${renderMathText(option)}</span>
+                            ${iconHtml}
+                        </button>
+                    `;
+                }).join('');
+
+                let feedbackHtml = '';
+                if (gameState === 'feedback') {
+                    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(currentQuestion.searchQuery)}`;
+                    const levelUpBanner = (mastery >= MASTERY_TARGET && isCorrect) ? `
+                        <div class="bg-white p-4 rounded-xl border border-emerald-200 mb-6 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p class="font-bold text-emerald-600 flex items-center gap-2">
+                                    <i data-lucide="trophy" class="w-5 h-5"></i> Topic Mastered!
+                                </p>
+                                <p class="text-sm text-slate-500 mt-1">You're ready for the next chapter.</p>
+                            </div>
+                        </div>
+                    ` : '';
+
+                    feedbackHtml = `
+                        <div class="p-6 sm:p-8 border-t-2 ${isCorrect ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}">
+                            <div class="flex items-start gap-4">
+                                <div class="mt-1">
+                                    <div class="${isCorrect ? 'bg-emerald-100' : 'bg-red-100'} p-2 rounded-full">
+                                        <i data-lucide="${isCorrect ? 'check-circle-2' : 'x-circle'}" class="${isCorrect ? 'text-emerald-600' : 'text-red-600'} w-6 h-6"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-lg font-bold mb-2 ${isCorrect ? 'text-emerald-800' : 'text-red-800'}">
+                                        ${isCorrect ? 'Correct!' : 'Not quite.'}
+                                    </h4>
+                                    <p class="text-slate-700 mb-6 leading-relaxed">
+                                        ${renderMathText(currentQuestion.explanation)}
+                                    </p>
+                                    
+                                    ${currentQuestion.searchQuery ? `
+                                        <div class="mb-6">
+                                            <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-blue-600 font-medium hover:text-blue-800 transition-colors bg-blue-50 px-4 py-2 rounded-lg border border-blue-100">
+                                                <i data-lucide="search" class="w-5 h-5"></i>
+                                                Search for help on this topic
+                                            </a>
+                                        </div>
+                                    ` : ''}
+
+                                    ${levelUpBanner}
+
+                                    <button onclick="handleNext()" class="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center">
+                                        ${mastery >= MASTERY_TARGET ? 'Continue to Next Chapter' : 'Next Question'}
+                                        <i data-lucide="chevron-right" class="ml-2 w-5 h-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const levelBadgeClass = currentQuestion.level === 1 ? 'bg-emerald-100 text-emerald-700' :
+                                        currentQuestion.level === 2 ? 'bg-blue-100 text-blue-700' :
+                                        'bg-purple-100 text-purple-700';
+
+                html = `
+                    <div class="p-4 sm:p-8 flex-1 flex flex-col items-center">
+                        <header class="max-w-3xl w-full mb-8 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800">${currentTopic.title}</h2>
+                                <p class="text-sm text-slate-500 font-medium">Chapter ${currentTopicIndex + 1} &bull; Score: ${totalScore}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Mastery Progress</p>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-32 bg-slate-200 rounded-full h-3 overflow-hidden border border-slate-300">
+                                        <div class="bg-blue-600 h-3 rounded-full transition-all duration-500 ease-in-out" style="width: ${progress}%"></div>
+                                    </div>
+                                    <span class="text-sm font-bold text-slate-700">${Math.min(mastery, MASTERY_TARGET)}/${MASTERY_TARGET}</span>
+                                </div>
+                            </div>
+                        </header>
+
+                        <main class="max-w-3xl w-full flex-1 flex flex-col">
+                            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex-1 flex flex-col">
+                                <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${levelBadgeClass}">
+                                        Level ${currentQuestion.level}
+                                    </span>
+                                </div>
+
+                                <div class="p-6 sm:p-10 flex-1">
+                                    <h3 class="text-2xl font-medium text-slate-900 mb-8 leading-snug">
+                                        ${renderMathText(currentQuestion.text)}
+                                    </h3>
+                                    <div class="grid grid-cols-1 gap-4">
+                                        ${optionsHtml}
+                                    </div>
+                                </div>
+
+                                ${feedbackHtml}
+                            </div>
+                        </main>
+                    </div>
+                `;
+            }
+
+            root.innerHTML = html;
+            // Re-initialize Lucide icons after manipulating DOM
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+        }
+
+        // Initialize application once external scripts (like KaTeX) are ready
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+
+    </script>
+</body>
+</html>
