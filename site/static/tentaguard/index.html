@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tentaguard - Retro Arcade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jersey+20&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Jersey 20', serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overscroll-behavior-y: contain;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 98vw;
+            max-width: 600px;
+            max-height: 98vh;
+            aspect-ratio: 1/1;
+            border: 4px solid #444;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            background: #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(16px, 4vw, 24px);
+            text-shadow: 2px 2px #000;
+            letter-spacing: 1px;
+        }
+
+        .bottom-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .pause-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #555;
+            color: #aaa;
+            padding: 5px 12px;
+            cursor: pointer;
+            pointer-events: auto;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(14px, 3.5vw, 20px);
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .pause-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; border-color: #fff; }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            z-index: 20;
+            pointer-events: auto;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            margin-top: 10px;
+            padding: 12px 30px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(20px, 5vw, 28px);
+            transition: transform 0.1s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-restart { background: #f80; color: #fff; }
+        .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
+
+        #crt-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .hidden { display: none !important; }
+
+        .health-bar-container {
+            width: clamp(100px, 25vw, 150px);
+            height: 12px;
+            background: #333;
+            border: 2px solid #fff;
+            margin-bottom: 5px;
+        }
+
+        .health-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.3s, background-color 0.3s; }
+
+        .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; }
+
+        .title { font-size: clamp(2.5rem, 10vw, 4rem); margin: 0 0 10px 0; line-height: 1; letter-spacing: 2px; }
+        .text-green { color: #4ade80; }
+        .text-red { color: #ef4444; }
+        .text-white { color: #ffffff; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+
+        .input-name {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Jersey 20', serif;
+            font-size: 48px;
+            width: 140px;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-list { width: 100%; max-width: 400px; margin-top: 20px; font-size: 24px; border-collapse: collapse; }
+        .leaderboard-list tr { border-bottom: 1px solid #333; }
+        .leaderboard-list td { padding: 8px 5px; }
+        .rank-col { color: #0f0; width: 40px; }
+        .name-col { text-align: left; }
+        .score-col { text-align: right; color: #f80; }
+
+        .loading-text { color: #aaa; font-style: italic; }
+
+        @media (max-height: 500px) {
+            .title { font-size: 1.5rem; }
+            .mb-8 { margin-bottom: 0.5rem; }
+            p { font-size: 14px; }
+            .btn { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="crt-effect"></div>
+
+        <div class="ui-overlay">
+            <div class="stats">
+                <div>SCORE: <span id="scoreVal">0</span></div>
+                <div>TIME: <span id="timeVal">0s</span></div>
+            </div>
+            <div class="bottom-ui">
+                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <div class="health-bar-container">
+                        <div id="healthBar" class="health-bar"></div>
+                    </div>
+                    <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="startScreen" class="screen">
+            <h1 class="title text-green">TENTAGUARD</h1>
+            <p style="margin-bottom: 2rem;">
+                PROTECT THE GEM AT THE BOTTOM.<br>
+                MOVE TENTACLES TO CRUSH NINJAS.<br>
+                AVOID ARROWS!
+            </p>
+            <button class="btn" onclick="startGame()">START MISSION</button>
+            <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
+        </div>
+
+        <div id="pauseScreen" class="screen hidden">
+            <h2 class="text-white mb-4">GAME PAUSED</h2>
+            <button class="btn" onclick="togglePause()">RESUME</button>
+            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+        </div>
+
+        <div id="submitScoreScreen" class="screen hidden">
+            <h2 class="text-green mb-4">NEW RECORD!</h2>
+            <p class="mb-4">SCORE: <span id="submitScoreVal">0</span></p>
+            <input type="text" id="initialsInput" class="input-name" maxlength="3" placeholder="AAA">
+            <button class="btn" onclick="submitScore()">SAVE SCORE</button>
+        </div>
+
+        <div id="leaderboardScreen" class="screen hidden">
+            <h2 class="text-green mb-2">TOP GUARDIANS</h2>
+            <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
+                <p class="loading-text">FETCHING DATA...</p>
+            </div>
+            <button class="btn" style="margin-top: 20px;" onclick="backToMain()">BACK</button>
+        </div>
+
+        <div id="gameOverScreen" class="screen hidden">
+            <h2 id="gameOverTitle" class="title text-red">GEM STOLEN!</h2>
+            <p class="mb-2">SCORE: <span id="finalScore">0</span></p>
+            <p class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></p>
+            <button class="btn" onclick="checkHighScoreFlow()">CONTINUE</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
+        let user = null;
+
+        const initAuth = async () => {
+            if (user) return user;
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+            } else {
+                user = (await signInAnonymously(auth)).user;
+            }
+            return user;
+        };
+
+        window.saveHighScore = async (name, score) => {
+            const u = await initAuth();
+            if (!u) return;
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            await addDoc(colRef, { name: name.toUpperCase(), score: score, timestamp: Date.now() });
+        };
+
+        window.fetchLeaderboard = async () => {
+            const u = await initAuth();
+            if (!u) return [];
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            const snapshot = await getDocs(colRef);
+            return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 10);
+        };
+    </script>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal');
+        const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
+        const pauseBtn = document.getElementById('pauseBtn'), pauseScreen = document.getElementById('pauseScreen');
+        const startScreen = document.getElementById('startScreen'), gameOverScreen = document.getElementById('gameOverScreen');
+        const submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
+        const initialsInput = document.getElementById('initialsInput');
+
+        const AudioFX = {
+            ctx: null,
+            init() { if (this.ctx) return; this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playOsc(freq, type, duration, volume, slideTo = null) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + duration);
+            },
+            beep() { this.playOsc(800, 'square', 0.1, 0.05); },
+            splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
+            whoosh(vol) { this.playOsc(100, 'sine', 0.3, Math.min(0.08, vol * 0.05), 300); },
+            hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
+            heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
+            powerDown() { [440, 349, 293, 220].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.5), i * 200)); },
+            gemLost() { [440, 311.13, 261.63, 207.65].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); }
+        };
+
+        let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false, hasPlayedEndSound = false; 
+        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = 0, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null;
+        const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
+        let thieves = [], arrows = [], particles = [], items = [];
+        const monsterPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.75 }, gemPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.9 };
+
+        class Tentacle {
+            constructor(side) {
+                this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15;
+                this.baseX = monsterPos.x + (side * 20); this.baseY = monsterPos.y;
+                this.maxReach = (this.numSegments * this.segLength) * 1.35; 
+                this.vx = 0; this.vy = 0; this.friction = 0.96; this.accelBase = 0.08; this.whooshCooldown = 0;
+                for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY });
+            }
+            update(targetX, targetY) {
+                if (isPaused) return;
+                let poisonScale = poisonTimer > 0 ? 0.75 : 1.0, currentLen = this.segLength * poisonScale;
+                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * (poisonTimer > 0 ? 0.25 : 1.0);
+                let tx = targetX + (this.side * 40), ty = targetY;
+                let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
+                let currentMaxReach = this.maxReach * poisonScale;
+                if (distB > currentMaxReach) { tx = this.baseX + (dxB / distB) * currentMaxReach; ty = this.baseY + (dyB / distB) * currentMaxReach; }
+                this.vx = (this.vx + (tx - this.segments[0].x) * moveAccel) * this.friction;
+                this.vy = (this.vy + (ty - this.segments[0].y) * moveAccel + (isDeathAnimation ? 0.5 : 0)) * this.friction;
+                this.segments[0].x += this.vx; this.segments[0].y += this.vy;
+                const vel = Math.sqrt(this.vx**2 + this.vy**2);
+                if (vel > 12 && this.whooshCooldown <= 0 && gameActive) { AudioFX.whoosh(vel / 20); this.whooshCooldown = 25; }
+                if (this.whooshCooldown > 0) this.whooshCooldown--;
+                for (let i = 1; i < this.numSegments; i++) {
+                    let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, dist = Math.sqrt(dx**2 + dy**2);
+                    if (dist > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/dist) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/dist) * currentLen; }
+                }
+                this.segments[this.numSegments - 1] = { x: this.baseX, y: this.baseY };
+                for (let i = this.numSegments - 2; i >= 0; i--) {
+                    let dx = this.segments[i].x - this.segments[i+1].x, dy = this.segments[i].y - this.segments[i+1].y, angle = Math.atan2(dy, dx);
+                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(angle) * currentLen, y: this.segments[i+1].y + Math.sin(angle) * currentLen };
+                }
+            }
+            draw() {
+                ctx.beginPath(); ctx.lineWidth = 10; ctx.lineCap = ctx.lineJoin = 'round';
+                ctx.strokeStyle = isDeathAnimation ? '#141' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0'));
+                ctx.moveTo(this.baseX, this.baseY);
+                for (let i = this.numSegments - 1; i > 0; i--) {
+                    const midX = (this.segments[i].x + this.segments[i-1].x) / 2, midY = (this.segments[i].y + this.segments[i-1].y) / 2;
+                    ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY);
+                }
+                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke();
+                ctx.fillStyle = isDeathAnimation ? '#020' : '#050';
+                for (let i = 2; i < this.numSegments; i+=3) { ctx.beginPath(); ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2); ctx.fill(); }
+            }
+        }
+
+        const leftTentacle = new Tentacle(-1), rightTentacle = new Tentacle(1);
+
+        class Thief {
+            constructor() {
+                const sY = Math.random() * 200, side = Math.random() > 0.5 ? 1 : -1;
+                this.y = sY; this.x = side === -1 ? 300 - sY : 300 + sY;
+                this.speed = 0.8 + Math.random() * 0.7; this.shootCooldown = 60 + Math.random() * 120;
+                this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
+                this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
+                this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.size = 12 * this.mobileScale;
+                const types = ['regular', 'regular', 'fire', 'poison'];
+                this.arrowType = types[Math.floor(Math.random() * types.length)];
+                this.color = this.arrowType === 'regular' ? '#bbb' : (this.arrowType === 'fire' ? '#f80' : '#a0f');
+            }
+            update() {
+                if (isPaused) return;
+                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.x = this.x; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) endGameUI('gem'); } return; }
+                if (isDeathAnimation) return;
+                this.wanderPhase += this.wanderFreq; this.animFrame += this.speed * 0.15;
+                let dx = gemPos.x - this.x, dy = gemPos.y - this.y;
+                let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * this.wanderAmp;
+                this.x += Math.cos(ang) * this.speed; this.y += Math.sin(ang) * this.speed;
+                if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
+                if (Math.sqrt(dx**2 + dy**2) < 20) triggerEscape(this);
+            }
+            draw() {
+                const lo = (Math.sin(this.animFrame) * 4) * this.mobileScale, hs = this.size / 2;
+                ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.8, this.y + hs * 0.6 + lo, hs * 0.6, hs * 0.6);
+                ctx.fillRect(this.x + hs * 0.2, this.y + hs * 0.6 - lo, hs * 0.6, hs * 0.6);
+                ctx.fillStyle = '#333'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
+                ctx.fillStyle = this.color; ctx.fillRect(this.x - hs, this.y - hs, this.size, hs * 0.5);
+                ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6, hs * 0.3);
+                ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.5, this.y - hs * 0.25, 1, hs * 0.3); ctx.fillRect(this.x + hs * 0.4, this.y - hs * 0.25, 1, hs * 0.3);
+            }
+        }
+
+        class Arrow {
+            constructor(x, y, type) {
+                this.x = x; this.y = y; this.type = type; this.speed = 3;
+                let dx = monsterPos.x - x, dy = monsterPos.y - y, dist = Math.sqrt(dx**2 + dy**2);
+                this.vx = (dx/dist) * this.speed; this.vy = (dy/dist) * this.speed; this.active = true;
+            }
+            update() { if (!isPaused) { this.x += this.vx; this.y += this.vy; if (this.y > CANVAS_SIZE) this.active = false; } }
+            draw() {
+                ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f');
+                ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke();
+            }
+        }
+
+        class Item {
+            constructor() {
+                this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0;
+                const r = leftTentacle.maxReach * 0.75 * 0.9, a = Math.PI + (Math.random() * Math.PI), d = 50 + (Math.random() * (r - 50));
+                this.x = Math.max(50, Math.min(CANVAS_SIZE-50, monsterPos.x + Math.cos(a) * d));
+                this.y = Math.max(50, monsterPos.y + Math.sin(a) * d); this.life = 400;
+            }
+            update() { if (!isPaused) this.life--; }
+            draw() { ctx.fillStyle = '#f00'; ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; ctx.fillText('❤', this.x - 10*this.mobileScale, this.y + 10*this.mobileScale); }
+        }
+
+        function spawnThief() {
+            if(!gameActive || isGameOver) return;
+            if (isPaused) { setTimeout(spawnThief, 100); return; }
+            thieves.push(new Thief()); setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
+        }
+
+        function spawnItem() {
+            if(!gameActive || isGameOver) return;
+            if (isPaused) { setTimeout(spawnItem, 100); return; }
+            if(Math.random() > 0.65) items.push(new Item()); setTimeout(spawnItem, Math.max(4500, 12000 - (currentTime * 45)));
+        }
+
+        function drawArena() {
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
+            ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+            for(let i=0; i<CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke(); }
+            if(gameActive || isEndingAnimation) {
+                ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf';
+                ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill(); ctx.shadowBlur = 0;
+            }
+            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080');
+            ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2); ctx.fill();
+            if (isDeathAnimation) {
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(monsterPos.x-15, monsterPos.y-5); ctx.lineTo(monsterPos.x-5, monsterPos.y-5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(monsterPos.x+5, monsterPos.y-5); ctx.lineTo(monsterPos.x+15, monsterPos.y-5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke();
+            } else {
+                let dxL = mouseX - monsterPos.x, dyL = mouseY - monsterPos.y;
+                if (isEndingAnimation && winningThief) { dxL = winningThief.x - monsterPos.x; dyL = winningThief.y - monsterPos.y; }
+                let lookA = Math.atan2(dyL, dxL), lx = Math.cos(lookA) * 2, ly = Math.sin(lookA) * 2;
+                ctx.fillStyle = '#fff'; ctx.fillRect(monsterPos.x-13, monsterPos.y-9, 7, 7); ctx.fillRect(monsterPos.x+6, monsterPos.y-9, 7, 7);
+                ctx.fillStyle = '#000'; ctx.fillRect(monsterPos.x-11+lx, monsterPos.y-7+ly, 3, 3); ctx.fillRect(monsterPos.x+8+lx, monsterPos.y-7+ly, 3, 3);
+                if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke(); }
+            }
+        }
+
+        function handleCollisions() {
+            if (isGameOver || isPaused) return;
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const a = arrows[i]; if (Math.sqrt((a.x-monsterPos.x)**2+(a.y-monsterPos.y)**2) < 28) {
+                    AudioFX.hit(); if(a.type === 'regular') health -= 3; else if(a.type === 'fire') health -= 8; else poisonTimer = 600;
+                    for(let j=0; j<15; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: '#f00' });
+                    arrows.splice(i, 1);
+                }
+            }
+            [leftTentacle, rightTentacle].forEach(tentacle => {
+                tentacle.segments.forEach(seg => {
+                    thieves.forEach((thief, tIdx) => {
+                        if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < (15 * thief.mobileScale)) {
+                            AudioFX.splat(); thieves.splice(tIdx, 1); score += 10;
+                            for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 20, color: thief.color });
+                        }
+                    });
+                    for (let i = arrows.length - 1; i >= 0; i--) {
+                        const a = arrows[i]; if(Math.sqrt((seg.x-a.x)**2 + (seg.y-a.y)**2) < 12) {
+                            AudioFX.hit(); if(a.type === 'regular') health -= 1; else if(a.type === 'fire') health -= 3; else poisonTimer = 600;
+                            arrows.splice(i, 1);
+                        }
+                    }
+                    items.forEach((item, iIdx) => {
+                        if(Math.sqrt((seg.x - item.x)**2 + (seg.y - item.y)**2) < (20 * item.mobileScale)) {
+                            AudioFX.heal(); health = Math.min(100, health + 25); poisonTimer = 0; items.splice(iIdx, 1);
+                        }
+                    });
+                });
+            });
+            if(health <= 0) { health = 0; triggerDeath(); }
+        }
+
+        function togglePause() {
+            if (!gameActive || isGameOver) return;
+            isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE';
+            if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); }
+            else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); }
+        }
+
+        function restartFromPause() { AudioFX.beep(); pauseScreen.classList.add('hidden'); resetGame(); }
+
+        function update() {
+            if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
+            if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
+            if(poisonTimer > 0 && !isPaused) poisonTimer--;
+            let tx, ty;
+            if (isDeathAnimation) { tx = monsterPos.x; ty = monsterPos.y + 120; if (++deathTimer > 100) endGameUI('health'); }
+            else if (isEndingAnimation) { tx = monsterPos.x; ty = monsterPos.y + 50; }
+            else { tx = mouseX; ty = mouseY; }
+            leftTentacle.update(tx, ty); rightTentacle.update(tx, ty);
+            thieves.forEach(t => t.update()); arrows.forEach(a => a.update()); arrows = arrows.filter(a => a.active);
+            items.forEach(it => it.update()); items = items.filter(it => it.life > 0);
+            if (!isPaused) { particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); particles = particles.filter(p => p.life > 0); }
+            handleCollisions();
+            scoreVal.innerText = score; timeVal.innerText = currentTime + 's';
+            healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
+            if(poisonTimer > 0) poisonStatus.classList.remove('hidden'); else poisonStatus.classList.add('hidden');
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
+            ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke();
+            ctx.save(); ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); ctx.clip();
+            drawArena(); leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw());
+            particles.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 20; ctx.fillRect(p.x, p.y, 4, 4); ctx.globalAlpha = 1; });
+            ctx.restore();
+        }
+
+        function gameLoop() { update(); draw(); if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestAnimationFrame(gameLoop); }
+
+        function startGame() { AudioFX.init(); AudioFX.beep(); startScreen.classList.add('hidden'); pauseBtn.classList.remove('hidden'); resetGameParams(); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); }
+
+        function resetGameParams() {
+            score = 0; health = 100; poisonTimer = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
+            pauseBtn.innerText = 'PAUSE'; gemPos.x = 300; gemPos.y = 540;
+        }
+
+        function triggerEscape(thief) { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.gemLost(); hasPlayedEndSound = true; } gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; }
+
+        function triggerDeath() { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.powerDown(); hasPlayedEndSound = true; } gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; }
+
+        function resetGame() { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); startGame(); }
+
+        function endGameUI(reason) {
+            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden');
+            gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!";
+            document.getElementById('finalScore').innerText = score; document.getElementById('finalTime').innerText = currentTime + ' seconds';
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        function checkHighScoreFlow() {
+            if (score > 0) { gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); }
+            else { backToMain(); }
+        }
+
+        async function submitScore() {
+            const initials = initialsInput.value.trim() || 'AAA'; AudioFX.beep();
+            submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
+            try { await window.saveHighScore(initials, score); await showLeaderboard(); } catch (err) { backToMain(); }
+        }
+
+        async function showLeaderboard() {
+            AudioFX.beep(); startScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
+            const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>';
+            try {
+                const top = await window.fetchLeaderboard();
+                if (top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
+                else {
+                    let h = '<table class="leaderboard-list">';
+                    top.forEach((s, i) => h += `<tr><td class="rank-col">${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
+                    content.innerHTML = h + '</table>';
+                }
+            } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; }
+        }
+
+        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
+
+        function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); mouseX = (cX - r.left) * (600 / r.width); mouseY = (cY - r.top) * (600 / r.height); }
+        canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
+        canvas.addEventListener('touchmove', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+
+        draw();
+    </script>
+</body>
+</html>
