@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tentacle Guardian - Retro Arcade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jersey+20&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Jersey 20', serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Prevents pull-to-refresh on some mobile browsers */
+            overscroll-behavior-y: contain;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 98vw;
+            max-width: 600px;
+            max-height: 98vh;
+            aspect-ratio: 1/1;
+            border: 4px solid #444;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            background: #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(16px, 4vw, 24px);
+            text-shadow: 2px 2px #000;
+            letter-spacing: 1px;
+        }
+
+        .bottom-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .pause-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #555;
+            color: #aaa;
+            padding: 5px 12px;
+            cursor: pointer;
+            pointer-events: auto;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(14px, 3.5vw, 20px);
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .pause-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .pause-btn:active {
+            transform: scale(0.9);
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            z-index: 20;
+            pointer-events: auto;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            margin-top: 10px;
+            padding: 12px 30px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(20px, 5vw, 28px);
+            transition: transform 0.1s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-restart {
+            background: #f80;
+            color: #fff;
+        }
+
+        #crt-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .hidden { display: none !important; }
+
+        .health-bar-container {
+            width: clamp(100px, 25vw, 150px);
+            height: 12px;
+            background: #333;
+            border: 2px solid #fff;
+            margin-bottom: 5px;
+        }
+
+        .health-bar {
+            height: 100%;
+            background: #0f0;
+            width: 100%;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        .poison-indicator {
+            color: #a0f;
+            font-size: clamp(12px, 3vw, 18px);
+            font-weight: bold;
+        }
+
+        .title { 
+            font-size: clamp(2.2rem, 8vw, 3.5rem); 
+            margin: 0 0 10px 0;
+            line-height: 1;
+        }
+        
+        .text-green { color: #4ade80; }
+        .text-red { color: #ef4444; }
+        .text-white { color: #ffffff; }
+        
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .leading-tight { line-height: 1.25; }
+
+        p { font-size: clamp(16px, 4vw, 22px); margin: 0; }
+
+        @media (max-height: 500px) {
+            .title { font-size: 1.5rem; }
+            .mb-8 { margin-bottom: 0.5rem; }
+            p { font-size: 14px; }
+            .btn { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="crt-effect"></div>
+
+        <div class="ui-overlay">
+            <div class="stats">
+                <div>SCORE: <span id="scoreVal">0</span></div>
+                <div>TIME: <span id="timeVal">0s</span></div>
+            </div>
+            
+            <div class="bottom-ui">
+                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
+                
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <div class="health-bar-container">
+                        <div id="healthBar" class="health-bar"></div>
+                    </div>
+                    <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="startScreen" class="screen">
+            <h1 class="title text-green">TENTACLE GUARDIAN</h1>
+            <p class="leading-tight mb-8">
+                PROTECT THE GEM AT THE BOTTOM.<br>
+                MOVE TENTACLES TO CRUSH NINJAS.<br>
+                AVOID ARROWS!
+            </p>
+            <button class="btn" onclick="startGame()">START MISSION</button>
+        </div>
+
+        <div id="pauseScreen" class="screen hidden">
+            <h2 class="text-white mb-4">GAME PAUSED</h2>
+            <button class="btn" onclick="togglePause()">RESUME</button>
+            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+        </div>
+
+        <div id="gameOverScreen" class="screen hidden">
+            <h2 id="gameOverTitle" class="title text-red">GEM STOLEN!</h2>
+            <p class="mb-2">SCORE: <span id="finalScore">0</span></p>
+            <p class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></p>
+            <button class="btn" onclick="resetGame()">RETRY</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal');
+        const timeVal = document.getElementById('timeVal');
+        const healthBar = document.getElementById('healthBar');
+        const poisonStatus = document.getElementById('poisonStatus');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const pauseScreen = document.getElementById('pauseScreen');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playOsc(freq, type, duration, volume, slideTo = null) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            },
+            beep() { this.playOsc(800, 'square', 0.1, 0.05); },
+            splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
+            whoosh(vol) { 
+                const clampedVol = Math.min(0.08, vol * 0.05);
+                this.playOsc(100, 'sine', 0.3, clampedVol, 300); 
+            },
+            hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
+            heal() {
+                const notes = [523.25, 659.25, 783.99, 1046.50]; 
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60);
+                });
+            },
+            powerDown() {
+                const notes = [440, 349, 293, 220];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.5), i * 200);
+                });
+            },
+            gemLost() {
+                const notes = [440, 311.13, 261.63, 207.65];
+                notes.forEach((n, i) => {
+                    setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150);
+                });
+            }
+        };
+
+        let gameActive = false;
+        let isPaused = false;
+        let isEndingAnimation = false;
+        let isDeathAnimation = false;
+        let hasPlayedEndSound = false; 
+        let deathTimer = 0;
+        let score = 0;
+        let startTime = 0;
+        let pauseTimeOffset = 0; 
+        let lastPauseTimestamp = 0;
+        let currentTime = 0;
+        let health = 100;
+        let poisonTimer = 0;
+        let mouseX = 300;
+        let mouseY = 300;
+        let gemVisible = true;
+        let frameCount = 0;
+        let winningThief = null;
+
+        const CANVAS_SIZE = 600;
+        canvas.width = CANVAS_SIZE;
+        canvas.height = CANVAS_SIZE;
+
+        let thieves = [];
+        let arrows = [];
+        let particles = [];
+        let items = [];
+
+        const monsterPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.75 };
+        const gemPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.9 };
+
+        class Tentacle {
+            constructor(side) {
+                this.side = side; 
+                this.segments = [];
+                this.numSegments = 20; 
+                this.segLength = 15;
+                this.baseX = monsterPos.x + (side * 20);
+                this.baseY = monsterPos.y;
+                this.maxReach = (this.numSegments * this.segLength) * 1.35; 
+                
+                this.vx = 0;
+                this.vy = 0;
+                this.friction = 0.96; 
+                this.accelBase = 0.08; 
+                this.whooshCooldown = 0;
+
+                for(let i=0; i < this.numSegments; i++) {
+                    this.segments.push({ x: this.baseX, y: this.baseY });
+                }
+            }
+
+            update(targetX, targetY) {
+                if (isPaused) return;
+
+                let poisonScale = poisonTimer > 0 ? 0.75 : 1.0;
+                let currentLen = this.segLength * poisonScale;
+                let healthMod = 0.5 + (health / 200);
+                let poisonSpeedMod = poisonTimer > 0 ? 0.25 : 1.0; 
+                
+                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * healthMod * poisonSpeedMod;
+
+                let tx = targetX + (this.side * 40);
+                let ty = targetY;
+
+                let dxBase = tx - this.baseX;
+                let dyBase = ty - this.baseY;
+                let distBase = Math.sqrt(dxBase * dxBase + dyBase * dyBase);
+                let currentMaxReach = this.maxReach * poisonScale;
+                
+                if (distBase > currentMaxReach) {
+                    tx = this.baseX + (dxBase / distBase) * currentMaxReach;
+                    ty = this.baseY + (dyBase / distBase) * currentMaxReach;
+                }
+
+                this.vx += (tx - this.segments[0].x) * moveAccel;
+                this.vy += (ty - this.segments[0].y) * moveAccel;
+
+                if (isDeathAnimation) {
+                    this.vy += 0.5; 
+                }
+
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+
+                this.segments[0].x += this.vx;
+                this.segments[0].y += this.vy;
+
+                const velocity = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (velocity > 12 && this.whooshCooldown <= 0 && gameActive) {
+                    AudioFX.whoosh(velocity / 20);
+                    this.whooshCooldown = 25;
+                }
+                if (this.whooshCooldown > 0) this.whooshCooldown--;
+
+                for (let i = 1; i < this.numSegments; i++) {
+                    let dx = this.segments[i].x - this.segments[i-1].x;
+                    let dy = this.segments[i].y - this.segments[i-1].y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    let angle = Math.atan2(dy, dx);
+                    if (dist > currentLen) {
+                        this.segments[i].x = this.segments[i-1].x + Math.cos(angle) * currentLen;
+                        this.segments[i].y = this.segments[i-1].y + Math.sin(angle) * currentLen;
+                    }
+                }
+
+                this.segments[this.numSegments - 1].x = this.baseX;
+                this.segments[this.numSegments - 1].y = this.baseY;
+
+                for (let i = this.numSegments - 2; i >= 0; i--) {
+                    let dx = this.segments[i].x - this.segments[i+1].x;
+                    let dy = this.segments[i].y - this.segments[i+1].y;
+                    let angle = Math.atan2(dy, dx);
+                    this.segments[i].x = this.segments[i+1].x + Math.cos(angle) * currentLen;
+                    this.segments[i].y = this.segments[i+1].y + Math.sin(angle) * currentLen;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.lineWidth = 10;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                const color = isDeathAnimation ? '#141' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0'));
+                ctx.strokeStyle = color;
+
+                ctx.moveTo(this.baseX, this.baseY);
+                for (let i = this.numSegments - 1; i > 0; i--) {
+                    const midX = (this.segments[i].x + this.segments[i-1].x) / 2;
+                    const midY = (this.segments[i].y + this.segments[i-1].y) / 2;
+                    ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY);
+                }
+                ctx.lineTo(this.segments[0].x, this.segments[0].y);
+                ctx.stroke();
+
+                ctx.fillStyle = isDeathAnimation ? '#020' : '#050';
+                for (let i = 2; i < this.numSegments; i+=3) {
+                    ctx.beginPath();
+                    ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        const leftTentacle = new Tentacle(-1);
+        const rightTentacle = new Tentacle(1);
+
+        class Thief {
+            constructor() {
+                const spawnY = Math.random() * 200; 
+                const side = Math.random() > 0.5 ? 1 : -1;
+                this.y = spawnY;
+                if (side === -1) {
+                    this.x = 300 - spawnY;
+                } else {
+                    this.x = 300 + spawnY;
+                }
+                
+                this.speed = 0.8 + Math.random() * 0.7;
+                this.shootCooldown = 60 + Math.random() * 120;
+                
+                this.wanderPhase = Math.random() * Math.PI * 2;
+                this.wanderFreq = 0.02 + Math.random() * 0.04;
+                this.wanderAmp = 0.4 + Math.random() * 0.4;
+                this.animFrame = 0;
+                
+                const types = ['regular', 'regular', 'fire', 'poison'];
+                this.arrowType = types[Math.floor(Math.random() * types.length)];
+                
+                if(this.arrowType === 'regular') this.color = '#bbb';
+                else if(this.arrowType === 'fire') this.color = '#f80';
+                else if(this.arrowType === 'poison') this.color = '#a0f';
+            }
+
+            update() {
+                if (isPaused) return;
+
+                if (isEndingAnimation) {
+                    if (this === winningThief) {
+                        this.y += 2.5; 
+                        gemPos.x = this.x;
+                        gemPos.y = this.y - 10;
+                        if (this.y > CANVAS_SIZE + 50) {
+                            endGameUI('gem');
+                        }
+                    }
+                    return;
+                }
+
+                if (isDeathAnimation) return; 
+
+                this.wanderPhase += this.wanderFreq;
+                this.animFrame += this.speed * 0.15; 
+
+                let dx = gemPos.x - this.x;
+                let dy = gemPos.y - this.y;
+                let baseAngle = Math.atan2(dy, dx);
+                let finalAngle = baseAngle + Math.sin(this.wanderPhase) * this.wanderAmp;
+                
+                this.x += Math.cos(finalAngle) * this.speed;
+                this.y += Math.sin(finalAngle) * this.speed;
+
+                this.shootCooldown--;
+                if(this.shootCooldown <= 0) {
+                    this.shoot();
+                    this.shootCooldown = 150 + Math.random() * 100;
+                }
+
+                let actualDist = Math.sqrt(dx*dx + dy*dy);
+                if(actualDist < 20) {
+                    triggerEscape(this);
+                }
+            }
+
+            shoot() {
+                arrows.push(new Arrow(this.x, this.y, this.arrowType));
+            }
+
+            draw() {
+                const legOffset = Math.sin(this.animFrame) * 4;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(this.x - 5, this.y + 4 + legOffset, 4, 4); 
+                ctx.fillRect(this.x + 1, this.y + 4 - legOffset, 4, 4); 
+                
+                ctx.fillStyle = '#333';
+                ctx.fillRect(this.x - 6, this.y - 6, 12, 12);
+                
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x - 6, this.y - 6, 12, 3);
+                
+                ctx.fillStyle = '#eee';
+                ctx.fillRect(this.x - 4, this.y - 3, 8, 2);
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(this.x - 3, this.y - 3, 1, 2);
+                ctx.fillRect(this.x + 2, this.y - 3, 1, 2);
+            }
+        }
+
+        class Arrow {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.speed = 3;
+                let dx = monsterPos.x - x;
+                let dy = monsterPos.y - y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                this.vx = (dx/dist) * this.speed;
+                this.vy = (dy/dist) * this.speed;
+                this.active = true;
+            }
+
+            update() {
+                if (isPaused) return;
+                this.x += this.vx;
+                this.y += this.vy;
+                if(this.y > CANVAS_SIZE) this.active = false;
+            }
+
+            draw() {
+                ctx.lineWidth = 2;
+                if(this.type === 'regular') ctx.strokeStyle = '#fff';
+                else if(this.type === 'fire') ctx.strokeStyle = '#f80';
+                else if(this.type === 'poison') ctx.strokeStyle = '#a0f';
+                
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3);
+                ctx.stroke();
+            }
+        }
+
+        class Item {
+            constructor() {
+                const spawnRadius = leftTentacle.maxReach * 0.75 * 0.9;
+                const angle = Math.PI + (Math.random() * Math.PI); 
+                const dist = 50 + (Math.random() * (spawnRadius - 50));
+                
+                this.x = monsterPos.x + Math.cos(angle) * dist;
+                this.y = monsterPos.y + Math.sin(angle) * dist;
+                
+                if (this.y < 50) this.y = 50; 
+                if (this.x < 50) this.x = 50;
+                if (this.x > CANVAS_SIZE - 50) this.x = CANVAS_SIZE - 50;
+
+                this.type = 'heart';
+                this.life = 400;
+            }
+            update() { 
+                if (isPaused) return;
+                this.life--; 
+            }
+            draw() {
+                ctx.fillStyle = '#f00';
+                ctx.font = '24px serif';
+                ctx.fillText('❤', this.x-10, this.y+10);
+            }
+        }
+
+        function spawnThief() {
+            if(!gameActive || isEndingAnimation || isDeathAnimation) return;
+            if (isPaused) {
+                setTimeout(spawnThief, 100);
+                return;
+            }
+            thieves.push(new Thief());
+            setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
+        }
+
+        function spawnItem() {
+            if(!gameActive || isEndingAnimation || isDeathAnimation) return;
+            if (isPaused) {
+                setTimeout(spawnItem, 100);
+                return;
+            }
+            if(Math.random() > 0.65) items.push(new Item());
+            const nextSpawnDelay = Math.max(4500, 12000 - (currentTime * 45));
+            setTimeout(spawnItem, nextSpawnDelay);
+        }
+
+        function createExplosion(x, y, color, scale = 1) {
+            for(let i=0; i < (10 * scale); i++) {
+                particles.push({
+                    x, y, 
+                    vx: (Math.random()-0.5)*4*scale, 
+                    vy: (Math.random()-0.5)*4*scale, 
+                    life: 20, 
+                    color
+                });
+            }
+        }
+
+        function setDiamondPath() {
+            ctx.beginPath();
+            ctx.moveTo(CANVAS_SIZE/2, 0);
+            ctx.lineTo(CANVAS_SIZE, CANVAS_SIZE/2);
+            ctx.lineTo(CANVAS_SIZE/2, CANVAS_SIZE);
+            ctx.lineTo(0, CANVAS_SIZE/2);
+            ctx.closePath();
+        }
+
+        function drawArena() {
+            setDiamondPath();
+            ctx.fillStyle = '#222'; 
+            ctx.fill();
+            
+            ctx.strokeStyle = '#333'; 
+            ctx.lineWidth = 1;
+            for(let i=0; i<CANVAS_SIZE; i+=40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke();
+            }
+
+            if(gemVisible) {
+                ctx.fillStyle = '#0cf';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#0cf';
+                ctx.beginPath();
+                ctx.moveTo(gemPos.x, gemPos.y - 15);
+                ctx.lineTo(gemPos.x + 15, gemPos.y);
+                ctx.lineTo(gemPos.x, gemPos.y + 15);
+                ctx.lineTo(gemPos.x - 15, gemPos.y);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+
+            const isCrit = health < 30;
+            const flash = (isCrit && frameCount % 20 < 10);
+            
+            ctx.fillStyle = isDeathAnimation ? '#400' : (isCrit ? '#f00' : '#080');
+            ctx.beginPath();
+            ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2);
+            ctx.fill();
+            
+            if (isDeathAnimation) {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(monsterPos.x - 15, monsterPos.y - 5);
+                ctx.lineTo(monsterPos.x - 5, monsterPos.y - 5);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(monsterPos.x + 5, monsterPos.y - 5);
+                ctx.lineTo(monsterPos.x + 15, monsterPos.y - 5);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.arc(monsterPos.x, monsterPos.y + 12, 8, Math.PI, 0, false);
+                ctx.stroke();
+            } else {
+                let dxLook = mouseX - monsterPos.x;
+                let dyLook = mouseY - monsterPos.y;
+                
+                if (isEndingAnimation && winningThief) {
+                    dxLook = winningThief.x - monsterPos.x;
+                    dyLook = winningThief.y - monsterPos.y;
+                }
+
+                let lookAngle = Math.atan2(dyLook, dxLook);
+                let lookDist = Math.min(2, Math.sqrt(dxLook*dxLook + dyLook*dyLook) / 50);
+                let lookX = Math.cos(lookAngle) * lookDist;
+                let lookY = Math.sin(lookAngle) * lookDist;
+
+                ctx.fillStyle = flash ? '#f00' : '#fff';
+                ctx.fillRect(monsterPos.x-13, monsterPos.y-9, 7, 7);
+                ctx.fillRect(monsterPos.x+6, monsterPos.y-9, 7, 7);
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(monsterPos.x-11 + lookX, monsterPos.y-7 + lookY, 3, 3);
+                ctx.fillRect(monsterPos.x+8 + lookX, monsterPos.y-7 + lookY, 3, 3);
+
+                if (isEndingAnimation) {
+                    ctx.strokeStyle = '#000';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(monsterPos.x, monsterPos.y + 12, 8, Math.PI, 0, false);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function drawBorder() {
+            setDiamondPath();
+            ctx.strokeStyle = '#555'; 
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        function applyArrowDamage(arrow, isHeadHit) {
+            if(arrow.type === 'regular') {
+                health -= isHeadHit ? 3 : 1; 
+            } else if(arrow.type === 'fire') {
+                health -= isHeadHit ? 8 : 3;
+            } else if(arrow.type === 'poison') {
+                poisonTimer = 600;
+            }
+        }
+
+        function handleCollisions() {
+            if (isEndingAnimation || isDeathAnimation || isPaused) return;
+
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const arrow = arrows[i];
+                const dx = arrow.x - monsterPos.x;
+                const dy = arrow.y - monsterPos.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 28) { 
+                    AudioFX.hit();
+                    applyArrowDamage(arrow, true); 
+                    createExplosion(arrow.x, arrow.y, '#f00', 2); 
+                    arrows.splice(i, 1);
+                    continue; 
+                }
+            }
+
+            [leftTentacle, rightTentacle].forEach(tentacle => {
+                tentacle.segments.forEach(seg => {
+                    thieves.forEach((thief, tIdx) => {
+                        let dx = seg.x - thief.x;
+                        let dy = seg.y - thief.y;
+                        if(Math.sqrt(dx*dx + dy*dy) < 15) {
+                            AudioFX.splat(); 
+                            createExplosion(thief.x, thief.y, thief.color);
+                            thieves.splice(tIdx, 1);
+                            score += 10;
+                        }
+                    });
+
+                    for (let i = arrows.length - 1; i >= 0; i--) {
+                        const arrow = arrows[i];
+                        let dx = seg.x - arrow.x;
+                        let dy = seg.y - arrow.y;
+                        if(Math.sqrt(dx*dx + dy*dy) < 12) {
+                            AudioFX.hit(); 
+                            applyArrowDamage(arrow, false); 
+                            createExplosion(seg.x, seg.y, arrow.type === 'poison' ? '#a0f' : '#f00', 0.8);
+                            arrows.splice(i, 1);
+                        }
+                    }
+
+                    items.forEach((item, iIdx) => {
+                        let dx = seg.x - item.x;
+                        let dy = seg.y - item.y;
+                        if(Math.sqrt(dx*dx + dy*dy) < 20) {
+                            AudioFX.heal(); 
+                            health = Math.min(100, health + 25);
+                            poisonTimer = 0; 
+                            items.splice(iIdx, 1);
+                            createExplosion(item.x, item.y, '#fff');
+                        }
+                    });
+                });
+            });
+
+            if(health <= 0) {
+                health = 0;
+                triggerDeath();
+            }
+        }
+
+        function togglePause() {
+            if (!gameActive || isEndingAnimation || isDeathAnimation) return;
+            isPaused = !isPaused;
+            AudioFX.beep();
+            pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE';
+            
+            if (isPaused) {
+                pauseScreen.classList.remove('hidden');
+                lastPauseTimestamp = Date.now();
+            } else {
+                pauseScreen.classList.add('hidden');
+                pauseTimeOffset += (Date.now() - lastPauseTimestamp);
+            }
+        }
+
+        function restartFromPause() {
+            AudioFX.beep();
+            pauseScreen.classList.add('hidden');
+            resetGame();
+        }
+
+        function update() {
+            if(!gameActive && !isEndingAnimation && !isDeathAnimation) return;
+            
+            frameCount++;
+            
+            if (gameActive && !isPaused) {
+                currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
+            }
+            
+            if(poisonTimer > 0 && !isPaused) poisonTimer--;
+
+            let tx, ty;
+            if (isDeathAnimation) {
+                tx = monsterPos.x;
+                ty = monsterPos.y + 120;
+                deathTimer++;
+                if (deathTimer > 100) {
+                    endGameUI('health');
+                }
+            } else if (isEndingAnimation) {
+                tx = monsterPos.x;
+                ty = monsterPos.y + 50;
+            } else {
+                tx = mouseX;
+                ty = mouseY;
+            }
+
+            leftTentacle.update(tx, ty);
+            rightTentacle.update(tx, ty);
+
+            thieves.forEach(t => t.update());
+            arrows.forEach(a => a.update());
+            arrows = arrows.filter(a => a.active);
+            items.forEach(it => it.update());
+            items = items.filter(it => it.life > 0);
+
+            if (!isPaused) {
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life--;
+                });
+                particles = particles.filter(p => p.life > 0);
+            }
+
+            handleCollisions();
+
+            scoreVal.innerText = score;
+            timeVal.innerText = currentTime + 's';
+            
+            healthBar.style.width = health + '%';
+            if (health < 30) {
+                healthBar.style.backgroundColor = '#f00';
+            } else {
+                healthBar.style.backgroundColor = '#0f0';
+            }
+
+            if(poisonTimer > 0) poisonStatus.classList.remove('hidden');
+            else poisonStatus.classList.add('hidden');
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            drawBorder();
+            ctx.save();
+            setDiamondPath();
+            ctx.clip();
+            drawArena();
+            leftTentacle.draw();
+            rightTentacle.draw();
+            thieves.forEach(t => t.draw());
+            arrows.forEach(a => a.draw());
+            items.forEach(it => it.draw());
+            particles.forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / 20;
+                ctx.fillRect(p.x, p.y, 4, 4);
+                ctx.globalAlpha = 1;
+            });
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestAnimationFrame(gameLoop);
+            else draw(); 
+        }
+
+        function startGame() {
+            AudioFX.init(); 
+            AudioFX.beep();
+            startScreen.classList.add('hidden');
+            pauseBtn.classList.remove('hidden');
+            resetGameParams();
+            gameActive = true;
+            startTime = Date.now();
+            spawnThief();
+            spawnItem();
+            gameLoop();
+        }
+
+        function resetGameParams() {
+            score = 0;
+            health = 100;
+            poisonTimer = 0;
+            gemVisible = true;
+            isEndingAnimation = false;
+            isDeathAnimation = false;
+            isPaused = false;
+            pauseTimeOffset = 0;
+            hasPlayedEndSound = false; 
+            deathTimer = 0;
+            winningThief = null;
+            frameCount = 0;
+            thieves = [];
+            arrows = [];
+            particles = [];
+            items = [];
+            gemPos.x = CANVAS_SIZE / 2;
+            gemPos.y = CANVAS_SIZE * 0.9;
+            pauseBtn.innerText = 'PAUSE';
+            
+            leftTentacle.vx = 0; leftTentacle.vy = 0;
+            rightTentacle.vx = 0; rightTentacle.vy = 0;
+        }
+
+        function triggerEscape(thief) {
+            if (isEndingAnimation || isDeathAnimation) return;
+            if (!hasPlayedEndSound) {
+                AudioFX.gemLost(); 
+                hasPlayedEndSound = true;
+            }
+            gameActive = false;
+            isEndingAnimation = true;
+            winningThief = thief;
+            arrows = [];
+            items = [];
+        }
+
+        function triggerDeath() {
+            if (isDeathAnimation || isEndingAnimation) return;
+            if (!hasPlayedEndSound) {
+                AudioFX.powerDown(); 
+                hasPlayedEndSound = true;
+            }
+            gameActive = false;
+            isDeathAnimation = true;
+            deathTimer = 0;
+            arrows = [];
+            items = [];
+            particles.push(...Array.from({length: 20}, () => ({
+                x: monsterPos.x, y: monsterPos.y, 
+                vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, 
+                life: 30, color: '#f00'
+            })));
+        }
+
+        function resetGame() {
+            AudioFX.beep();
+            gameOverScreen.classList.add('hidden');
+            startGame();
+        }
+
+        function endGameUI(reason) {
+            gameActive = false;
+            isEndingAnimation = false;
+            isDeathAnimation = false;
+            pauseBtn.classList.add('hidden');
+            
+            if (reason === 'health') {
+                gameOverTitle.innerText = "GAME OVER";
+            } else {
+                gameOverTitle.innerText = "GEM STOLEN!";
+            }
+            
+            gameOverScreen.classList.remove('hidden');
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('finalTime').innerText = currentTime + ' seconds';
+        }
+
+        function handleInput(clientX, clientY) {
+            if (!gameActive || isPaused) return;
+            const rect = canvas.getBoundingClientRect();
+            mouseX = (clientX - rect.left) * (CANVAS_SIZE / rect.width);
+            mouseY = (clientY - rect.top) * (CANVAS_SIZE / rect.height);
+        }
+
+        canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
+
+        canvas.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            handleInput(touch.clientX, touch.clientY);
+            // Crucial: prevent native scrolling while playing
+            if (gameActive && !isPaused) e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            handleInput(touch.clientX, touch.clientY);
+        }, { passive: true });
+
+        draw();
+
+    </script>
+</body>
+</html>
