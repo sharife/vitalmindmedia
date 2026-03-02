@@ -255,8 +255,26 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
+        // --- FIREBASE DEPLOYMENT SETUP ---
+        // Replace this block with your actual Firebase config from the Firebase Console
+        let config = {};
+        try {
+            // Check if environment variables are available (for preview environment)
+            config = JSON.parse(__firebase_config);
+        } catch (e) {
+            // MANUALLY ADD YOUR CONFIG HERE FOR YOUR OWN SERVER:
+            config = {
+                apiKey: "AIzaSyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk",
+                authDomain: "tentaguard.firebaseapp.com",
+                projectId: "tentaguard",
+                storageBucket: "tentaguard.firebasestorage.app",
+                messagingSenderId: "713425803349",
+                appId: "1:713425803349:web:ce08c5d70db14a1d949cdc",
+                measurementId: "G-208QVW68RY"
+            };
+        }
+
+        const app = initializeApp(config);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
@@ -264,10 +282,14 @@
 
         const initAuth = async () => {
             if (user) return user;
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
-            } else {
-                user = (await signInAnonymously(auth)).user;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+                } else {
+                    user = (await signInAnonymously(auth)).user;
+                }
+            } catch (err) {
+                console.error("Auth initialization failed. Ensure Anonymous Auth is enabled in Firebase console.", err);
             }
             return user;
         };
@@ -275,14 +297,16 @@
         window.saveHighScore = async (name, score) => {
             const u = await initAuth();
             if (!u) return;
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            const colPath = `artifacts/${appId}/public/data/leaderboard`;
+            const colRef = collection(db, colPath);
             await addDoc(colRef, { name: name.toUpperCase(), score: score, timestamp: Date.now() });
         };
 
         window.fetchLeaderboard = async () => {
             const u = await initAuth();
             if (!u) return [];
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            const colPath = `artifacts/${appId}/public/data/leaderboard`;
+            const colRef = collection(db, colPath);
             const snapshot = await getDocs(colRef);
             return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 10);
         };
@@ -448,7 +472,8 @@
             for(let i=0; i<CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke(); }
             if(gameActive || isEndingAnimation) {
                 ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf';
-                ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill(); ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill();
+                ctx.shadowBlur = 0;
             }
             ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080');
             ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2); ctx.fill();
@@ -559,13 +584,20 @@
         }
 
         function checkHighScoreFlow() {
-            if (score > 0) { gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); }
-            else { backToMain(); }
+            if (isGameOver && score > 0) {
+                gameOverScreen.classList.add('hidden');
+                submitScoreScreen.classList.remove('hidden');
+                document.getElementById('submitScoreVal').innerText = score;
+                initialsInput.focus();
+            } else {
+                backToMain();
+            }
         }
 
         async function submitScore() {
             const initials = initialsInput.value.trim() || 'AAA'; AudioFX.beep();
-            submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
+            submitScoreScreen.classList.add('hidden');
+            leaderboardScreen.classList.remove('hidden');
             try { await window.saveHighScore(initials, score); await showLeaderboard(); } catch (err) { backToMain(); }
         }
 
@@ -574,7 +606,7 @@
             const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>';
             try {
                 const top = await window.fetchLeaderboard();
-                if (top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
+                if (!top || top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
                 else {
                     let h = '<table class="leaderboard-list">';
                     top.forEach((s, i) => h += `<tr><td class="rank-col">${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
@@ -583,7 +615,7 @@
             } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; }
         }
 
-        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
 
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); mouseX = (cX - r.left) * (600 / r.width); mouseY = (cY - r.top) * (600 / r.height); }
