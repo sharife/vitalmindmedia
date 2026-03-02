@@ -255,7 +255,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Netlify safe key assembly to bypass scanner false positives
+        // Netlify safe key assembly to avoid Netlify/Scanner false positives
         const p1 = "AIza";
         const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
 
@@ -330,6 +330,7 @@
             },
             beep() { this.playOsc(800, 'square', 0.1, 0.05); },
             splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
+            clink() { this.playOsc(1200, 'triangle', 0.1, 0.1, 800); }, 
             whoosh(vol) { this.playOsc(100, 'sine', 0.3, Math.min(0.08, vol * 0.05), 300); },
             hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
             heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
@@ -394,13 +395,30 @@
         const leftTentacle = new Tentacle(-1), rightTentacle = new Tentacle(1);
 
         class Thief {
-            constructor() {
+            constructor(isSamurai = false) {
                 const sY = Math.random() * 200, side = Math.random() > 0.5 ? 1 : -1;
                 this.y = sY; this.x = side === -1 ? 300 - sY : 300 + sY;
-                this.speed = 0.8 + Math.random() * 0.7; this.shootCooldown = 60 + Math.random() * 120;
-                this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
-                this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
-                this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.size = 12 * this.mobileScale;
+                this.isSamurai = isSamurai;
+                this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0;
+                
+                if (this.isSamurai) {
+                    this.speed = 0.5;
+                    this.size = 20 * this.mobileScale;
+                    this.shielded = true;
+                    this.pauseTimer = 0;
+                    this.moveTimer = 60 + Math.random() * 60;
+                } else {
+                    this.speed = 0.8 + Math.random() * 0.7;
+                    this.size = 12 * this.mobileScale;
+                    this.shielded = false;
+                }
+
+                this.shootCooldown = 60 + Math.random() * 120;
+                this.wanderPhase = Math.random() * Math.PI * 2; 
+                this.wanderFreq = 0.02 + Math.random() * 0.04;
+                this.wanderAmp = 0.4 + Math.random() * 0.4; 
+                this.animFrame = 0;
+
                 const types = ['regular', 'regular', 'fire', 'poison'];
                 this.arrowType = types[Math.floor(Math.random() * types.length)];
                 this.color = this.arrowType === 'regular' ? '#bbb' : (this.arrowType === 'fire' ? '#f80' : '#a0f');
@@ -409,21 +427,43 @@
                 if (isPaused) return;
                 if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.x = this.x; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) endGameUI('gem'); } return; }
                 if (isDeathAnimation) return;
+
+                if (this.isSamurai) {
+                    if (this.pauseTimer > 0) { this.pauseTimer--; return; }
+                    this.moveTimer--;
+                    if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; }
+                }
+
                 this.wanderPhase += this.wanderFreq; this.animFrame += this.speed * 0.15;
                 let dx = gemPos.x - this.x, dy = gemPos.y - this.y;
-                let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * this.wanderAmp;
+                let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * (this.isSamurai ? 0.1 : this.wanderAmp);
                 this.x += Math.cos(ang) * this.speed; this.y += Math.sin(ang) * this.speed;
-                if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
-                if (Math.sqrt(dx**2 + dy**2) < 20) triggerEscape(this);
+                
+                if (--this.shootCooldown <= 0) { 
+                    arrows.push(new Arrow(this.x, this.y, this.arrowType)); 
+                    this.shootCooldown = 150 + Math.random() * 100; 
+                }
+                if (Math.sqrt(dx**2 + dy**2) < (this.isSamurai ? 25 : 20)) triggerEscape(this);
             }
             draw() {
                 const lo = (Math.sin(this.animFrame) * 4) * this.mobileScale, hs = this.size / 2;
-                ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.8, this.y + hs * 0.6 + lo, hs * 0.6, hs * 0.6);
-                ctx.fillRect(this.x + hs * 0.2, this.y + hs * 0.6 - lo, hs * 0.6, hs * 0.6);
-                ctx.fillStyle = '#333'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
-                ctx.fillStyle = this.color; ctx.fillRect(this.x - hs, this.y - hs, this.size, hs * 0.5);
-                ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6, hs * 0.3);
-                ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.5, this.y - hs * 0.25, 1, hs * 0.3); ctx.fillRect(this.x + hs * 0.4, this.y - hs * 0.25, 1, hs * 0.3);
+                if (this.isSamurai) {
+                    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
+                    ctx.fillStyle = '#444'; ctx.fillRect(this.x - hs, this.y - hs, this.size, hs * 0.8);
+                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - 2, this.y - hs - 5, 4, 6);
+                    if (this.shielded) {
+                        ctx.fillStyle = '#889'; ctx.fillRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size);
+                        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size);
+                    }
+                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - hs * 0.4, this.y - hs * 0.4, 2, 2); ctx.fillRect(this.x + hs * 0.2, this.y - hs * 0.4, 2, 2);
+                } else {
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.8, this.y + hs * 0.6 + lo, hs * 0.6, hs * 0.6);
+                    ctx.fillRect(this.x + hs * 0.2, this.y + hs * 0.6 - lo, hs * 0.6, hs * 0.6);
+                    ctx.fillStyle = '#333'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
+                    ctx.fillStyle = this.color; ctx.fillRect(this.x - hs, this.y - hs, this.size, hs * 0.5);
+                    ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6, hs * 0.3);
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.5, this.y - hs * 0.25, 1, hs * 0.3); ctx.fillRect(this.x + hs * 0.4, this.y - hs * 0.25, 1, hs * 0.3);
+                }
             }
         }
 
@@ -454,7 +494,13 @@
         function spawnThief() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnThief, 100); return; }
-            thieves.push(new Thief()); setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
+            
+            // Samurai now appear at 1000 instead of 2000
+            let samuraiChance = (score >= 1000) ? 0.3 : 0;
+            if (Math.random() < samuraiChance) thieves.push(new Thief(true));
+            else thieves.push(new Thief(false));
+            
+            setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
         }
 
         function spawnItem() {
@@ -467,16 +513,13 @@
             ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
             ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
             for(let i=0; i<CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke(); }
-            
             if(gameActive || isEndingAnimation) {
                 ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf';
                 ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill();
                 ctx.shadowBlur = 0;
             }
-
             ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080');
             ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2); ctx.fill();
-            
             if (isDeathAnimation) {
                 ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(monsterPos.x-15, monsterPos.y-5); ctx.lineTo(monsterPos.x-5, monsterPos.y-5); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(monsterPos.x+5, monsterPos.y-5); ctx.lineTo(monsterPos.x+15, monsterPos.y-5); ctx.stroke();
@@ -504,9 +547,18 @@
             [leftTentacle, rightTentacle].forEach(tentacle => {
                 tentacle.segments.forEach(seg => {
                     thieves.forEach((thief, tIdx) => {
-                        if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < (15 * thief.mobileScale)) {
-                            AudioFX.splat(); thieves.splice(tIdx, 1); score += 10;
-                            for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 20, color: thief.color });
+                        let hitRadius = 15 * thief.mobileScale;
+                        if (thief.isSamurai) hitRadius = 25 * thief.mobileScale;
+                        if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < hitRadius) {
+                            if (thief.isSamurai && thief.shielded) {
+                                AudioFX.clink(); thief.shielded = false;
+                                for(let j=0; j<15; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: '#889' });
+                                thief.x -= Math.cos(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
+                                thief.y -= Math.sin(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
+                            } else {
+                                AudioFX.splat(); thieves.splice(tIdx, 1); score += thief.isSamurai ? 50 : 10;
+                                for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 20, color: thief.color });
+                            }
                         }
                     });
                     for (let i = arrows.length - 1; i >= 0; i--) {
@@ -538,10 +590,9 @@
             if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
             if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
             
-            // PHASE 2: Mirror Rotation
-            if (gameActive && !isPaused && score >= 1000) {
-                // START SPEED LOWER (0.001) for a gentle "unlocking" feel
-                const phase2Score = score - 1000;
+            // Phase 2 logic shifted to 2000 points
+            if (gameActive && !isPaused && score >= 2000) {
+                const phase2Score = score - 2000;
                 const currentSpeed = 0.001 + (phase2Score * 0.000005); 
                 arenaRotation += currentSpeed;
             }
@@ -565,11 +616,9 @@
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
             ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
             ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke();
-
             ctx.save();
             ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
             ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); ctx.clip();
-
             drawArena(); leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw());
             particles.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 20; ctx.fillRect(p.x, p.y, 4, 4); ctx.globalAlpha = 1; });
             ctx.restore();
@@ -599,19 +648,14 @@
 
         function checkHighScoreFlow() {
             if (isGameOver && score > 0) {
-                gameOverScreen.classList.add('hidden');
-                submitScoreScreen.classList.remove('hidden');
-                document.getElementById('submitScoreVal').innerText = score;
-                initialsInput.focus();
-            } else {
-                backToMain();
-            }
+                gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden');
+                document.getElementById('submitScoreVal').innerText = score; initialsInput.focus();
+            } else { backToMain(); }
         }
 
         async function submitScore() {
             const initials = initialsInput.value.trim() || 'AAA'; AudioFX.beep();
-            submitScoreScreen.classList.add('hidden');
-            leaderboardScreen.classList.remove('hidden');
+            submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
             try { await window.saveHighScore(initials, score); await showLeaderboard(); } catch (err) { backToMain(); }
         }
 
