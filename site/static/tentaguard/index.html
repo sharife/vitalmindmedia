@@ -180,6 +180,7 @@
             position: relative;
             box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), inset 0 0 10px rgba(0, 255, 0, 0.05);
             backdrop-filter: blur(2px);
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .joystick-knob {
@@ -194,6 +195,18 @@
             transform: translate(-50%, -50%);
             pointer-events: none;
             box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        /* Poison State for Joystick */
+        .joystick-container.poisoned .joystick-base {
+            border-color: rgba(160, 0, 255, 0.5);
+            box-shadow: 0 0 15px rgba(160, 0, 255, 0.3), inset 0 0 10px rgba(160, 0, 255, 0.1);
+        }
+        .joystick-container.poisoned .joystick-knob {
+            background: rgba(160, 0, 255, 0.6);
+            border-color: rgba(160, 0, 255, 0.9);
+            box-shadow: 0 0 10px rgba(160, 0, 255, 0.5);
         }
 
         @media (pointer: coarse) {
@@ -293,7 +306,7 @@
         </div>
     </div>
 
-    <!-- Virtual Joystick - Anchored Outside Arena -->
+    <!-- Virtual Joystick -->
     <div id="joystick-container" class="joystick-container">
         <div id="joystick-base" class="joystick-base">
             <div id="joystick-knob" class="joystick-knob"></div>
@@ -636,6 +649,11 @@
             if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
             if (gameActive && !isPaused && score >= 2000) { arenaRotation += 0.001 + (score - 2000) * 0.000005; }
             if(poisonTimer > 0 && !isPaused) poisonTimer--;
+
+            // Update Joystick Color state based on poison
+            if (poisonTimer > 0) joyContainer.classList.add('poisoned');
+            else joyContainer.classList.remove('poisoned');
+
             let tx, ty;
             if (isDeathAnimation) { tx = monsterPos.x; ty = monsterPos.y + 120; if (++deathTimer > 100) endGameUI('health'); }
             else if (isEndingAnimation) { tx = monsterPos.x; ty = monsterPos.y + 50; }
