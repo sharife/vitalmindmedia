@@ -229,7 +229,7 @@
         .leaderboard-list { width: 100%; max-width: 400px; margin-top: 20px; font-size: 24px; border-collapse: collapse; }
         .leaderboard-list tr { border-bottom: 1px solid #333; }
         .leaderboard-list td { padding: 8px 5px; }
-        .rank-col { color: #0f0; width: 40px; }
+        .rank-col { color: #0f0; width: 50px; text-align: left; }
         .name-col { text-align: left; }
         .score-col { text-align: right; color: #f80; }
 
@@ -291,7 +291,7 @@
         </div>
 
         <div id="leaderboardScreen" class="screen hidden">
-            <h2 class="text-green mb-2">TOP GUARDIANS</h2>
+            <h2 class="text-green mb-2">TOP 50 GUARDIANS</h2>
             <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
                 <p class="loading-text">FETCHING DATA...</p>
             </div>
@@ -365,7 +365,8 @@
             if (!u) throw new Error("Unauthenticated");
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             const snapshot = await getDocs(colRef);
-            return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 10);
+            // Switched slice to (0, 50) for Top 50 display
+            return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 50);
         };
     </script>
 
@@ -723,10 +724,13 @@
                 if (!top || top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
                 else {
                     let h = '<table class="leaderboard-list">';
-                    top.forEach((s, i) => h += `<tr><td class="rank-col">${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
+                    top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
                     content.innerHTML = h + '</table>';
                 }
-            } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; }
+            } catch (err) { 
+                console.error("Fetch failed:", err);
+                content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; 
+            }
         }
 
         function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
