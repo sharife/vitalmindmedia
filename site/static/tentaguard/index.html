@@ -158,6 +158,47 @@
         .mb-4 { margin-bottom: 1rem; }
         .mb-8 { margin-bottom: 2rem; }
 
+        /* Virtual Joystick Styles */
+        .joystick-container {
+            position: absolute;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            z-index: 30;
+            display: none; /* Only visible on touch devices */
+            pointer-events: auto;
+        }
+
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(0, 255, 0, 0.2);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+        }
+
+        .joystick-knob {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 255, 0, 0.3);
+            border: 1px solid rgba(0, 255, 0, 0.6);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: background 0.2s;
+        }
+
+        @media (pointer: coarse) {
+            .joystick-container { display: block; }
+        }
+
         .input-name {
             background: #111;
             border: 2px solid #0f0;
@@ -185,6 +226,7 @@
             .mb-8 { margin-bottom: 0.5rem; }
             p { font-size: 14px; }
             .btn { padding: 8px 20px; }
+            .joystick-container { bottom: 20px; width: 80px; height: 80px; }
         }
     </style>
 </head>
@@ -207,6 +249,13 @@
                     </div>
                     <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Virtual Joystick -->
+        <div id="joystick-container" class="joystick-container">
+            <div id="joystick-base" class="joystick-base">
+                <div id="joystick-knob" class="joystick-knob"></div>
             </div>
         </div>
 
@@ -255,7 +304,6 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Netlify safe key assembly
         const p1 = "AIza";
         const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
 
@@ -316,6 +364,11 @@
         const submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
         const initialsInput = document.getElementById('initialsInput');
 
+        // Joystick Elements
+        const joyContainer = document.getElementById('joystick-container');
+        const joyBase = document.getElementById('joystick-base');
+        const joyKnob = document.getElementById('joystick-knob');
+
         const AudioFX = {
             ctx: null,
             init() { if (this.ctx) return; this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -331,7 +384,7 @@
             beep() { this.playOsc(800, 'square', 0.1, 0.05); },
             splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
             clink() { this.playOsc(1200, 'triangle', 0.1, 0.1, 800); }, 
-            jump() { this.playOsc(300, 'sine', 0.2, 0.1, 600); }, // New jump sound
+            jump() { this.playOsc(300, 'sine', 0.2, 0.1, 600); },
             whoosh(vol) { this.playOsc(100, 'sine', 0.3, Math.min(0.08, vol * 0.05), 300); },
             hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
             heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
@@ -401,36 +454,26 @@
                 this.y = sY; this.x = side === -1 ? 300 - sY : 300 + sY;
                 this.type = type;
                 this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0;
-                
-                // State properties
                 this.shielded = type === "samurai";
                 this.isJumping = false;
                 this.jumpTimer = 0;
                 this.jumpCooldown = 0;
-                this.scale = 1.0; // Visual scale for jumping
+                this.scale = 1.0;
 
                 if (this.type === "samurai") {
-                    this.speed = 0.5;
-                    this.size = 20 * this.mobileScale;
-                    this.pauseTimer = 0;
-                    this.moveTimer = 60 + Math.random() * 60;
+                    this.speed = 0.5; this.size = 20 * this.mobileScale;
+                    this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60;
                     this.color = "#444";
                 } else if (this.type === "jumper") {
-                    this.speed = 1.2;
-                    this.size = 14 * this.mobileScale;
-                    this.color = "#a0f"; // Purple
+                    this.speed = 1.2; this.size = 14 * this.mobileScale;
+                    this.color = "#a0f";
                 } else {
-                    this.speed = 0.8 + Math.random() * 0.7;
-                    this.size = 12 * this.mobileScale;
+                    this.speed = 0.8 + Math.random() * 0.7; this.size = 12 * this.mobileScale;
                     this.color = "#bbb";
                 }
-
                 this.shootCooldown = 60 + Math.random() * 120;
-                this.wanderPhase = Math.random() * Math.PI * 2; 
-                this.wanderFreq = 0.02 + Math.random() * 0.04;
-                this.wanderAmp = 0.4 + Math.random() * 0.4; 
-                this.animFrame = 0;
-
+                this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
+                this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
                 const arrowTypes = ['regular', 'regular', 'fire', 'poison'];
                 this.arrowType = arrowTypes[Math.floor(Math.random() * arrowTypes.length)];
                 if (this.type === "ninja") this.maskColor = this.arrowType === 'regular' ? '#bbb' : (this.arrowType === 'fire' ? '#f80' : '#a0f');
@@ -440,71 +483,33 @@
                 if (isPaused) return;
                 if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.x = this.x; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) endGameUI('gem'); } return; }
                 if (isDeathAnimation) return;
-
-                // Samurai pausing logic
                 if (this.type === "samurai") {
                     if (this.pauseTimer > 0) { this.pauseTimer--; return; }
-                    this.moveTimer--;
-                    if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; }
+                    this.moveTimer--; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; }
                 }
-
-                // Jumper leap logic
                 if (this.type === "jumper") {
                     if (this.isJumping) {
-                        this.jumpTimer++;
-                        // Invulnerability window: arc of scale
-                        this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8;
-                        if (this.jumpTimer >= 45) {
-                            this.isJumping = false;
-                            this.jumpTimer = 0;
-                            this.jumpCooldown = 120 + Math.random() * 100;
-                            this.scale = 1.0;
-                        }
-                    } else if (this.jumpCooldown > 0) {
-                        this.jumpCooldown--;
-                    } else {
-                        // Trigger jump if somewhat close to monster/mouse
-                        const distToMonster = Math.sqrt((this.x - monsterPos.x)**2 + (this.y - monsterPos.y)**2);
-                        if (distToMonster < 200) {
-                            this.isJumping = true;
-                            AudioFX.jump();
-                        }
-                    }
+                        this.jumpTimer++; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8;
+                        if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; }
+                    } else if (this.jumpCooldown > 0) { this.jumpCooldown--; }
+                    else { if (Math.sqrt((this.x - monsterPos.x)**2 + (this.y - monsterPos.y)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
                 }
-
                 this.wanderPhase += this.wanderFreq; this.animFrame += this.speed * 0.15;
                 let dx = gemPos.x - this.x, dy = gemPos.y - this.y;
                 let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * (this.type === "samurai" ? 0.1 : this.wanderAmp);
-                
-                // Speed boost during jump
-                const currentSpeed = this.isJumping ? this.speed * 2.5 : this.speed;
-                this.x += Math.cos(ang) * currentSpeed; this.y += Math.sin(ang) * currentSpeed;
-                
-                if (--this.shootCooldown <= 0) { 
-                    arrows.push(new Arrow(this.x, this.y, this.arrowType)); 
-                    this.shootCooldown = 150 + Math.random() * 100; 
-                }
+                this.x += Math.cos(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
+                this.y += Math.sin(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
+                if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
                 if (Math.sqrt(dx**2 + dy**2) < 25) triggerEscape(this);
             }
             draw() {
                 const lo = (Math.sin(this.animFrame) * 4) * this.mobileScale, hs = (this.size * this.scale) / 2;
-                
-                if (this.isJumping) {
-                    // Shadow below during jump
-                    ctx.fillStyle = "rgba(0,0,0,0.3)";
-                    ctx.beginPath();
-                    ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-
+                if (this.isJumping) { ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2); ctx.fill(); }
                 if (this.type === "samurai") {
                     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
                     ctx.fillStyle = '#444'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.8);
                     ctx.fillStyle = '#f00'; ctx.fillRect(this.x - 2, this.y - hs - 5, 4, 6);
-                    if (this.shielded) {
-                        ctx.fillStyle = '#889'; ctx.fillRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale);
-                        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale);
-                    }
+                    if (this.shielded) { ctx.fillStyle = '#889'; ctx.fillRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); }
                     ctx.fillStyle = '#f00'; ctx.fillRect(this.x - hs * 0.4, this.y - hs * 0.4, 2, 2); ctx.fillRect(this.x + hs * 0.2, this.y - hs * 0.4, 2, 2);
                 } else {
                     const colorBody = this.type === "jumper" ? "#407" : "#333";
@@ -525,10 +530,7 @@
                 this.vx = (dx/dist) * this.speed; this.vy = (dy/dist) * this.speed; this.active = true;
             }
             update() { if (!isPaused) { this.x += this.vx; this.y += this.vy; if (this.y > CANVAS_SIZE) this.active = false; } }
-            draw() {
-                ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f');
-                ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke();
-            }
+            draw() { ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f'); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke(); }
         }
 
         class Item {
@@ -545,16 +547,10 @@
         function spawnThief() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnThief, 100); return; }
-            
             let dice = Math.random();
-            if (score >= 1500 && dice < 0.25) {
-                thieves.push(new Thief("jumper"));
-            } else if (score >= 1000 && dice < 0.5) {
-                thieves.push(new Thief("samurai"));
-            } else {
-                thieves.push(new Thief("ninja"));
-            }
-            
+            if (score >= 1500 && dice < 0.25) thieves.push(new Thief("jumper"));
+            else if (score >= 1000 && dice < 0.5) thieves.push(new Thief("samurai"));
+            else thieves.push(new Thief("ninja"));
             setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
         }
 
@@ -582,7 +578,8 @@
             } else {
                 let dxL = mouseX - monsterPos.x, dyL = mouseY - monsterPos.y;
                 if (isEndingAnimation && winningThief) { dxL = winningThief.x - monsterPos.x; dyL = winningThief.y - monsterPos.y; }
-                let lookA = Math.atan2(dyL, dxL), lx = Math.cos(lookA) * 2, ly = Math.sin(lookA) * 2;
+                let lookA = Math.atan2(dyL, dxL), lookD = Math.min(2, Math.sqrt(dxL**2 + dyL**2) / 50);
+                let lx = Math.cos(lookA) * 2, ly = Math.sin(lookA) * 2;
                 ctx.fillStyle = '#fff'; ctx.fillRect(monsterPos.x-13, monsterPos.y-9, 7, 7); ctx.fillRect(monsterPos.x+6, monsterPos.y-9, 7, 7);
                 ctx.fillStyle = '#000'; ctx.fillRect(monsterPos.x-11+lx, monsterPos.y-7+ly, 3, 3); ctx.fillRect(monsterPos.x+8+lx, monsterPos.y-7+ly, 3, 3);
                 if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke(); }
@@ -601,9 +598,7 @@
             [leftTentacle, rightTentacle].forEach(tentacle => {
                 tentacle.segments.forEach(seg => {
                     thieves.forEach((thief, tIdx) => {
-                        // JUMPERS ARE INVULNERABLE IN AIR
                         if (thief.isJumping && thief.scale > 1.2) return;
-
                         let hitRadius = 15 * thief.mobileScale;
                         if (thief.type === "samurai") hitRadius = 25 * thief.mobileScale;
                         if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < hitRadius) {
@@ -724,23 +719,98 @@
             } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; }
         }
 
-        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
 
+        // --- Improved Input Mapping (Supports Screen Drag + Joystick) ---
         function handleInput(cX, cY) { 
             if (!gameActive || isPaused) return; 
             const r = canvas.getBoundingClientRect(); 
             let rawX = (cX - r.left) * (600 / r.width); 
             let rawY = (cY - r.top) * (600 / r.height); 
+
+            // Calculate target relative to screen but accounting for rotation
             const centerX = 300, centerY = 300;
             const dx = rawX - centerX, dy = rawY - centerY;
             const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
             mouseX = dx * cos - dy * sin + centerX; mouseY = dx * sin + dy * cos + centerY;
         }
 
+        // --- Joystick Logic ---
+        let joystickActive = false;
+        function updateJoystick(touchX, touchY) {
+            const rect = joyBase.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const maxRadius = rect.width / 2;
+
+            let dx = touchX - centerX;
+            let dy = touchY - centerY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist > maxRadius) {
+                dx = (dx / dist) * maxRadius;
+                dy = (dy / dist) * maxRadius;
+            }
+
+            // Move Knob visually
+            joyKnob.style.left = `calc(50% + ${dx}px)`;
+            joyKnob.style.top = `calc(50% + ${dy}px)`;
+
+            // Map Joystick deflection to Arena position (0.0 to 1.0 range)
+            // Normalized vector (-1.0 to 1.0)
+            const nx = dx / maxRadius;
+            const ny = dy / maxRadius;
+
+            // Map deflection directly to the MouseX/Y variables used by tentacles
+            // Center of stick = Center of arena (300, 300)
+            // Full stick = Corner of arena (300 +/- 300)
+            const targetX = 300 + nx * 300;
+            const targetY = 300 + ny * 300;
+
+            // Apply inverse rotation manually since we're bypassing screen coordinates
+            const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
+            const rdx = targetX - 300;
+            const rdy = targetY - 300;
+            mouseX = rdx * cos - rdy * sin + 300;
+            mouseY = rdx * sin + rdy * cos + 300;
+        }
+
+        function resetJoystick() {
+            joyKnob.style.left = '50%';
+            joyKnob.style.top = '50%';
+            joystickActive = false;
+        }
+
+        // Listeners for Joystick Base
+        joyBase.addEventListener('touchstart', (e) => {
+            joystickActive = true;
+            updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
+            e.stopPropagation();
+        }, { passive: false });
+
+        joyBase.addEventListener('touchmove', (e) => {
+            if (joystickActive) {
+                updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', resetJoystick);
+
+        // General canvas listeners
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-        canvas.addEventListener('touchmove', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
-        canvas.addEventListener('touchstart', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => { 
+            if (joystickActive) return; // Prioritize joystick if used
+            handleInput(e.touches[0].clientX, e.touches[0].clientY); 
+            if (gameActive && !isPaused) e.preventDefault(); 
+        }, { passive: false });
+
+        canvas.addEventListener('touchstart', (e) => { 
+            if (joystickActive) return;
+            handleInput(e.touches[0].clientX, e.touches[0].clientY); 
+        }, { passive: true });
 
         draw();
     </script>
