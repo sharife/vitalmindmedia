@@ -28,7 +28,7 @@
             max-width: 600px;
             max-height: 98vh;
             aspect-ratio: 1/1;
-            border: 1px solid #444;
+            border: 4px solid #444;
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
             background: #000;
             display: flex;
@@ -57,17 +57,31 @@
             z-index: 10;
         }
 
-        .stats {
+        .hud-top {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .stats-group {
+            display: flex;
+            flex-direction: column;
             font-size: clamp(16px, 4vw, 24px);
             text-shadow: 2px 2px #000;
             letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .health-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
 
         .bottom-ui {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: flex-end;
             pointer-events: none;
             width: 100%;
@@ -148,7 +162,7 @@
 
         .health-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.3s, background-color 0.3s; }
 
-        .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; }
+        .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
 
         .title { font-size: clamp(2.5rem, 10vw, 4rem); margin: 0 0 10px 0; line-height: 1; letter-spacing: 2px; }
         .text-green { color: #4ade80; }
@@ -158,7 +172,7 @@
         .mb-4 { margin-bottom: 1rem; }
         .mb-8 { margin-bottom: 2rem; }
 
-        /* Virtual Joystick Styles - Anchored to Viewport */
+        /* Virtual Joystick Styles */
         .joystick-container {
             position: fixed;
             bottom: max(30px, env(safe-area-inset-bottom));
@@ -167,7 +181,7 @@
             width: 110px;
             height: 110px;
             z-index: 100;
-            display: none; /* Visible only on touch */
+            display: none; 
             pointer-events: auto;
         }
 
@@ -198,7 +212,6 @@
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
 
-        /* Poison State for Joystick */
         .joystick-container.poisoned .joystick-base {
             border-color: rgba(160, 0, 255, 0.5);
             box-shadow: 0 0 15px rgba(160, 0, 255, 0.3), inset 0 0 10px rgba(160, 0, 255, 0.1);
@@ -251,18 +264,24 @@
         <div id="crt-effect"></div>
 
         <div class="ui-overlay">
-            <div class="stats">
-                <div>SCORE: <span id="scoreVal">0</span></div>
-                <div>TIME: <span id="timeVal">0s</span></div>
-            </div>
-            <div class="bottom-ui">
-                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
-                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+            <div class="hud-top">
+                <!-- Top Left: Score and Time Group -->
+                <div class="stats-group">
+                    <div>SCORE: <span id="scoreVal">0</span></div>
+                    <div>TIME: <span id="timeVal">0s</span></div>
+                </div>
+
+                <!-- Top Right: Health Bar Group -->
+                <div class="health-group">
                     <div class="health-bar-container">
                         <div id="healthBar" class="health-bar"></div>
                     </div>
                     <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
                 </div>
+            </div>
+            
+            <div class="bottom-ui">
+                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
             </div>
         </div>
 
@@ -300,8 +319,8 @@
 
         <div id="gameOverScreen" class="screen hidden">
             <h2 id="gameOverTitle" class="title text-red">GEM STOLEN!</h2>
-            <p class="mb-2">SCORE: <span id="finalScore">0</span></p>
-            <p class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></p>
+            <h2 class="mb-2">SCORE: <span id="finalScore">0</span></h2>
+            <h3 class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></h3>
             <button class="btn" onclick="checkHighScoreFlow()">CONTINUE</button>
         </div>
     </div>
@@ -365,7 +384,6 @@
             if (!u) throw new Error("Unauthenticated");
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             const snapshot = await getDocs(colRef);
-            // Switched slice to (0, 50) for Top 50 display
             return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 50);
         };
     </script>
@@ -379,7 +397,6 @@
         const submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
         const initialsInput = document.getElementById('initialsInput');
 
-        // Joystick Elements
         const joyContainer = document.getElementById('joystick-container');
         const joyBase = document.getElementById('joystick-base');
         const joyKnob = document.getElementById('joystick-knob');
@@ -425,8 +442,17 @@
             }
             update(targetX, targetY) {
                 if (isPaused) return;
-                let poisonScale = poisonTimer > 0 ? 0.75 : 1.0, currentLen = this.segLength * poisonScale;
-                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * (poisonTimer > 0 ? 0.25 : 1.0);
+                
+                // Reach scaling based on poison
+                let poisonScale = poisonTimer > 0 ? 0.75 : 1.0;
+                let currentLen = this.segLength * poisonScale;
+                
+                // Speed penalty system: 
+                // Regular speed mod is 0.25 (the old poison "smooth" speed).
+                // Poisoned speed mod is now 0.12 (extra slow penalty).
+                const speedMod = poisonTimer > 0 ? 0.12 : 0.25;
+                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * speedMod;
+                
                 let tx = targetX + (this.side * 40), ty = targetY;
                 let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
                 let currentMaxReach = this.maxReach * poisonScale;
@@ -650,11 +676,8 @@
             if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
             if (gameActive && !isPaused && score >= 2000) { arenaRotation += 0.001 + (score - 2000) * 0.000005; }
             if(poisonTimer > 0 && !isPaused) poisonTimer--;
-
-            // Update Joystick Color state based on poison
             if (poisonTimer > 0) joyContainer.classList.add('poisoned');
             else joyContainer.classList.remove('poisoned');
-
             let tx, ty;
             if (isDeathAnimation) { tx = monsterPos.x; ty = monsterPos.y + 120; if (++deathTimer > 100) endGameUI('health'); }
             else if (isEndingAnimation) { tx = monsterPos.x; ty = monsterPos.y + 50; }
@@ -747,7 +770,6 @@
             mouseX = dx * cos - dy * sin + centerX; mouseY = dx * sin + dy * cos + centerY;
         }
 
-        // --- Joystick Logic ---
         let joystickActive = false;
         function updateJoystick(touchX, touchY) {
             const rect = joyBase.getBoundingClientRect();
