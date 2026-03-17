@@ -442,17 +442,10 @@
             }
             update(targetX, targetY) {
                 if (isPaused) return;
-                
-                // Reach scaling based on poison
                 let poisonScale = poisonTimer > 0 ? 0.75 : 1.0;
                 let currentLen = this.segLength * poisonScale;
-                
-                // Speed penalty system: 
-                // Regular speed mod is 0.25 (the old poison "smooth" speed).
-                // Poisoned speed mod is now 0.12 (extra slow penalty).
                 const speedMod = poisonTimer > 0 ? 0.12 : 0.25;
                 let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * speedMod;
-                
                 let tx = targetX + (this.side * 40), ty = targetY;
                 let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
                 let currentMaxReach = this.maxReach * poisonScale;
@@ -579,11 +572,16 @@
         function spawnThief() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnThief, 100); return; }
+            
             let dice = Math.random();
             if (score >= 1500 && dice < 0.25) thieves.push(new Thief("jumper"));
             else if (score >= 1000 && dice < 0.5) thieves.push(new Thief("samurai"));
             else thieves.push(new Thief("ninja"));
-            setTimeout(spawnThief, Math.max(500, 2000 - (score * 5)));
+            
+            // BALANCE RECALIBRATION: Faster start (1600ms), 650ms minimum floor.
+            const difficultyScore = Math.min(score, 1000); 
+            const spawnRate = Math.max(650, 1600 - (difficultyScore * 0.95));
+            setTimeout(spawnThief, spawnRate);
         }
 
         function spawnItem() {
