@@ -158,41 +158,42 @@
         .mb-4 { margin-bottom: 1rem; }
         .mb-8 { margin-bottom: 2rem; }
 
-        /* Virtual Joystick Styles */
+        /* Virtual Joystick Styles - Anchored to Viewport */
         .joystick-container {
-            position: absolute;
-            bottom: 45px;
+            position: fixed;
+            bottom: max(30px, env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 100px;
-            z-index: 30;
-            display: none; /* Only visible on touch devices */
+            width: 110px;
+            height: 110px;
+            z-index: 100;
+            display: none; /* Visible only on touch */
             pointer-events: auto;
         }
 
         .joystick-base {
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(0, 255, 0, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 255, 0, 0.3);
             border-radius: 50%;
             position: relative;
-            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), inset 0 0 10px rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(2px);
         }
 
         .joystick-knob {
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 255, 0, 0.3);
-            border: 1px solid rgba(0, 255, 0, 0.6);
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 255, 0, 0.4);
+            border: 2px solid rgba(0, 255, 0, 0.7);
             border-radius: 50%;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-            transition: background 0.2s;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
 
         @media (pointer: coarse) {
@@ -221,12 +222,12 @@
 
         .loading-text { color: #aaa; font-style: italic; }
 
-        @media (max-height: 500px) {
+        @media (max-height: 550px) {
             .title { font-size: 1.5rem; }
             .mb-8 { margin-bottom: 0.5rem; }
             p { font-size: 14px; }
             .btn { padding: 8px 20px; }
-            .joystick-container { bottom: 20px; width: 80px; height: 80px; }
+            .joystick-container { bottom: 10px; width: 80px; height: 80px; }
         }
     </style>
 </head>
@@ -249,13 +250,6 @@
                     </div>
                     <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Virtual Joystick -->
-        <div id="joystick-container" class="joystick-container">
-            <div id="joystick-base" class="joystick-base">
-                <div id="joystick-knob" class="joystick-knob"></div>
             </div>
         </div>
 
@@ -296,6 +290,13 @@
             <p class="mb-2">SCORE: <span id="finalScore">0</span></p>
             <p class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></p>
             <button class="btn" onclick="checkHighScoreFlow()">CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- Virtual Joystick - Anchored Outside Arena -->
+    <div id="joystick-container" class="joystick-container">
+        <div id="joystick-base" class="joystick-base">
+            <div id="joystick-knob" class="joystick-knob"></div>
         </div>
     </div>
 
@@ -459,18 +460,9 @@
                 this.jumpTimer = 0;
                 this.jumpCooldown = 0;
                 this.scale = 1.0;
-
-                if (this.type === "samurai") {
-                    this.speed = 0.5; this.size = 20 * this.mobileScale;
-                    this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60;
-                    this.color = "#444";
-                } else if (this.type === "jumper") {
-                    this.speed = 1.2; this.size = 14 * this.mobileScale;
-                    this.color = "#a0f";
-                } else {
-                    this.speed = 0.8 + Math.random() * 0.7; this.size = 12 * this.mobileScale;
-                    this.color = "#bbb";
-                }
+                if (this.type === "samurai") { this.speed = 0.5; this.size = 20 * this.mobileScale; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; this.color = "#444"; }
+                else if (this.type === "jumper") { this.speed = 1.2; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
+                else { this.speed = 0.8 + Math.random() * 0.7; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
                 this.shootCooldown = 60 + Math.random() * 120;
                 this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
                 this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
@@ -719,17 +711,14 @@
             } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; }
         }
 
-        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
 
-        // --- Improved Input Mapping (Supports Screen Drag + Joystick) ---
         function handleInput(cX, cY) { 
             if (!gameActive || isPaused) return; 
             const r = canvas.getBoundingClientRect(); 
             let rawX = (cX - r.left) * (600 / r.width); 
             let rawY = (cY - r.top) * (600 / r.height); 
-
-            // Calculate target relative to screen but accounting for rotation
             const centerX = 300, centerY = 300;
             const dx = rawX - centerX, dy = rawY - centerY;
             const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
@@ -743,74 +732,27 @@
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
             const maxRadius = rect.width / 2;
-
-            let dx = touchX - centerX;
-            let dy = touchY - centerY;
+            let dx = touchX - centerX, dy = touchY - centerY;
             const dist = Math.sqrt(dx*dx + dy*dy);
-
-            if (dist > maxRadius) {
-                dx = (dx / dist) * maxRadius;
-                dy = (dy / dist) * maxRadius;
-            }
-
-            // Move Knob visually
+            if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
             joyKnob.style.left = `calc(50% + ${dx}px)`;
             joyKnob.style.top = `calc(50% + ${dy}px)`;
-
-            // Map Joystick deflection to Arena position (0.0 to 1.0 range)
-            // Normalized vector (-1.0 to 1.0)
-            const nx = dx / maxRadius;
-            const ny = dy / maxRadius;
-
-            // Map deflection directly to the MouseX/Y variables used by tentacles
-            // Center of stick = Center of arena (300, 300)
-            // Full stick = Corner of arena (300 +/- 300)
-            const targetX = 300 + nx * 300;
-            const targetY = 300 + ny * 300;
-
-            // Apply inverse rotation manually since we're bypassing screen coordinates
+            const nx = dx / maxRadius, ny = dy / maxRadius;
+            const targetX = 300 + nx * 300, targetY = 300 + ny * 300;
             const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
-            const rdx = targetX - 300;
-            const rdy = targetY - 300;
-            mouseX = rdx * cos - rdy * sin + 300;
-            mouseY = rdx * sin + rdy * cos + 300;
+            const rdx = targetX - 300, rdy = targetY - 300;
+            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300;
         }
 
-        function resetJoystick() {
-            joyKnob.style.left = '50%';
-            joyKnob.style.top = '50%';
-            joystickActive = false;
-        }
+        function resetJoystick() { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; }
 
-        // Listeners for Joystick Base
-        joyBase.addEventListener('touchstart', (e) => {
-            joystickActive = true;
-            updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
-            e.stopPropagation();
-        }, { passive: false });
-
-        joyBase.addEventListener('touchmove', (e) => {
-            if (joystickActive) {
-                updateJoystick(e.touches[0].clientX, e.touches[0].clientY);
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, { passive: false });
-
+        joyBase.addEventListener('touchstart', (e) => { joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+        joyBase.addEventListener('touchmove', (e) => { if (joystickActive) { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); } }, { passive: false });
         window.addEventListener('touchend', resetJoystick);
 
-        // General canvas listeners
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-        canvas.addEventListener('touchmove', (e) => { 
-            if (joystickActive) return; // Prioritize joystick if used
-            handleInput(e.touches[0].clientX, e.touches[0].clientY); 
-            if (gameActive && !isPaused) e.preventDefault(); 
-        }, { passive: false });
-
-        canvas.addEventListener('touchstart', (e) => { 
-            if (joystickActive) return;
-            handleInput(e.touches[0].clientX, e.touches[0].clientY); 
-        }, { passive: true });
+        canvas.addEventListener('touchmove', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 
         draw();
     </script>
