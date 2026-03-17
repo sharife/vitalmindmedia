@@ -572,22 +572,24 @@
         function spawnThief() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnThief, 100); return; }
-            
             let dice = Math.random();
-            if (score >= 1500 && dice < 0.25) thieves.push(new Thief("jumper"));
-            else if (score >= 1000 && dice < 0.5) thieves.push(new Thief("samurai"));
+            if (score >= 1000 && dice < 0.25) thieves.push(new Thief("jumper"));
+            else if (score >= 500 && dice < 0.5) thieves.push(new Thief("samurai"));
             else thieves.push(new Thief("ninja"));
-            
-            // BALANCE RECALIBRATION: Faster start (1600ms), 650ms minimum floor.
-            const difficultyScore = Math.min(score, 1000); 
-            const spawnRate = Math.max(650, 1600 - (difficultyScore * 0.95));
+            const spawnRate = Math.max(650, 1400 - (score * 1.5));
             setTimeout(spawnThief, spawnRate);
         }
 
         function spawnItem() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnItem, 100); return; }
-            if(Math.random() > 0.65) items.push(new Item()); setTimeout(spawnItem, Math.max(4500, 12000 - (currentTime * 45)));
+            
+            // INCREASED HEART FREQUENCY
+            // Spawn chance increased from 35% to 50%
+            // Interval reduced from 4.5s-12s range down to 3.5s-9s range
+            if(Math.random() > 0.5) items.push(new Item());
+            const nextCheck = Math.max(3500, 9000 - (currentTime * 55));
+            setTimeout(spawnItem, nextCheck);
         }
 
         function drawArena() {
@@ -672,7 +674,7 @@
         function update() {
             if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
             if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
-            if (gameActive && !isPaused && score >= 2000) { arenaRotation += 0.001 + (score - 2000) * 0.000005; }
+            if (gameActive && !isPaused && score >= 1500) { arenaRotation += 0.001 + (score - 1500) * 0.000005; }
             if(poisonTimer > 0 && !isPaused) poisonTimer--;
             if (poisonTimer > 0) joyContainer.classList.add('poisoned');
             else joyContainer.classList.remove('poisoned');
