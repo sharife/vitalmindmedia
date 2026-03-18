@@ -138,6 +138,33 @@
         .btn-restart { background: black; color: #fff; font-size: clamp(16px, 4vw, 22px); border: solid 2px #444; }
         .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
 
+        /* Sharing Links Styling */
+        .share-row {
+            display: flex;
+            gap: 18px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .share-link {
+            color: #fff;
+            transition: opacity 0.2s, transform 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .share-link:hover {
+            opacity: 0.7;
+            transform: translateY(-2px);
+        }
+
+        .share-link svg {
+            width: 18px; /* Reduced from 24px */
+            height: 18px;
+            fill: currentColor;
+        }
+
         #crt-effect {
             position: absolute;
             top: 0;
@@ -265,13 +292,11 @@
 
         <div class="ui-overlay">
             <div class="hud-top">
-                <!-- Top Left: Score and Time Group -->
                 <div class="stats-group">
                     <div>SCORE: <span id="scoreVal">0</span></div>
                     <div>TIME: <span id="timeVal">0s</span></div>
                 </div>
 
-                <!-- Top Right: Health Bar Group -->
                 <div class="health-group">
                     <div class="health-bar-container">
                         <div id="healthBar" class="health-bar"></div>
@@ -287,13 +312,33 @@
 
         <div id="startScreen" class="screen">
             <h1 class="title text-green" style="margin-top: auto;">TENTAGUARD</h1>
-            <p style="margin-bottom: 2rem;">
+            <p style="margin-bottom: 1.5rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
-                MOVE TENTACLES TO CRUSH THEIVES.<br>
+                MOVE TENTACLES TO CRUSH THIEVES.<br>
                 AVOID ARROWS!
             </p>
             <button class="btn" onclick="startGame()">START MISSION</button>
             <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
+            
+            <!-- Social Share Links -->
+            <div class="share-row">
+                <a class="share-link" title="Share on Facebook" onclick="shareGame('facebook')">
+                    <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a class="share-link" title="Share on Instagram" onclick="shareGame('instagram')">
+                    <!-- Improved Instagram Compound Path -->
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></path>
+                    </svg>
+                </a>
+                <a class="share-link" title="Share on X" onclick="shareGame('x')">
+                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24h-2.19L17.61 20.644Z"></path></svg>
+                </a>
+                <a class="share-link" title="Share on Bluesky" onclick="shareGame('bluesky')">
+                    <svg viewBox="0 0 568 501"><path d="M123.1 33.5c84.2 62.8 147.2 181.5 160.9 214.3 13.7-32.8 76.7-151.5 160.9-214.3C491.5 1 568-15 568 76.5c0 19.5-11 143.1-17.5 166.5-23.5 84-118.5 106.5-199 90 101.5 18 206 67.5 125 152-114.5 119.5-182.5-54-187.5-66.5-5 12.5-73 186-187.5 66.5-81-84.5 23.5-134 125-152-80.5 16.5-175.5-6-199-90C6 219.6 0 96 0 76.5 0-15 76.5 1 123.1 33.5Z"/></svg>
+                </a>
+            </div>
+
             <p style="margin-bottom: 2rem; margin-top: auto;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA
                 <br> MADE WITH <span style="color:red;">&hearts;</span> AND COFFEE</p>
         </div>
@@ -585,10 +630,6 @@
         function spawnItem() {
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnItem, 100); return; }
-            
-            // REDUCED HEART FREQUENCY
-            // Spawn chance reduced from 50% to 30%
-            // Interval increased from 3.5s-9s range back up to 6s-15s range
             if(Math.random() > 0.7) items.push(new Item());
             const nextCheck = Math.max(6000, 15000 - (currentTime * 40));
             setTimeout(spawnItem, nextCheck);
@@ -708,7 +749,7 @@
 
         function gameLoop() { update(); draw(); if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestAnimationFrame(gameLoop); }
 
-        function startGame() { AudioFX.init(); AudioFX.beep(); startScreen.classList.add('hidden'); pauseBtn.classList.remove('hidden'); resetGameParams(); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); }
+        function startGame() { AudioFX.init(); AudioFX.beep(); startScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); resetGameParams(); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); }
 
         function resetGameParams() {
             score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
@@ -722,7 +763,7 @@
         function resetGame() { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); startGame(); }
 
         function endGameUI(reason) {
-            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden');
+            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden');
             gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!";
             document.getElementById('finalScore').innerText = score; document.getElementById('finalTime').innerText = currentTime + ' seconds';
             gameOverScreen.classList.remove('hidden');
@@ -758,8 +799,21 @@
             }
         }
 
-        function backToMain() { AudioFX.beep(); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        function backToMain() { AudioFX.beep(); joyContainer.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
+
+        function shareGame(platform) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent("Defend the Gem in TENTAGUARD! 🐙💎");
+            let shareUrl = '';
+            switch(platform) {
+                case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
+                case 'x': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+                case 'bluesky': shareUrl = `https://bsky.app/intent/compose?text=${text}%20${url}`; break;
+                case 'instagram': shareUrl = `https://www.instagram.com/`; break; 
+            }
+            window.open(shareUrl, '_blank');
+        }
 
         function handleInput(cX, cY) { 
             if (!gameActive || isPaused) return; 
