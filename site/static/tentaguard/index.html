@@ -584,11 +584,11 @@
             if(!gameActive || isGameOver) return;
             if (isPaused) { setTimeout(spawnItem, 100); return; }
             
-            // INCREASED HEART FREQUENCY
-            // Spawn chance increased from 35% to 50%
-            // Interval reduced from 4.5s-12s range down to 3.5s-9s range
-            if(Math.random() > 0.5) items.push(new Item());
-            const nextCheck = Math.max(3500, 9000 - (currentTime * 55));
+            // REDUCED HEART FREQUENCY
+            // Spawn chance reduced from 50% to 30%
+            // Interval increased from 3.5s-9s range back up to 6s-15s range
+            if(Math.random() > 0.7) items.push(new Item());
+            const nextCheck = Math.max(6000, 15000 - (currentTime * 40));
             setTimeout(spawnItem, nextCheck);
         }
 
