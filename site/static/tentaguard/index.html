@@ -109,7 +109,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -138,7 +138,6 @@
         .btn-restart { background: black; color: #fff; font-size: clamp(16px, 4vw, 22px); border: solid 2px #444; }
         .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
 
-        /* Sharing Links Styling */
         .share-row {
             display: flex;
             gap: 18px;
@@ -191,7 +190,20 @@
 
         .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
 
-        .title { font-size: clamp(2.5rem, 10vw, 4rem); margin: 0 0 10px 0; line-height: 1; letter-spacing: 2px; }
+        /* Color Cycle Animation for the Main Title */
+        @keyframes titleColorCycle {
+            0%, 100% { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+            50% { color: #a0f; text-shadow: 0 0 10px rgba(160, 0, 255, 0.3); }
+        }
+
+        .title { 
+            font-size: clamp(2.5rem, 10vw, 4rem); 
+            margin: 0 0 10px 0; 
+            line-height: 1; 
+            letter-spacing: 2px;
+            animation: titleColorCycle 4s ease-in-out infinite;
+        }
+
         .text-green { color: #4ade80; }
         .text-red { color: #ef4444; }
         .text-white { color: #ffffff; }
@@ -199,7 +211,6 @@
         .mb-4 { margin-bottom: 1rem; }
         .mb-8 { margin-bottom: 2rem; }
 
-        /* Virtual Joystick Styles */
         .joystick-container {
             position: fixed;
             bottom: max(30px, env(safe-area-inset-bottom));
@@ -311,8 +322,9 @@
         </div>
 
         <div id="startScreen" class="screen">
-            <h1 class="title text-green" style="margin-top: auto;">TENTAGUARD</h1>
-            <p style="margin-bottom: 1.5rem;">
+            <!-- text-green class removed from h1 to let the CSS animation handle the color -->
+            <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
+            <p style="margin-top: 0; margin-bottom: 1.2rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
                 MOVE TENTACLES TO CRUSH THIEVES.<br>
                 AVOID ARROWS!
@@ -320,7 +332,6 @@
             <button class="btn" onclick="startGame()">START MISSION</button>
             <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
             
-            <!-- Social Share Links -->
             <div class="share-row">
                 <a class="share-link" title="Share on Facebook" onclick="shareGame('facebook')">
                     <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
@@ -342,12 +353,14 @@
                 <br> MADE WITH <span style="color:red;">&hearts;</span> AND COFFEE</p>
         </div>
 
+        <!-- Pause Screen -->
         <div id="pauseScreen" class="screen hidden">
             <h2 class="text-white mb-4">GAME PAUSED</h2>
             <button class="btn" onclick="togglePause()">RESUME</button>
             <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
         </div>
 
+        <!-- Submission and Leaderboard Screens remain identical -->
         <div id="submitScoreScreen" class="screen hidden">
             <h2 class="text-green mb-4">NEW RECORD!</h2>
             <p class="mb-4">SCORE: <span id="submitScoreVal">0</span></p>
@@ -413,7 +426,6 @@
                     try {
                         user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
                     } catch (tokenErr) {
-                        // Fallback to anonymous if custom token is invalid or expired
                         console.warn("Auth token invalid, using anonymous sign-in.");
                         user = (await signInAnonymously(auth)).user;
                     }
@@ -481,6 +493,8 @@
         let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false, hasPlayedEndSound = false; 
         let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = 0, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null;
         let arenaRotation = 0; 
+        let requestID = null;
+        let spawnThiefTimeout = null, spawnItemTimeout = null;
 
         const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
         let thieves = [], arrows = [], particles = [], items = [];
@@ -625,21 +639,21 @@
 
         function spawnThief() {
             if(!gameActive || isGameOver) return;
-            if (isPaused) { setTimeout(spawnThief, 100); return; }
+            if (isPaused) { spawnThiefTimeout = setTimeout(spawnThief, 100); return; }
             let dice = Math.random();
             if (score >= 1000 && dice < 0.25) thieves.push(new Thief("jumper"));
             else if (score >= 500 && dice < 0.5) thieves.push(new Thief("samurai"));
             else thieves.push(new Thief("ninja"));
             const spawnRate = Math.max(650, 1400 - (score * 1.5));
-            setTimeout(spawnThief, spawnRate);
+            spawnThiefTimeout = setTimeout(spawnThief, spawnRate);
         }
 
         function spawnItem() {
             if(!gameActive || isGameOver) return;
-            if (isPaused) { setTimeout(spawnItem, 100); return; }
+            if (isPaused) { spawnItemTimeout = setTimeout(spawnItem, 100); return; }
             if(Math.random() > 0.7) items.push(new Item());
             const nextCheck = Math.max(6000, 15000 - (currentTime * 40));
-            setTimeout(spawnItem, nextCheck);
+            spawnItemTimeout = setTimeout(spawnItem, nextCheck);
         }
 
         function drawArena() {
@@ -754,11 +768,32 @@
             ctx.restore();
         }
 
-        function gameLoop() { update(); draw(); if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestAnimationFrame(gameLoop); }
+        function gameLoop() { 
+            update(); 
+            draw(); 
+            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) {
+                requestID = requestAnimationFrame(gameLoop);
+            }
+        }
 
-        function startGame() { AudioFX.init(); AudioFX.beep(); startScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); resetGameParams(); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); }
+        function startGame() { 
+            AudioFX.init(); 
+            AudioFX.beep(); 
+            startScreen.classList.add('hidden'); 
+            joyContainer.classList.remove('hidden'); 
+            pauseBtn.classList.remove('hidden'); 
+            if (requestID) cancelAnimationFrame(requestID);
+            resetGameParams(); 
+            gameActive = true; 
+            startTime = Date.now(); 
+            spawnThief(); 
+            spawnItem(); 
+            gameLoop(); 
+        }
 
         function resetGameParams() {
+            if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout);
+            if (spawnItemTimeout) clearTimeout(spawnItemTimeout);
             score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
             pauseBtn.innerText = 'PAUSE'; gemPos.x = 300; gemPos.y = 540;
         }
