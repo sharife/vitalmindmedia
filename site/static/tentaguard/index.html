@@ -190,7 +190,6 @@
 
         .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
 
-        /* Color Cycle Animation for the Main Title */
         @keyframes titleColorCycle {
             0%, 100% { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
             50% { color: #a0f; text-shadow: 0 0 10px rgba(160, 0, 255, 0.3); }
@@ -322,14 +321,13 @@
         </div>
 
         <div id="startScreen" class="screen">
-            <!-- text-green class removed from h1 to let the CSS animation handle the color -->
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
             <p style="margin-top: 0; margin-bottom: 1.2rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
                 MOVE TENTACLES TO CRUSH THIEVES.<br>
                 AVOID ARROWS!
             </p>
-            <button class="btn" onclick="startGame()">START MISSION</button>
+            <button class="btn" onclick="startGame()">START</button>
             <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
             
             <div class="share-row">
@@ -353,19 +351,19 @@
                 <br> MADE WITH <span style="color:red;">&hearts;</span> AND COFFEE</p>
         </div>
 
-        <!-- Pause Screen -->
         <div id="pauseScreen" class="screen hidden">
             <h2 class="text-white mb-4">GAME PAUSED</h2>
             <button class="btn" onclick="togglePause()">RESUME</button>
             <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
         </div>
 
-        <!-- Submission and Leaderboard Screens remain identical -->
         <div id="submitScoreScreen" class="screen hidden">
-            <h2 class="text-green mb-4">NEW RECORD!</h2>
-            <p class="mb-4">SCORE: <span id="submitScoreVal">0</span></p>
+            <!-- ID Added for dynamic messaging -->
+            <h1 id="submitMessage" class="text-green mb-2">NEW RECORD!</h1>
+            <p class="mb-4" style="font-size:1.5rem;">SCORE: <span id="submitScoreVal">0</span></p>
             <input type="text" id="initialsInput" class="input-name" maxlength="3" placeholder="AAA">
             <button class="btn" onclick="submitScore()">SAVE SCORE</button>
+            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
         </div>
 
         <div id="leaderboardScreen" class="screen hidden">
@@ -495,6 +493,7 @@
         let arenaRotation = 0; 
         let requestID = null;
         let spawnThiefTimeout = null, spawnItemTimeout = null;
+        let visualReachScale = 1.0;
 
         const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
         let thieves = [], arrows = [], particles = [], items = [];
@@ -510,13 +509,12 @@
             }
             update(targetX, targetY) {
                 if (isPaused) return;
-                let poisonScale = poisonTimer > 0 ? 0.75 : 1.0;
-                let currentLen = this.segLength * poisonScale;
+                let currentLen = this.segLength * visualReachScale;
                 const speedMod = poisonTimer > 0 ? 0.12 : 0.25;
                 let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * speedMod;
                 let tx = targetX + (this.side * 40), ty = targetY;
                 let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
-                let currentMaxReach = this.maxReach * poisonScale;
+                let currentMaxReach = this.maxReach * visualReachScale;
                 if (distB > currentMaxReach) { tx = this.baseX + (dxB / distB) * currentMaxReach; ty = this.baseY + (dyB / distB) * currentMaxReach; }
                 this.vx = (this.vx + (tx - this.segments[0].x) * moveAccel) * this.friction;
                 this.vy = (this.vy + (ty - this.segments[0].y) * moveAccel + (isDeathAnimation ? 0.5 : 0)) * this.friction;
@@ -739,6 +737,11 @@
             if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
             if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
             if (gameActive && !isPaused && score >= 1500) { arenaRotation += 0.001 + (score - 1500) * 0.000005; }
+            
+            const targetScale = (poisonTimer > 0) ? 0.75 : 1.0;
+            const shrinkSpeed = 0.05;
+            visualReachScale += (targetScale - visualReachScale) * shrinkSpeed;
+
             if(poisonTimer > 0 && !isPaused) poisonTimer--;
             if (poisonTimer > 0) joyContainer.classList.add('poisoned');
             else joyContainer.classList.remove('poisoned');
@@ -795,6 +798,7 @@
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout);
             if (spawnItemTimeout) clearTimeout(spawnItemTimeout);
             score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
+            visualReachScale = 1.0; 
             pauseBtn.innerText = 'PAUSE'; gemPos.x = 300; gemPos.y = 540;
         }
 
@@ -811,10 +815,23 @@
             gameOverScreen.classList.remove('hidden');
         }
 
+        // NEW: Snarky Message Logic
+        function getSnarkyMessage(s) {
+            if (s < 500) return "NOT BAD FOR A WARM-UP, SQUIRT.";
+            if (s < 1000) return "YOU'RE GETTING THE HANG OF THIS, MONSTER.";
+            if (s < 2000) return "THE THIEVES ARE STARTING TO HATE YOU.";
+            if (s < 5000) return "ABSOLUTE MENACE. A TRUE TENTACLE LORD.";
+            return "STOP ALREADY. YOU'RE INSATIABLE.";
+        }
+
         function checkHighScoreFlow() {
             if (isGameOver && score > 0) {
-                gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden');
-                document.getElementById('submitScoreVal').innerText = score; initialsInput.focus();
+                gameOverScreen.classList.add('hidden'); 
+                submitScoreScreen.classList.remove('hidden');
+                // Set the dynamic message
+                document.getElementById('submitMessage').innerText = getSnarkyMessage(score);
+                document.getElementById('submitScoreVal').innerText = score; 
+                initialsInput.focus();
             } else { backToMain(); }
         }
 
