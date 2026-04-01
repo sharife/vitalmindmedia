@@ -371,8 +371,8 @@
 
         <div id="loadingScreen" class="screen">
             <div style="text-align: center;">
-                <h2 style="letter-spacing: 5px; color: #4ade80; font-size: 2.5rem; margin-bottom: 10px;">VITAL MIND MEDIA</h2>
-                <p style="font-size: 1.5rem; color: #666; margin-top: -10px;">PRESENTS</p>
+                <h2 style="letter-spacing: 1px; color: #4ade80; font-size: 1.5rem; margin-bottom: 10px;">VITAL MIND MEDIA</h2>
+                <p style="font-size: 1rem; color: #666; margin-top: -10px;">PRESENTS</p>
                 <div class="loader-bar" style="margin: 20px auto;">
                     <div class="loader-progress"></div>
                 </div>
@@ -583,13 +583,11 @@
                 ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
-                ctx.fillStyle = '#0ff';
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#0ff';
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
                 ctx.fill();
-                ctx.shadowBlur = 0;
             }
             collides(px, py, radius = 0) {
                 const dist = Math.sqrt((px - this.x)**2 + (py - this.y)**2);
@@ -622,10 +620,12 @@
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 6, 0, Math.PI*2);
                 ctx.fillStyle = '#f80';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#f00';
                 ctx.fill();
-                ctx.shadowBlur = 0;
+                // Subtler inner glow
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                ctx.fill();
             }
         }
 
@@ -738,7 +738,10 @@
                     if (this.shielded) {
                         ctx.fillStyle = '#889'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
                         const sw = hs * 1.0, sh = this.size * this.scale * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
-                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); ctx.quadraticCurveTo(sx + sw, sy + h, sx + sw/2, sy + sh); ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); 
+                        ctx.quadraticCurveTo(sx + sw, sy + sh, sx + sw/2, sy + sh); 
+                        ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); 
+                        ctx.closePath(); ctx.fill(); ctx.stroke();
                     }
                 } else {
                     const colorBody = this.type === "jumper" ? '#407' : '#333'; 
@@ -833,7 +836,12 @@
             shape.draw(); ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke(); ctx.clip();
             ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)';
             for(let i=0; i<=CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
-            if(gameActive || isEndingAnimation) { ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf'; ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill(); ctx.shadowBlur = 0; }
+            if(gameActive || isEndingAnimation) { 
+                ctx.fillStyle = '#0cf';
+                ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill();
+                // Subtler gem glow
+                ctx.beginPath(); ctx.arc(300, gemPos.y, 20, 0, Math.PI*2); ctx.fillStyle = 'rgba(0, 200, 255, 0.15)'; ctx.fill();
+            }
             ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080'); ctx.beginPath(); ctx.arc(300, 450, 25, 0, Math.PI*2); ctx.fill();
             if (!isDeathAnimation) {
                 let dxL = mouseX - 300, dyL = mouseY - 450;
@@ -940,7 +948,7 @@
         window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
         window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
         window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
-        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); };
+        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; };
         window.resetGameParams = (fullReset) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
             if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0;
@@ -955,9 +963,10 @@
                 loadingScreen.style.transition = "opacity 0.8s ease-in-out";
                 loadingScreen.style.opacity = "0";
                 startScreen.classList.remove('hidden');
-                startScreen.style.transition = "opacity 0.8s ease-in-out";
-                setTimeout(() => { startScreen.style.opacity = "1"; }, 50);
-                setTimeout(() => { loadingScreen.classList.add('hidden'); }, 800);
+                setTimeout(() => {
+                    startScreen.style.opacity = "1";
+                    loadingScreen.classList.add('hidden');
+                }, 50);
             }, 2500);
         };
         joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
