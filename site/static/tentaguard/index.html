@@ -28,11 +28,15 @@
             max-width: 600px;
             max-height: 98vh;
             aspect-ratio: 1/1;
-            /*border: 1px solid #444;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);*/
             background: #000;
             display: flex;
             flex-direction: column;
+            opacity: 0;
+            transition: opacity 1.5s ease-in;
+        }
+
+        #game-container.visible {
+            opacity: 1;
         }
 
         canvas {
@@ -127,6 +131,36 @@
             z-index: 20;
             pointer-events: auto;
             box-sizing: border-box;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #loadingScreen {
+            z-index: 100;
+            background: #000;
+            opacity: 1;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 4px;
+            background: #222;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            position: absolute;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #0f0;
+            animation: loadingMove 2s infinite linear;
+        }
+
+        @keyframes loadingMove {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         .btn {
@@ -297,7 +331,7 @@
         }
 
         @media (max-height: 550px) {
-            .title { font-size: 2rem; }
+            .title { font-size: 2.2rem; }
             .mb-8 { margin-bottom: 0.5rem; }
             p { font-size: 14px; }
             .btn { padding: 8px 20px; }
@@ -315,14 +349,14 @@
         <div id="crt-effect"></div>
 
         <div class="ui-overlay">
-            <div class="hud-top">
+            <div id="topHUD" class="hud-top hidden">
                 <div class="stats-group">
                     <div>SCORE: <span id="scoreVal">0</span></div>
                     <div>TIME: <span id="timeVal">100s</span></div>
                 </div>
 
                 <div class="health-group">
-                    <div class="health-bar-container">
+                    <div id="healthBarContainer" class="health-bar-container">
                         <div id="healthBar" class="health-bar"></div>
                     </div>
                     <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
@@ -335,7 +369,17 @@
             </div>
         </div>
 
-        <div id="startScreen" class="screen">
+        <div id="loadingScreen" class="screen">
+            <div style="text-align: center;">
+                <h2 style="letter-spacing: 5px; color: #4ade80; font-size: 2.5rem; margin-bottom: 10px;">VITAL MIND MEDIA</h2>
+                <p style="font-size: 1.5rem; color: #666; margin-top: -10px;">PRESENTS</p>
+                <div class="loader-bar" style="margin: 20px auto;">
+                    <div class="loader-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="startScreen" class="screen hidden" style="opacity: 0;">
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
             <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.5rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
@@ -463,7 +507,10 @@
         const levelClearScreen = document.getElementById('levelClearScreen'), submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
         const levelMenuScreen = document.getElementById('levelMenuScreen'), levelGrid = document.getElementById('levelGrid');
         const levelDisplayHUD = document.getElementById('levelDisplayHUD');
+        const topHUD = document.getElementById('topHUD');
         const initialsInput = document.getElementById('initialsInput');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const gameContainer = document.getElementById('game-container');
         const joyContainer = document.getElementById('joystick-container'), joyBase = document.getElementById('joystick-base'), joyKnob = document.getElementById('joystick-knob');
 
         const AudioFX = {
@@ -691,7 +738,7 @@
                     if (this.shielded) {
                         ctx.fillStyle = '#889'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
                         const sw = hs * 1.0, sh = this.size * this.scale * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
-                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); ctx.quadraticCurveTo(sx + sw, sy + sh, sx + sw/2, sy + sh); ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); ctx.quadraticCurveTo(sx + sw, sy + h, sx + sw/2, sy + sh); ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
                     }
                 } else {
                     const colorBody = this.type === "jumper" ? '#407' : '#333'; 
@@ -782,7 +829,7 @@
 
         function draw() {
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); const shape = arenaShapes[currentLevel];
-            ctx.save(); ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
+            ctx.save(); ctx.translate(300, 450); ctx.rotate(arenaRotation); ctx.translate(-300, -450);
             shape.draw(); ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke(); ctx.clip();
             ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)';
             for(let i=0; i<=CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
@@ -814,7 +861,6 @@
 
         function handleCollisions() {
             if (isGameOver || isPaused) return;
-            
             fireballs.forEach(fb => {
                 thieves.forEach((thief, tIdx) => {
                     if (Math.sqrt((fb.x-thief.x)**2 + (fb.y-thief.y)**2) < 20) {
@@ -826,7 +872,6 @@
                     }
                 });
             });
-
             arrows.forEach((a, i) => { 
                 if (Math.sqrt((a.x-300)**2+(a.y-450)**2) < 28) { 
                     AudioFX.hit(); score = Math.max(0, score - 3);
@@ -863,7 +908,7 @@
                             AudioFX.heal(); health = Math.min(100, health+25); poisonTimer = 0; 
                         } else {
                             AudioFX.levelUp(); 
-                            fireballPowerTimer = 600; // 10 seconds
+                            fireballPowerTimer = 600; 
                         }
                         items.splice(i, 1); 
                     } 
@@ -872,16 +917,16 @@
             if(health <= 0) { health = 0; window.triggerDeath(); }
         }
 
-        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) unlockedLevels++; document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); levelDisplayHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
-        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); gameLoop(); };
+        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) unlockedLevels++; document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
+        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); gameLoop(); };
         window.showLevelMenu = () => { AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
-        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
+        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
         window.resetGame = () => { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); window.startGameAtLevel(1); };
         window.restartFromPause = () => { AudioFX.beep(); pauseScreen.classList.add('hidden'); window.resetGame(); };
         window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); } else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); } };
-        window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); };
-        window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); };
-        window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
+        window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
+        window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
+        window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
         window.checkHighScoreFlow = (source) => { 
             if (score > 0) { 
                 gameOverScreen.classList.add('hidden'); 
@@ -892,26 +937,34 @@
                 initialsInput.focus(); 
             } else window.backToMain(); 
         };
-        window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
+        window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
         window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
         window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
-        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); };
+        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); };
         window.resetGameParams = (fullReset) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
             if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0;
             obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
         };
-        
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 450; }
         function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius, tx = 300 + nx * 300, ty = 450 + ny * 300, rdx = tx - 300, rdy = ty - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 450; }
-        
+        window.onload = () => {
+            gameContainer.classList.add('visible');
+            setTimeout(() => {
+                loadingScreen.style.transition = "opacity 0.8s ease-in-out";
+                loadingScreen.style.opacity = "0";
+                startScreen.classList.remove('hidden');
+                startScreen.style.transition = "opacity 0.8s ease-in-out";
+                setTimeout(() => { startScreen.style.opacity = "1"; }, 50);
+                setTimeout(() => { loadingScreen.classList.add('hidden'); }, 800);
+            }, 2500);
+        };
         joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
         joyBase.addEventListener('touchmove', (e) => { if (joystickActive) { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); } }, { passive: false });
         window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; });
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
         canvas.addEventListener('touchmove', (e) => { if (!joystickActive) { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); } }, { passive: false });
-        draw();
     </script>
 </body>
 </html>
