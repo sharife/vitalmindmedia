@@ -67,7 +67,7 @@
         .stats-group {
             display: flex;
             flex-direction: column;
-            font-size: clamp(16px, 4vw, 24px);
+            font-size: clamp(20px, 5vw, 28px);
             text-shadow: 2px 2px #000;
             letter-spacing: 1px;
             line-height: 1.1;
@@ -81,10 +81,18 @@
 
         .bottom-ui {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: flex-end;
             pointer-events: none;
             width: 100%;
+        }
+
+        .level-indicator {
+            font-size: clamp(18px, 4vw, 24px);
+            color: #4ade80;
+            text-shadow: 2px 2px #000;
+            pointer-events: none;
+            margin-bottom: 5px;
         }
 
         .pause-btn {
@@ -131,38 +139,66 @@
             font-family: 'Jersey 20', serif;
             font-size: clamp(20px, 5vw, 28px);
             transition: transform 0.1s, background 0.2s;
+            border-radius: 4px;
             -webkit-tap-highlight-color: transparent;
         }
 
         .btn:active { transform: scale(0.95); }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
         .btn-restart { background: black; color: #fff; font-size: clamp(16px, 4vw, 22px); border: solid 2px #444; }
         .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
 
-        .share-row {
-            display: flex;
-            gap: 18px;
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             margin-top: 20px;
+            width: 80%;
+        }
+
+        .level-card {
+            background: #111;
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .level-card.unlocked { border-color: #0f0; }
+        .level-card.unlocked:hover { background: #030; }
+        .level-card.locked { opacity: 0.5; cursor: not-allowed; border-style: dashed; }
+        .level-card h3 { margin: 0 0 5px 0; color: #0f0; }
+        .level-card.locked h3 { color: #666; }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            width: 100%;
             justify-content: center;
         }
 
-        .share-link {
-            color: #fff;
-            transition: opacity 0.2s, transform 0.2s;
+        .tab-btn {
+            background: #222;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 5px 10px;
+            font-family: 'Jersey 20', serif;
+            font-size: 18px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
+        }
+        .tab-btn.active {
+            background: #0f0;
+            color: #000;
+            border-color: #0f0;
         }
 
-        .share-link:hover {
-            opacity: 0.7;
-            transform: translateY(-2px);
-        }
-
-        .share-link svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
+        .leaderboard-list { width: 100%; max-width: 400px; margin-top: 5px; font-size: 24px; border-collapse: collapse; }
+        .leaderboard-list tr { border-bottom: 1px solid #333; }
+        .leaderboard-list td { padding: 8px 5px; }
+        .rank-col { color: #0f0; width: 50px; text-align: left; }
+        .name-col { text-align: left; }
+        .score-col { text-align: right; color: #f80; }
 
         #crt-effect {
             position: absolute;
@@ -191,24 +227,31 @@
         .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
 
         @keyframes titleColorCycle {
-            0%, 100% { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
-            50% { color: #a0f; text-shadow: 0 0 10px rgba(160, 0, 255, 0.3); }
+            0%, 100% { color: #4ade80; text-shadow: 0 0 15px rgba(74, 222, 128, 0.5); }
+            50% { color: #a0f; text-shadow: 0 0 15px rgba(160, 0, 255, 0.5); }
         }
 
         .title { 
-            font-size: clamp(2.5rem, 10vw, 4rem); 
-            margin: 0 0 10px 0; 
-            line-height: 1; 
+            font-size: clamp(2.5rem, 10vw, 4.5rem); 
+            margin: 0 0 15px 0; 
+            line-height: 0.95; 
             letter-spacing: 2px;
             animation: titleColorCycle 4s ease-in-out infinite;
         }
 
-        .text-green { color: #4ade80; }
-        .text-red { color: #ef4444; }
-        .text-white { color: #ffffff; }
-        .mb-2 { margin-bottom: 0.5rem; }
-        .mb-4 { margin-bottom: 1rem; }
-        .mb-8 { margin-bottom: 2rem; }
+        .input-name {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Jersey 20', serif;
+            font-size: 48px;
+            width: 140px;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
 
         .joystick-container {
             position: fixed;
@@ -249,48 +292,19 @@
             transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
 
-        .joystick-container.poisoned .joystick-base {
-            border-color: rgba(160, 0, 255, 0.5);
-            box-shadow: 0 0 15px rgba(160, 0, 255, 0.3), inset 0 0 10px rgba(160, 0, 255, 0.1);
-        }
-        .joystick-container.poisoned .joystick-knob {
-            background: rgba(160, 0, 255, 0.6);
-            border-color: rgba(160, 0, 255, 0.9);
-            box-shadow: 0 0 10px rgba(160, 0, 255, 0.5);
-        }
-
         @media (pointer: coarse) {
             .joystick-container { display: block; }
         }
 
-        .input-name {
-            background: #111;
-            border: 2px solid #0f0;
-            color: #0f0;
-            font-family: 'Jersey 20', serif;
-            font-size: 48px;
-            width: 140px;
-            text-align: center;
-            text-transform: uppercase;
-            outline: none;
-            margin-bottom: 20px;
-        }
-
-        .leaderboard-list { width: 100%; max-width: 400px; margin-top: 20px; font-size: 24px; border-collapse: collapse; }
-        .leaderboard-list tr { border-bottom: 1px solid #333; }
-        .leaderboard-list td { padding: 8px 5px; }
-        .rank-col { color: #0f0; width: 50px; text-align: left; }
-        .name-col { text-align: left; }
-        .score-col { text-align: right; color: #f80; }
-
-        .loading-text { color: #aaa; font-style: italic; }
-
         @media (max-height: 550px) {
-            .title { font-size: 1.5rem; }
+            .title { font-size: 2rem; }
             .mb-8 { margin-bottom: 0.5rem; }
             p { font-size: 14px; }
             .btn { padding: 8px 20px; }
             .joystick-container { bottom: 10px; width: 80px; height: 80px; }
+            .level-grid { margin-top: 5px; gap: 8px; }
+            .level-card { padding: 5px; }
+            .input-name { font-size: 32px; width: 100px; }
         }
     </style>
 </head>
@@ -304,7 +318,7 @@
             <div class="hud-top">
                 <div class="stats-group">
                     <div>SCORE: <span id="scoreVal">0</span></div>
-                    <div>TIME: <span id="timeVal">0s</span></div>
+                    <div>TIME: <span id="timeVal">100s</span></div>
                 </div>
 
                 <div class="health-group">
@@ -316,69 +330,70 @@
             </div>
             
             <div class="bottom-ui">
-                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
+                <button id="pauseBtn" class="pause-btn hidden" onclick="window.togglePause()">PAUSE</button>
+                <div id="levelDisplayHUD" class="level-indicator hidden">LEVEL: <span id="levelValHUD">1</span></div>
             </div>
         </div>
 
         <div id="startScreen" class="screen">
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
-            <p style="margin-top: 0; margin-bottom: 1.2rem;">
+            <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.5rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
-                MOVE TENTACLES TO CRUSH THIEVES.<br>
-                AVOID ARROWS!
+                LAST 100s TO CLEAR EACH LEVEL.
             </p>
-            <button class="btn" onclick="startGame()">START</button>
-            <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
-            <!--
-            <div class="share-row">
-                <a class="share-link" title="Share on Facebook" onclick="shareGame('facebook')">
-                    <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-                </a>
-                <a class="share-link" title="Share on Instagram" onclick="shareGame('instagram')">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></path>
-                    </svg>
-                </a>
-                <a class="share-link" title="Share on X" onclick="shareGame('x')">
-                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24h-2.19L17.61 20.644Z"></path></svg>
-                </a>
-                <a class="share-link" title="Share on Bluesky" onclick="shareGame('bluesky')">
-                    <svg viewBox="0 0 568 501"><path d="M123.1 33.5c84.2 62.8 147.2 181.5 160.9 214.3 13.7-32.8 76.7-151.5 160.9-214.3C491.5 1 568-15 568 76.5c0 19.5-11 143.1-17.5 166.5-23.5 84-118.5 106.5-199 90 101.5 18 206 67.5 125 152-114.5 119.5-182.5-54-187.5-66.5-5 12.5-73 186-187.5 66.5-81-84.5 23.5-134 125-152-80.5 16.5-175.5-6-199-90C6 219.6 0 96 0 76.5 0-15 76.5 1 123.1 33.5Z"/></svg>
-                </a>
-            </div>
-            -->
-            <p style="margin-bottom: 0.5rem; font-size:0.9rem; margin-top: auto;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA
-                <br> MADE WITH <span style="color:red;">&hearts;</span> AND COFFEE</p>
+            <button class="btn" onclick="window.startGameAtLevel(1)">START GAME</button>
+            <button class="btn btn-secondary" onclick="window.showLevelMenu()">LEVELS</button>
+            <button class="btn btn-secondary" onclick="window.showLeaderboard()">LEADERBOARD</button>
+            <p style="margin-bottom: 0.5rem; font-size:0.9rem; margin-top: auto;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA</p>
+        </div>
+
+        <div id="levelMenuScreen" class="screen hidden">
+            <h2 class="title">SELECT LEVEL</h2>
+            <div id="levelGrid" class="level-grid"></div>
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="window.backToMain()">BACK</button>
         </div>
 
         <div id="pauseScreen" class="screen hidden">
             <h2 class="text-white mb-4">GAME PAUSED</h2>
-            <button class="btn" onclick="togglePause()">RESUME</button>
-            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+            <button class="btn" onclick="window.togglePause()">RESUME</button>
+            <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
         </div>
 
         <div id="submitScoreScreen" class="screen hidden">
-            <!-- ID Added for dynamic messaging -->
-            <h1 id="submitMessage" class="text-green mb-2">NEW RECORD!</h1>
+            <h1 id="submitMessage" class="title" style="font-size:2rem;">NEW RECORD!</h1>
             <p class="mb-4" style="font-size:1.5rem;">SCORE: <span id="submitScoreVal">0</span></p>
             <input type="text" id="initialsInput" class="input-name" maxlength="3" placeholder="AAA">
-            <button class="btn" onclick="submitScore()">SAVE SCORE</button>
-            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+            <button class="btn" onclick="window.submitScore()">SAVE SCORE</button>
+            <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
         </div>
 
         <div id="leaderboardScreen" class="screen hidden">
-            <h2 class="text-green mb-2">TOP 50 GUARDIANS</h2>
+            <h2 class="title">LEADERBOARD</h2>
+            <div id="leaderboardTabs" class="leaderboard-tabs">
+                <button class="tab-btn" onclick="window.changeLeaderboardTab(1)">LVL 1</button>
+                <button class="tab-btn" onclick="window.changeLeaderboardTab(2)">LVL 2</button>
+                <button class="tab-btn" onclick="window.changeLeaderboardTab(3)">LVL 3</button>
+                <button class="tab-btn" onclick="window.changeLeaderboardTab(4)">LVL 4</button>
+            </div>
             <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
                 <p class="loading-text">FETCHING DATA...</p>
             </div>
-            <button class="btn" style="margin-top: 20px;" onclick="backToMain()">BACK</button>
+            <button class="btn" style="margin-top: 20px;" onclick="window.backToMain()">BACK</button>
+        </div>
+
+        <div id="levelClearScreen" class="screen hidden">
+            <h1 class="title">LEVEL CLEAR!</h1>
+            <h2 class="mb-4">PREPARE FOR THE NEXT CHALLENGE</h2>
+            <button id="nextLevelBtn" class="btn" onclick="window.nextLevel()">CONTINUE</button>
+            <button class="btn btn-secondary" onclick="window.checkHighScoreFlow('clear')">SAVE SCORE</button>
+            <button class="btn btn-secondary" onclick="window.backToMain()">MENU</button>
         </div>
 
         <div id="gameOverScreen" class="screen hidden">
-            <h2 id="gameOverTitle" class="title text-red">GEM STOLEN!</h2>
+            <h2 id="gameOverTitle" class="title">GEM STOLEN!</h2>
             <h2 class="mb-2">SCORE: <span id="finalScore">0</span></h2>
-            <h3 class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></h3>
-            <button class="btn" onclick="checkHighScoreFlow()">CONTINUE</button>
+            <h3 class="mb-6" style="margin-bottom: 1.5rem;">LEVEL REACHED: <span id="finalLevel">1</span></h3>
+            <button class="btn" onclick="window.checkHighScoreFlow('gameover')">CONTINUE</button>
         </div>
     </div>
 
@@ -391,79 +406,65 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const p1 = "AIza";
         const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
-
         let config = {
             apiKey: p1 + p2,
             authDomain: "tentaguard.firebaseapp.com",
             projectId: "tentaguard",
             storageBucket: "tentaguard.firebasestorage.app",
             messagingSenderId: "713425803349",
-            appId: "1:713425803349:web:ce08c5d70db14a1d949cdc",
-            measurementId: "G-208QVW68RY"
+            appId: "1:713425803349:web:ce08c5d70db14a1d949cdc"
         };
-
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-            try { config = JSON.parse(__firebase_config); } catch (e) {}
-        }
 
         const app = initializeApp(config);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
+        const appId = 'tentaguard';
         let user = null;
 
         const initAuth = async () => {
             if (user) return user;
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    try {
-                        user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
-                    } catch (tokenErr) {
-                        console.warn("Auth token invalid, using anonymous sign-in.");
-                        user = (await signInAnonymously(auth)).user;
-                    }
-                } else {
-                    user = (await signInAnonymously(auth)).user;
-                }
-            } catch (err) { 
-                console.error("Auth initialization failed.", err); 
-            }
+                user = (await signInAnonymously(auth)).user;
+            } catch (err) { console.error("Auth failed", err); }
             return user;
         };
 
-        window.saveHighScore = async (name, score) => {
+        window.saveHighScore = async (name, score, level) => {
             const u = await initAuth();
-            if (!u) throw new Error("Unauthenticated");
+            if (!u) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            await addDoc(colRef, { name: name.toUpperCase(), score: score, timestamp: Date.now() });
+            await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now() });
         };
 
-        window.fetchLeaderboard = async () => {
+        window.fetchLeaderboard = async (targetLevel) => {
             const u = await initAuth();
-            if (!u) throw new Error("Unauthenticated");
+            if (!u) return [];
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             const snapshot = await getDocs(colRef);
-            return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 50);
+            return snapshot.docs
+                .map(doc => doc.data())
+                .filter(entry => entry.level === targetLevel)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 50);
         };
     </script>
 
     <script>
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal');
+        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal'), levelValHUD = document.getElementById('levelValHUD');
         const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
         const pauseBtn = document.getElementById('pauseBtn'), pauseScreen = document.getElementById('pauseScreen');
         const startScreen = document.getElementById('startScreen'), gameOverScreen = document.getElementById('gameOverScreen');
-        const submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
+        const levelClearScreen = document.getElementById('levelClearScreen'), submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
+        const levelMenuScreen = document.getElementById('levelMenuScreen'), levelGrid = document.getElementById('levelGrid');
+        const levelDisplayHUD = document.getElementById('levelDisplayHUD');
         const initialsInput = document.getElementById('initialsInput');
-
-        const joyContainer = document.getElementById('joystick-container');
-        const joyBase = document.getElementById('joystick-base');
-        const joyKnob = document.getElementById('joystick-knob');
+        const joyContainer = document.getElementById('joystick-container'), joyBase = document.getElementById('joystick-base'), joyKnob = document.getElementById('joystick-knob');
 
         const AudioFX = {
             ctx: null,
@@ -485,337 +486,268 @@
             hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
             heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
             powerDown() { [440, 349, 293, 220].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.5), i * 200)); },
-            gemLost() { [440, 311.13, 261.63, 207.65].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); }
+            gemLost() { [440, 311.13, 261.63, 207.65].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); },
+            levelUp() { [440, 554.37, 659.25, 880].forEach((n, i) => setTimeout(() => this.playOsc(n, 'square', 0.3, 0.1), i * 100)); },
+            bounce() { this.playOsc(220, 'triangle', 0.1, 0.1, 150); },
+            fireball() { this.playOsc(600, 'sawtooth', 0.1, 0.05, 100); }
         };
 
+        const LEVEL_TIME = 100;
         let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false, hasPlayedEndSound = false; 
-        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = 0, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null;
-        let arenaRotation = 0; 
-        let requestID = null;
-        let spawnThiefTimeout = null, spawnItemTimeout = null;
-        let visualReachScale = 1.0;
+        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, unlockedLevels = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
+        let arenaRotation = 0, visualReachScale = 1.0, requestID = null, spawnThiefTimeout = null, spawnItemTimeout = null;
+        let fireballPowerTimer = 0;
 
         const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
-        let thieves = [], arrows = [], particles = [], items = [];
-        const monsterPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.75 }, gemPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.9 };
+        let thieves = [], arrows = [], particles = [], items = [], obstacles = [], fireballs = [];
+        const monsterPos = { x: 300, y: 450 }, gemPos = { x: 300, y: 540 };
 
-        class Tentacle {
-            constructor(side) {
-                this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15;
-                this.baseX = monsterPos.x + (side * 20); this.baseY = monsterPos.y;
-                this.maxReach = (this.numSegments * this.segLength) * 1.35; 
-                this.vx = 0; this.vy = 0; this.friction = 0.96; this.accelBase = 0.08; this.whooshCooldown = 0;
-                for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY });
-            }
-            update(targetX, targetY) {
-                if (isPaused) return;
-                let currentLen = this.segLength * visualReachScale;
-                const speedMod = poisonTimer > 0 ? 0.12 : 0.25;
-                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * speedMod;
-                let tx = targetX + (this.side * 40), ty = targetY;
-                let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
-                let currentMaxReach = this.maxReach * visualReachScale;
-                if (distB > currentMaxReach) { tx = this.baseX + (dxB / distB) * currentMaxReach; ty = this.baseY + (dyB / distB) * currentMaxReach; }
-                this.vx = (this.vx + (tx - this.segments[0].x) * moveAccel) * this.friction;
-                this.vy = (this.vy + (ty - this.segments[0].y) * moveAccel + (isDeathAnimation ? 0.5 : 0)) * this.friction;
-                this.segments[0].x += this.vx; this.segments[0].y += this.vy;
-                const vel = Math.sqrt(this.vx**2 + this.vy**2);
-                if (vel > 12 && this.whooshCooldown <= 0 && gameActive) { AudioFX.whoosh(vel / 20); this.whooshCooldown = 25; }
-                if (this.whooshCooldown > 0) this.whooshCooldown--;
-                for (let i = 1; i < this.numSegments; i++) {
-                    let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, dist = Math.sqrt(dx**2 + dy**2);
-                    if (dist > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/dist) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/dist) * currentLen; }
-                }
-                this.segments[this.numSegments - 1] = { x: this.baseX, y: this.baseY };
-                for (let i = this.numSegments - 2; i >= 0; i--) {
-                    let dx = this.segments[i].x - this.segments[i+1].x, dy = this.segments[i].y - this.segments[i+1].y, angle = Math.atan2(dy, dx);
-                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(angle) * currentLen, y: this.segments[i+1].y + Math.sin(angle) * currentLen };
+        const arenaShapes = {
+            1: { name: "DOOM DIAMOND", draw: () => { ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); }, isInside: (px, py) => (Math.abs(px - 300) + Math.abs(py - 300)) <= 300 },
+            2: { name: "OCTAGAUNTLET", draw: () => { ctx.beginPath(); for(let i=0; i<8; i++){ const a = (i * Math.PI / 4) + Math.PI/8; ctx.lineTo(300 + Math.cos(a) * 300, 300 + Math.sin(a) * 300); } ctx.closePath(); }, isInside: (px, py) => { const dx = Math.abs(px - 300), dy = Math.abs(py - 300), s = 300 * Math.cos(Math.PI/8); return dx <= s && dy <= s && (dx + dy) <= 300 * Math.sqrt(2) * Math.cos(Math.PI/8); } },
+            3: { name: "TRAPEZOID OF FEAR", draw: () => { ctx.beginPath(); ctx.moveTo(200, 20); ctx.lineTo(400, 20); ctx.lineTo(580, 580); ctx.lineTo(20, 580); ctx.closePath(); }, isInside: (px, py) => { if (py < 20 || py > 580) return false; const widthAtY = 200 + (py - 20) * (380 / 560); return px >= (300 - widthAtY) && px <= (300 + widthAtY); } },
+            4: { name: "VOID STAR", draw: () => { ctx.beginPath(); for(let i=0; i<16; i++){ const r = i % 2 === 0 ? 300 : 150; const a = i * Math.PI / 8 - Math.PI/2; ctx.lineTo(300 + Math.cos(a) * r, 300 + Math.sin(a) * r); } ctx.closePath(); }, isInside: (px, py) => { const dx = px - 300, dy = py - 300, dist = Math.sqrt(dx*dx + dy*dy); if (dist < 140) return true; if (dist > 300) return false; let angle = Math.atan2(dy, dx) + Math.PI/2; if (angle < 0) angle += Math.PI * 2; const sector = (angle / (Math.PI/4)) % 1; return dist <= 150 + (1 - Math.abs(sector - 0.5) * 2) * 150; } }
+        };
+
+        class Obstacle {
+            constructor() {
+                const shape = arenaShapes[currentLevel];
+                let valid = false;
+                this.radius = 13; 
+                let attempts = 0;
+                while (!valid && attempts < 100) {
+                    attempts++;
+                    this.x = 100 + Math.random() * 400;
+                    this.y = 100 + Math.random() * 250; 
+                    const distToMonster = Math.sqrt((this.x - 300)**2 + (this.y - 450)**2);
+                    if (distToMonster < 160) continue; 
+                    valid = shape.isInside(this.x - this.radius, this.y - this.radius) && 
+                            shape.isInside(this.x + this.radius, this.y + this.radius) &&
+                            (Math.abs(this.x-300)+Math.abs(this.y-300)) < 265;
+                    if (valid && obstacles.some(o => Math.sqrt((o.x-this.x)**2+(o.y-this.y)**2) < 75)) valid = false;
                 }
             }
             draw() {
-                ctx.beginPath(); ctx.lineWidth = 10; ctx.lineCap = ctx.lineJoin = 'round';
-                ctx.strokeStyle = isDeathAnimation ? '#141' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0'));
-                ctx.moveTo(this.baseX, this.baseY);
-                for (let i = this.numSegments - 1; i > 0; i--) {
-                    const midX = (this.segments[i].x + this.segments[i-1].x) / 2, midY = (this.segments[i].y + this.segments[i-1].y) / 2;
-                    ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY);
-                }
-                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke();
-                ctx.fillStyle = isDeathAnimation ? '#020' : '#050';
-                for (let i = 2; i < this.numSegments; i+=3) { ctx.beginPath(); ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2); ctx.fill(); }
+                const pulse = Math.sin(Date.now() / 200) * 0.1 + 0.9;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(60, 60, 65, 0.4)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
+                ctx.fillStyle = '#0ff';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#0ff';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            collides(px, py, radius = 0) {
+                const dist = Math.sqrt((px - this.x)**2 + (py - this.y)**2);
+                return dist < (this.radius + radius);
+            }
+            isShadowed(tx, ty) {
+                const distToObs = Math.sqrt((tx - this.x)**2 + (ty - this.y)**2);
+                if (distToObs > 45) return false;
+                const dot = ((tx - 300) * (this.x - 300) + (ty - 450) * (this.y - 450));
+                return dot > 0; 
             }
         }
 
+        class Fireball {
+            constructor(x, y, vx, vy) {
+                this.x = x; this.y = y;
+                const speed = 7;
+                const mag = Math.sqrt(vx**2 + vy**2);
+                this.vx = (vx / mag) * speed;
+                this.vy = (vy / mag) * speed;
+                this.active = true;
+                this.life = 100;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                this.life--;
+                if (this.life <= 0 || this.x < 0 || this.x > 600 || this.y < 0 || this.y > 600) this.active = false;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 6, 0, Math.PI*2);
+                ctx.fillStyle = '#f80';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#f00';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+        }
+
+        class Tentacle {
+            constructor(side) { this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15; this.vx = 0; this.vy = 0; this.fireCooldown = 0; this.baseX = 300 + (side * 20); this.baseY = 450; for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY }); }
+            update(tx, ty) {
+                if (isPaused) return;
+                const realTx = tx + this.side * 40;
+                let currentLen = this.segLength * visualReachScale, speedMod = poisonTimer > 0 ? 0.12 : 0.25;
+                let dxB = realTx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
+                if (distB > this.numSegments * this.segLength * 1.3 * visualReachScale) { const limit = this.numSegments * this.segLength * 1.3 * visualReachScale; dxB = (dxB/distB) * limit; dyB = (dyB/distB) * limit; }
+                
+                let nextX = this.segments[0].x + this.vx;
+                let nextY = this.segments[0].y + this.vy;
+
+                obstacles.forEach(obs => {
+                    if (obs.collides(nextX, nextY, 12)) {
+                        const angle = Math.atan2(nextY - obs.y, nextX - obs.x);
+                        const speed = Math.sqrt(this.vx**2 + this.vy**2);
+                        this.vx = Math.cos(angle) * (speed + 2) * 0.6;
+                        this.vy = Math.sin(angle) * (speed + 2) * 0.6;
+                        AudioFX.bounce();
+                    }
+                });
+
+                this.vx = (this.vx + (this.baseX + dxB - this.segments[0].x) * (0.08) * (0.5 + health/200) * speedMod) * 0.96;
+                this.vy = (this.vy + (this.baseY + dyB - this.segments[0].y) * (0.08) * (0.5 + health/200) * speedMod) * 0.96;
+
+                if (fireballPowerTimer > 0) {
+                    if (this.fireCooldown > 0) this.fireCooldown--;
+                    const moveMag = Math.sqrt(this.vx**2 + this.vy**2);
+                    if (moveMag > 5 && this.fireCooldown <= 0) {
+                        fireballs.push(new Fireball(this.segments[0].x, this.segments[0].y, this.vx, this.vy));
+                        AudioFX.fireball();
+                        this.fireCooldown = 6;
+                    }
+                }
+
+                this.segments[0].x += this.vx; this.segments[0].y += this.vy;
+                for (let i = 1; i < this.numSegments; i++) { 
+                    let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, d = Math.sqrt(dx**2 + dy**2); 
+                    if (d > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/d) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/d) * currentLen; } 
+                }
+                this.segments[this.numSegments - 1] = { x: this.baseX, y: this.baseY };
+                for (let i = this.numSegments - 2; i >= 0; i--) { 
+                    let dx = this.segments[i].x - this.segments[i+1].x, dy = this.segments[i].y - this.segments[i+1].y, ang = Math.atan2(dy, dx); 
+                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(ang) * currentLen, y: this.segments[i+1].y + Math.sin(ang) * currentLen }; 
+                }
+            }
+            draw() {
+                ctx.beginPath(); ctx.lineWidth = 10; ctx.lineCap = ctx.lineJoin = 'round'; 
+                ctx.strokeStyle = isDeathAnimation ? '#141' : (fireballPowerTimer > 0 ? '#f80' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0')));
+                ctx.moveTo(this.baseX, this.baseY); for (let i = this.numSegments - 1; i > 0; i--) { const midX = (this.segments[i].x + this.segments[i-1].x) / 2, midY = (this.segments[i].y + this.segments[i-1].y) / 2; ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY); }
+                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke(); ctx.fillStyle = isDeathAnimation ? '#020' : '#050'; for (let i = 2; i < this.numSegments; i+=3) { ctx.beginPath(); ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2); ctx.fill(); }
+            }
+        }
         const leftTentacle = new Tentacle(-1), rightTentacle = new Tentacle(1);
 
         class Thief {
             constructor(type = "ninja") {
-                const sY = Math.random() * 200, side = Math.random() > 0.5 ? 1 : -1;
-                this.y = sY; this.x = side === -1 ? 300 - sY : 300 + sY;
-                this.type = type;
-                this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0;
-                this.shielded = type === "samurai";
-                this.isJumping = false;
-                this.jumpTimer = 0;
-                this.jumpCooldown = 0;
-                this.scale = 1.0;
-                if (this.type === "samurai") { this.speed = 0.5; this.size = 20 * this.mobileScale; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; this.color = "#444"; }
-                else if (this.type === "jumper") { this.speed = 1.2; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
-                else { this.speed = 0.8 + Math.random() * 0.7; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
-                this.shootCooldown = 60 + Math.random() * 120;
-                this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
-                this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
-                const arrowTypes = ['regular', 'regular', 'fire', 'poison'];
-                this.arrowType = arrowTypes[Math.floor(Math.random() * arrowTypes.length)];
-                if (this.type === "ninja") this.maskColor = this.arrowType === 'regular' ? '#bbb' : (this.arrowType === 'fire' ? '#f80' : '#a0f');
-                else this.maskColor = this.color;
+                const sY = Math.random() * 150, side = Math.random() > 0.5 ? 1 : -1;
+                this.y = sY; this.x = 300 + (side * (300 - sY - 40)); this.type = type; this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.shielded = type === "samurai"; this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 0; this.scale = 1.0; this.hitCooldown = 0;
+                if (this.type === "samurai") { this.speed = 0.4; this.size = 20 * this.mobileScale; this.color = "#444"; this.arrowType = 'regular'; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; }
+                else if (this.type === "jumper") { this.speed = 1.0; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
+                else { this.speed = 0.7 + Math.random() * 0.6; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
+                if (this.type !== "samurai") { let pool = ['regular', 'regular', 'regular', 'regular', 'fire', 'poison']; if (currentLevel === 1) pool.push('regular', 'regular'); this.arrowType = pool[Math.floor(Math.random() * pool.length)]; }
+                this.maskColor = this.type === "ninja" ? (this.arrowType === 'fire' ? '#f80' : (this.arrowType === 'poison' ? '#a0f' : '#bbb')) : this.color;
+                this.shootCooldown = 60 + Math.random() * 120; this.avoidSide = this.x < 300 ? -1 : 1; this.aiPhase = 0; this.wanderPhase = Math.random() * Math.PI * 2;
             }
             update() {
-                if (isPaused) return;
-                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.x = this.x; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) endGameUI('gem'); } return; }
-                if (isDeathAnimation) return;
-                if (this.type === "samurai") {
-                    if (this.pauseTimer > 0) { this.pauseTimer--; return; }
-                    this.moveTimer--; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; }
-                }
-                if (this.type === "jumper") {
-                    if (this.isJumping) {
-                        this.jumpTimer++; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8;
-                        if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; }
-                    } else if (this.jumpCooldown > 0) { this.jumpCooldown--; }
-                    else { if (Math.sqrt((this.x - monsterPos.x)**2 + (this.y - monsterPos.y)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
-                }
-                this.wanderPhase += this.wanderFreq; this.animFrame += this.speed * 0.15;
-                let dx = gemPos.x - this.x, dy = gemPos.y - this.y;
-                let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * (this.type === "samurai" ? 0.1 : this.wanderAmp);
-                this.x += Math.cos(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
-                this.y += Math.sin(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
+                if (isPaused || isDeathAnimation) return;
+                if (this.hitCooldown > 0) this.hitCooldown--;
+                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) window.endGameUI('gem'); } return; }
+                if (this.type === "samurai") { if (this.pauseTimer > 0) { this.pauseTimer--; return; } this.moveTimer--; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; } }
+                if (this.type === "jumper") { if (this.isJumping) { this.jumpTimer++; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8; if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; } } else if (this.jumpCooldown > 0) this.jumpCooldown--; else if (Math.sqrt((this.x - 300)**2 + (this.y - 450)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
+                
+                let targetX = gemPos.x, targetY = gemPos.y;
+                if (this.aiPhase === 0) { targetX = this.avoidSide === -1 ? 50 : 550; targetY = 300; if (this.y > 280) this.aiPhase = 1; }
+                else if (this.aiPhase === 1) { targetX = this.avoidSide === -1 ? 180 : 420; targetY = 480; if (this.y > 450) this.aiPhase = 2; }
+                
+                let dx = targetX - this.x, dy = targetY - this.y, targetAng = Math.atan2(dy, dx);
+                if (this.aiPhase < 2 && Math.abs(this.y - 300) < 150) { const dX = Math.abs(this.x - 300); if (dX < 200) targetAng += this.avoidSide * 1.5 * (1 - dX / 200); }
+                
+                let currentSpeed = this.isJumping ? this.speed * 2.5 : this.speed;
+                if (obstacles.some(obs => obs.isShadowed(this.x, this.y))) { currentSpeed *= 0.4; }
+
+                let ang = targetAng + Math.sin(this.wanderPhase += 0.03) * 0.2;
+                let nx = this.x + Math.cos(ang) * currentSpeed;
+                let ny = this.y + Math.sin(ang) * currentSpeed;
+
+                obstacles.forEach(obs => {
+                    if (obs.collides(nx, ny, 8)) {
+                        const pushDir = Math.atan2(ny - obs.y, nx - obs.x);
+                        nx = obs.x + Math.cos(pushDir) * (obs.radius + 10);
+                        ny = obs.y + Math.sin(pushDir) * (obs.radius + 10);
+                    }
+                });
+
+                this.x = nx; this.y = ny;
+                const shape = arenaShapes[currentLevel]; if (!shape.isInside(this.x, this.y)) { const dXC = this.x - 300, dYC = this.y - 300, dist = Math.sqrt(dXC**2 + dYC**2); this.x = 300 + dXC * ((dist - 10) / dist); this.y = 300 + dYC * ((dist - 10) / dist); }
                 if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
-                if (Math.sqrt(dx**2 + dy**2) < 25) triggerEscape(this);
+                if (Math.sqrt((this.x - gemPos.x)**2 + (this.y - gemPos.y)**2) < 25) window.triggerEscape(this);
             }
-            draw() {
-                const lo = (Math.sin(this.animFrame) * 4) * this.mobileScale, hs = (this.size * this.scale) / 2;
-                if (this.isJumping) { ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2); ctx.fill(); }
+            draw() { 
+                const hs = (this.size * this.scale) / 2; if (this.isJumping) { ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2); ctx.fill(); } 
                 if (this.type === "samurai") {
                     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
                     ctx.fillStyle = '#444'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.8);
-                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - 2, this.y - hs - 5, 4, 6);
-                    if (this.shielded) { ctx.fillStyle = '#889'; ctx.fillRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); }
-                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - hs * 0.4, this.y - hs * 0.4, 2, 2); ctx.fillRect(this.x + hs * 0.2, this.y - hs * 0.4, 2, 2);
-                } else {
-                    const colorBody = this.type === "jumper" ? "#407" : "#333";
-                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.8, this.y + hs * 0.6 + lo, hs * 0.6, hs * 0.6);
-                    ctx.fillRect(this.x + hs * 0.2, this.y + hs * 0.6 - lo, hs * 0.6, hs * 0.6);
-                    ctx.fillStyle = colorBody; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
-                    ctx.fillStyle = this.maskColor; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.5);
-                    ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6 * this.scale, hs * 0.3);
-                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.5, this.y - hs * 0.25, 1, hs * 0.3); ctx.fillRect(this.x + hs * 0.4, this.y - hs * 0.25, 1, hs * 0.3);
-                }
-            }
-        }
-
-        class Arrow {
-            constructor(x, y, type) {
-                this.x = x; this.y = y; this.type = type; this.speed = 3;
-                let dx = monsterPos.x - x, dy = monsterPos.y - y, dist = Math.sqrt(dx**2 + dy**2);
-                this.vx = (dx/dist) * this.speed; this.vy = (dy/dist) * this.speed; this.active = true;
-            }
-            update() { if (!isPaused) { this.x += this.vx; this.y += this.vy; if (this.y > CANVAS_SIZE) this.active = false; } }
-            draw() { ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f'); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke(); }
-        }
-
-        class Item {
-            constructor() {
-                this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0;
-                const r = leftTentacle.maxReach * 0.75 * 0.9, a = Math.PI + (Math.random() * Math.PI), d = 50 + (Math.random() * (r - 50));
-                this.x = Math.max(50, Math.min(CANVAS_SIZE-50, monsterPos.x + Math.cos(a) * d));
-                this.y = Math.max(50, monsterPos.y + Math.sin(a) * d); this.life = 400;
-            }
-            update() { if (!isPaused) this.life--; }
-            draw() { ctx.fillStyle = '#f00'; ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; ctx.fillText('❤', this.x - 10*this.mobileScale, this.y + 10*this.mobileScale); }
-        }
-
-        function spawnThief() {
-            if(!gameActive || isGameOver) return;
-            if (isPaused) { spawnThiefTimeout = setTimeout(spawnThief, 100); return; }
-            let dice = Math.random();
-            if (score >= 1000 && dice < 0.25) thieves.push(new Thief("jumper"));
-            else if (score >= 500 && dice < 0.5) thieves.push(new Thief("samurai"));
-            else thieves.push(new Thief("ninja"));
-            const spawnRate = Math.max(650, 1400 - (score * 1.5));
-            spawnThiefTimeout = setTimeout(spawnThief, spawnRate);
-        }
-
-        function spawnItem() {
-            if(!gameActive || isGameOver) return;
-            if (isPaused) { spawnItemTimeout = setTimeout(spawnItem, 100); return; }
-            if(Math.random() > 0.7) items.push(new Item());
-            const nextCheck = Math.max(6000, 15000 - (currentTime * 40));
-            spawnItemTimeout = setTimeout(spawnItem, nextCheck);
-        }
-
-        function drawArena() {
-            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
-            ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
-            for(let i=0; i<CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke(); }
-            if(gameActive || isEndingAnimation) {
-                ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf';
-                ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill();
-                ctx.shadowBlur = 0;
-            }
-            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080');
-            ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2); ctx.fill();
-            if (isDeathAnimation) {
-                ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(monsterPos.x-15, monsterPos.y-5); ctx.lineTo(monsterPos.x-5, monsterPos.y-5); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(monsterPos.x+5, monsterPos.y-5); ctx.lineTo(monsterPos.x+15, monsterPos.y-5); ctx.stroke();
-                ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke();
-            } else {
-                let dxL = mouseX - monsterPos.x, dyL = mouseY - monsterPos.y;
-                if (isEndingAnimation && winningThief) { dxL = winningThief.x - monsterPos.x; dyL = winningThief.y - monsterPos.y; }
-                let lookA = Math.atan2(dyL, dxL), lookD = Math.min(2, Math.sqrt(dxL**2 + dyL**2) / 50);
-                let lx = Math.cos(lookA) * 2, ly = Math.sin(lookA) * 2;
-                ctx.fillStyle = '#fff'; ctx.fillRect(monsterPos.x-13, monsterPos.y-9, 7, 7); ctx.fillRect(monsterPos.x+6, monsterPos.y-9, 7, 7);
-                ctx.fillStyle = '#000'; ctx.fillRect(monsterPos.x-11+lx, monsterPos.y-7+ly, 3, 3); ctx.fillRect(monsterPos.x+8+lx, monsterPos.y-7+ly, 3, 3);
-                if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke(); }
-            }
-        }
-
-        function handleCollisions() {
-            if (isGameOver || isPaused) return;
-            for (let i = arrows.length - 1; i >= 0; i--) {
-                const a = arrows[i]; if (Math.sqrt((a.x-monsterPos.x)**2+(a.y-monsterPos.y)**2) < 28) {
-                    AudioFX.hit(); if(a.type === 'regular') health -= 3; else if(a.type === 'fire') health -= 8; else poisonTimer = 600;
-                    for(let j=0; j<15; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: '#f00' });
-                    arrows.splice(i, 1);
-                }
-            }
-            [leftTentacle, rightTentacle].forEach(tentacle => {
-                tentacle.segments.forEach(seg => {
-                    thieves.forEach((thief, tIdx) => {
-                        if (thief.isJumping && thief.scale > 1.2) return;
-                        let hitRadius = 15 * thief.mobileScale;
-                        if (thief.type === "samurai") hitRadius = 25 * thief.mobileScale;
-                        if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < hitRadius) {
-                            if (thief.type === "samurai" && thief.shielded) {
-                                AudioFX.clink(); thief.shielded = false;
-                                for(let j=0; j<15; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: '#889' });
-                                thief.x -= Math.cos(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
-                                thief.y -= Math.sin(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
-                            } else {
-                                AudioFX.splat(); thieves.splice(tIdx, 1); 
-                                score += (thief.type === "samurai") ? 50 : (thief.type === "jumper" ? 30 : 10);
-                                for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 20, color: thief.color });
-                            }
-                        }
-                    });
-                    for (let i = arrows.length - 1; i >= 0; i--) {
-                        const a = arrows[i]; if(Math.sqrt((seg.x-a.x)**2 + (seg.y-a.y)**2) < 12) {
-                            AudioFX.hit(); if(a.type === 'regular') health -= 1; else if(a.type === 'fire') health -= 3; else poisonTimer = 600;
-                            arrows.splice(i, 1);
-                        }
+                    ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.arc(this.x - hs * 0.4, this.y - hs * 0.2, 2.5, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(this.x + hs * 0.4, this.y - hs * 0.2, 2.5, 0, Math.PI * 2); ctx.fill();
+                    if (this.shielded) {
+                        ctx.fillStyle = '#889'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+                        const sw = hs * 1.0, sh = this.size * this.scale * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
+                        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); ctx.quadraticCurveTo(sx + sw, sy + sh, sx + sw/2, sy + sh); ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
                     }
-                    items.forEach((item, iIdx) => {
-                        if(Math.sqrt((seg.x - item.x)**2 + (seg.y - item.y)**2) < (20 * item.mobileScale)) {
-                            AudioFX.heal(); health = Math.min(100, health + 25); poisonTimer = 0; items.splice(iIdx, 1);
-                        }
-                    });
-                });
-            });
-            if(health <= 0) { health = 0; triggerDeath(); }
-        }
-
-        function togglePause() {
-            if (!gameActive || isGameOver) return;
-            isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE';
-            if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); }
-            else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); }
-        }
-
-        function restartFromPause() { AudioFX.beep(); pauseScreen.classList.add('hidden'); resetGame(); }
-
-        function update() {
-            if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
-            if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
-            if (gameActive && !isPaused && score >= 1500) { arenaRotation += 0.001 + (score - 1500) * 0.000005; }
-            
-            const targetScale = (poisonTimer > 0) ? 0.75 : 1.0;
-            const shrinkSpeed = 0.05;
-            visualReachScale += (targetScale - visualReachScale) * shrinkSpeed;
-
-            if(poisonTimer > 0 && !isPaused) poisonTimer--;
-            if (poisonTimer > 0) joyContainer.classList.add('poisoned');
-            else joyContainer.classList.remove('poisoned');
-            let tx, ty;
-            if (isDeathAnimation) { tx = monsterPos.x; ty = monsterPos.y + 120; if (++deathTimer > 100) endGameUI('health'); }
-            else if (isEndingAnimation) { tx = monsterPos.x; ty = monsterPos.y + 50; }
-            else { tx = mouseX; ty = mouseY; }
-            leftTentacle.update(tx, ty); rightTentacle.update(tx, ty);
-            thieves.forEach(t => t.update()); arrows.forEach(a => a.update()); arrows = arrows.filter(a => a.active);
-            items.forEach(it => it.update()); items = items.filter(it => it.life > 0);
-            if (!isPaused) { particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); particles = particles.filter(p => p.life > 0); }
-            handleCollisions();
-            scoreVal.innerText = score; timeVal.innerText = currentTime + 's';
-            healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
-            if(poisonTimer > 0) poisonStatus.classList.remove('hidden'); else poisonStatus.classList.add('hidden');
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
-            ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke();
-            ctx.save();
-            ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
-            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); ctx.clip();
-            drawArena(); leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw());
-            particles.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 20; ctx.fillRect(p.x, p.y, 4, 4); ctx.globalAlpha = 1; });
-            ctx.restore();
-        }
-
-        function gameLoop() { 
-            update(); 
-            draw(); 
-            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) {
-                requestID = requestAnimationFrame(gameLoop);
+                } else {
+                    const colorBody = this.type === "jumper" ? '#407' : '#333'; 
+                    ctx.fillStyle = colorBody; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale); 
+                    ctx.fillStyle = this.maskColor; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.5); 
+                    ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6 * this.scale, hs * 0.3);
+                }
+                if (this.hitCooldown > 0) { ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(this.x - hs - 2, this.y - hs - 2, this.size * this.scale + 4, this.size * this.scale + 4); }
             }
         }
 
-        function startGame() { 
-            AudioFX.init(); 
-            AudioFX.beep(); 
-            startScreen.classList.add('hidden'); 
-            joyContainer.classList.remove('hidden'); 
-            pauseBtn.classList.remove('hidden'); 
-            if (requestID) cancelAnimationFrame(requestID);
-            resetGameParams(); 
-            gameActive = true; 
-            startTime = Date.now(); 
-            spawnThief(); 
-            spawnItem(); 
-            gameLoop(); 
+        class Arrow { 
+            constructor(x, y, type) { this.x = x; this.y = y; this.type = type; let dx = 300 - x, dy = 450 - y, dist = Math.sqrt(dx**2 + dy**2); this.vx = (dx/dist) * 3; this.vy = (dy/dist) * 3; this.active = true; } 
+            update() { 
+                if (!isPaused) { 
+                    this.x += this.vx; this.y += this.vy; 
+                    if (this.y > CANVAS_SIZE || this.y < 0) this.active = false; 
+                    obstacles.forEach(obs => { if (obs.collides(this.x, this.y)) this.active = false; });
+                } 
+            } 
+            draw() { ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f'); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke(); } 
         }
 
-        function resetGameParams() {
-            if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout);
-            if (spawnItemTimeout) clearTimeout(spawnItemTimeout);
-            score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
-            visualReachScale = 1.0; 
-            pauseBtn.innerText = 'PAUSE'; gemPos.x = 300; gemPos.y = 540;
+        class Item { 
+            constructor(type = 'heart') { 
+                const a = Math.PI + Math.random() * Math.PI; 
+                this.x = 300 + Math.cos(a) * (50 + Math.random() * 200); 
+                this.y = 450 + Math.sin(a) * (50 + Math.random() * 100); 
+                this.life = 400; 
+                this.type = type;
+                this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0; 
+            } 
+            update() { if (!isPaused) this.life--; } 
+            draw() { 
+                ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; 
+                if (this.type === 'heart') {
+                    ctx.fillStyle = '#f00'; ctx.fillText('❤', this.x - 10, this.y + 10); 
+                } else {
+                    ctx.fillStyle = '#f80'; ctx.fillText('🔥', this.x - 10, this.y + 10);
+                }
+            } 
         }
 
-        function triggerEscape(thief) { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.gemLost(); hasPlayedEndSound = true; } gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; }
-
-        function triggerDeath() { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.powerDown(); hasPlayedEndSound = true; } gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; }
-
-        function resetGame() { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); startGame(); }
-
-        function endGameUI(reason) {
-            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden');
-            gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!";
-            document.getElementById('finalScore').innerText = score; document.getElementById('finalTime').innerText = currentTime + ' seconds';
-            gameOverScreen.classList.remove('hidden');
+        function spawnThief() { if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnThiefTimeout = setTimeout(spawnThief, 100); return; } let dice = Math.random(), elapsed = LEVEL_TIME - currentTime; if (elapsed >= 60 && dice < 0.25) thieves.push(new Thief("jumper")); else if (elapsed >= 30 && dice < 0.35) thieves.push(new Thief("samurai")); else thieves.push(new Thief("ninja")); spawnThiefTimeout = setTimeout(spawnThief, Math.max(550, 1400 - (elapsed * 9) - (currentLevel * 60))); }
+        
+        function spawnItem() { 
+            if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnItemTimeout = setTimeout(spawnItem, 100); return; } 
+            let elapsed = LEVEL_TIME - currentTime;
+            if (elapsed > 45 && Math.random() > 0.8) {
+                items.push(new Item('fireball'));
+            } else if(Math.random() > 0.6) {
+                items.push(new Item('heart')); 
+            }
+            spawnItemTimeout = setTimeout(spawnItem, Math.max(6000, 15000 - (elapsed * 40))); 
         }
 
-        // NEW: Snarky Message Logic
         function getSnarkyMessage(s) {
             if (s < 500) return "NOT BAD FOR A WARM-UP, SQUIRT.";
             if (s < 1000) return "YOU'RE GETTING THE HANG OF THIS, MONSTER.";
@@ -824,95 +756,162 @@
             return "STOP ALREADY. YOU'RE INSATIABLE.";
         }
 
-        function checkHighScoreFlow() {
-            if (isGameOver && score > 0) {
+        function update() {
+            if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
+            if (gameActive && !isPaused) { 
+                currentTime = LEVEL_TIME - Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000); 
+                if (currentTime <= 0) { currentTime = 0; window.triggerLevelClear(); } 
+                if (fireballPowerTimer > 0) fireballPowerTimer--;
+            }
+            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + 0.003 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03); }
+            visualReachScale += ((poisonTimer > 0 ? 0.75 : 1.0) - visualReachScale) * 0.05;
+            if(poisonTimer > 0 && !isPaused) poisonTimer--;
+            let tx = isDeathAnimation ? 300 : mouseX, ty = isDeathAnimation ? 570 : mouseY;
+            if (isDeathAnimation && ++deathTimer > 100) window.endGameUI('health');
+            leftTentacle.update(tx, ty); rightTentacle.update(tx, ty);
+            thieves.forEach(t => t.update()); arrows.forEach(a => a.update()); arrows = arrows.filter(a => a.active); 
+            items.forEach(it => it.update()); items = items.filter(it => it.life > 0);
+            fireballs.forEach(fb => fb.update()); fireballs = fireballs.filter(fb => fb.active);
+            particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); 
+            particles = particles.filter(p => p.life > 0);
+            handleCollisions();
+            scoreVal.innerText = score; timeVal.innerText = currentTime + 's'; levelValHUD.innerText = currentLevel;
+            healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
+            if(poisonTimer > 0) poisonStatus.classList.remove('hidden'); else poisonStatus.classList.add('hidden');
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); const shape = arenaShapes[currentLevel];
+            ctx.save(); ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
+            shape.draw(); ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke(); ctx.clip();
+            ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            for(let i=0; i<=CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
+            if(gameActive || isEndingAnimation) { ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf'; ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill(); ctx.shadowBlur = 0; }
+            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080'); ctx.beginPath(); ctx.arc(300, 450, 25, 0, Math.PI*2); ctx.fill();
+            
+            if (!isDeathAnimation) {
+                let dxL = mouseX - 300, dyL = mouseY - 450;
+                if (isEndingAnimation && winningThief) { dxL = winningThief.x - 300; dyL = winningThief.y - 450; }
+                let lookA = Math.atan2(dyL, dxL), lx = Math.cos(lookA) * 3, ly = Math.sin(lookA) * 3;
+                ctx.fillStyle = '#fff'; ctx.fillRect(300-13, 450-9, 8, 8); ctx.fillRect(300+6, 450-9, 8, 8);
+                ctx.fillStyle = '#000'; ctx.fillRect(300-11+lx, 450-7+ly, 4, 4); ctx.fillRect(300+8+lx, 450-7+ly, 4, 4);
+                if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(300, 450+12, 8, Math.PI, 0, false); ctx.stroke(); }
+            } else {
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(300-15, 450-5); ctx.lineTo(300-5, 450-5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(300+5, 450-5); ctx.lineTo(300+15, 450-5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 450+12, 8, Math.PI, 0, false); ctx.stroke();
+            }
+            obstacles.forEach(obs => obs.draw());
+            leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw()); fireballs.forEach(fb => fb.draw());
+            
+            particles.forEach(p => { 
+                ctx.globalAlpha = p.life / 25;
+                ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); 
+            }); 
+            ctx.globalAlpha = 1.0;
+            ctx.restore();
+        }
+
+        function gameLoop() { update(); draw(); if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestID = requestAnimationFrame(gameLoop); }
+
+        function handleCollisions() {
+            if (isGameOver || isPaused) return;
+            
+            fireballs.forEach(fb => {
+                thieves.forEach((thief, tIdx) => {
+                    if (Math.sqrt((fb.x-thief.x)**2 + (fb.y-thief.y)**2) < 20) {
+                        AudioFX.splat();
+                        for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 25, color: '#f80' });
+                        thieves.splice(tIdx, 1);
+                        score += (thief.type === "samurai" ? 50 : 10);
+                        fb.active = false;
+                    }
+                });
+            });
+
+            arrows.forEach((a, i) => { 
+                if (Math.sqrt((a.x-300)**2+(a.y-450)**2) < 28) { 
+                    AudioFX.hit(); score = Math.max(0, score - 3);
+                    for(let j=0; j<10; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 20, color: '#f00' });
+                    if(a.type === 'fire') health -= 8; else if(a.type === 'poison') poisonTimer = 600; else health -= 3; arrows.splice(i, 1); 
+                } 
+            });
+            [leftTentacle, rightTentacle].forEach(tentacle => tentacle.segments.forEach(seg => {
+                thieves.forEach((thief, tIdx) => {
+                    if (thief.hitCooldown > 0) return;
+                    if (Math.sqrt((seg.x-thief.x)**2+(seg.y-thief.y)**2) < (thief.type === 'samurai' ? 25 : 15) * thief.mobileScale) {
+                        if(thief.shielded) { 
+                            AudioFX.clink(); thief.shielded = false; thief.hitCooldown = 30; 
+                            for(let j=0; j<15; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: '#889' });
+                            const ang = Math.atan2(thief.y - 450, thief.x - 300); thief.x += Math.cos(ang) * 40; thief.y += Math.sin(ang) * 40; 
+                        }
+                        else { 
+                            AudioFX.splat(); 
+                            for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: thief.color });
+                            thieves.splice(tIdx, 1); score += (thief.type === "samurai" ? 50 : 10); 
+                        }
+                    }
+                });
+                arrows.forEach((a, i) => { 
+                    if(Math.sqrt((seg.x-a.x)**2+(seg.y-a.y)**2) < 12) { 
+                        AudioFX.hit(); score = Math.max(0, score - 1); 
+                        for(let j=0; j<5; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 15, color: '#0f0' });
+                        if(a.type === 'fire') health -= 3; else if(a.type === 'poison') poisonTimer = 600; else health -= 1; arrows.splice(i, 1); 
+                    } 
+                });
+                items.forEach((it, i) => { 
+                    if(Math.sqrt((seg.x-it.x)**2+(seg.y-it.y)**2) < 20) { 
+                        if (it.type === 'heart') {
+                            AudioFX.heal(); health = Math.min(100, health+25); poisonTimer = 0; 
+                        } else {
+                            AudioFX.levelUp(); 
+                            fireballPowerTimer = 600; // 10 seconds
+                        }
+                        items.splice(i, 1); 
+                    } 
+                });
+            }));
+            if(health <= 0) { health = 0; window.triggerDeath(); }
+        }
+
+        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) unlockedLevels++; document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); levelDisplayHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
+        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); gameLoop(); };
+        window.showLevelMenu = () => { AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
+        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); if (lvl === 1) score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
+        window.resetGame = () => { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); window.startGameAtLevel(1); };
+        window.restartFromPause = () => { AudioFX.beep(); pauseScreen.classList.add('hidden'); window.resetGame(); };
+        window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); } else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); } };
+        window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); };
+        window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); };
+        window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
+        window.checkHighScoreFlow = (source) => { 
+            if (score > 0) { 
                 gameOverScreen.classList.add('hidden'); 
-                submitScoreScreen.classList.remove('hidden');
-                // Set the dynamic message
+                levelClearScreen.classList.add('hidden'); 
+                submitScoreScreen.classList.remove('hidden'); 
                 document.getElementById('submitMessage').innerText = getSnarkyMessage(score);
                 document.getElementById('submitScoreVal').innerText = score; 
-                initialsInput.focus();
-            } else { backToMain(); }
-        }
-
-        async function submitScore() {
-            const initials = initialsInput.value.trim() || 'AAA'; AudioFX.beep();
-            submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
-            try { await window.saveHighScore(initials, score); await showLeaderboard(); } catch (err) { backToMain(); }
-        }
-
-        async function showLeaderboard() {
-            AudioFX.beep(); startScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
-            const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>';
-            try {
-                const top = await window.fetchLeaderboard();
-                if (!top || top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
-                else {
-                    let h = '<table class="leaderboard-list">';
-                    top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
-                    content.innerHTML = h + '</table>';
-                }
-            } catch (err) { 
-                console.error("Fetch failed:", err);
-                content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; 
-            }
-        }
-
-        function backToMain() { AudioFX.beep(); joyContainer.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
-        initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
-
-        function shareGame(platform) {
-            const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent("Defend the Gem in Tentaguard! 🐙💎");
-            let shareUrl = '';
-            switch(platform) {
-                case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
-                case 'x': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
-                case 'bluesky': shareUrl = `https://bsky.app/intent/compose?text=${text}%20${url}`; break;
-                case 'instagram': shareUrl = `https://www.instagram.com/`; break; 
-            }
-            window.open(shareUrl, '_blank');
-        }
-
-        function handleInput(cX, cY) { 
-            if (!gameActive || isPaused) return; 
-            const r = canvas.getBoundingClientRect(); 
-            let rawX = (cX - r.left) * (600 / r.width); 
-            let rawY = (cY - r.top) * (600 / r.height); 
-            const centerX = 300, centerY = 300;
-            const dx = rawX - centerX, dy = rawY - centerY;
-            const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
-            mouseX = dx * cos - dy * sin + centerX; mouseY = dx * sin + dy * cos + centerY;
-        }
-
-        let joystickActive = false;
-        function updateJoystick(touchX, touchY) {
-            const rect = joyBase.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const maxRadius = rect.width / 2;
-            let dx = touchX - centerX, dy = touchY - centerY;
-            const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
-            joyKnob.style.left = `calc(50% + ${dx}px)`;
-            joyKnob.style.top = `calc(50% + ${dy}px)`;
-            const nx = dx / maxRadius, ny = dy / maxRadius;
-            const targetX = 300 + nx * 300, targetY = 300 + ny * 300;
-            const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
-            const rdx = targetX - 300, rdy = targetY - 300;
-            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300;
-        }
-
-        function resetJoystick() { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; }
-
-        joyBase.addEventListener('touchstart', (e) => { joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+                initialsInput.focus(); 
+            } else window.backToMain(); 
+        };
+        window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
+        window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
+        window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
+        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); };
+        window.resetGameParams = (fullReset) => { 
+            if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
+            if (fullReset) { score = 0; currentLevel = 1; } health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0;
+            obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
+        };
+        
+        initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
+        function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 450; }
+        function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius, tx = 300 + nx * 300, ty = 450 + ny * 300, rdx = tx - 300, rdy = ty - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 450; }
+        
+        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
         joyBase.addEventListener('touchmove', (e) => { if (joystickActive) { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); } }, { passive: false });
-        window.addEventListener('touchend', resetJoystick);
-
+        window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; });
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-        canvas.addEventListener('touchmove', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
-        canvas.addEventListener('touchstart', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-
+        canvas.addEventListener('touchmove', (e) => { if (!joystickActive) { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); } }, { passive: false });
         draw();
     </script>
 </body>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tentaguard - Retro Arcade</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jersey+20&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Jersey 20', serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overscroll-behavior-y: contain;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 98vw;
+            max-width: 600px;
+            max-height: 98vh;
+            aspect-ratio: 1/1;
+            border: 1px solid #444;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            background: #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+        }
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 10px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .stats-group {
+            display: flex;
+            flex-direction: column;
+            font-size: clamp(16px, 4vw, 24px);
+            text-shadow: 2px 2px #000;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .health-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .bottom-ui {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+            pointer-events: none;
+            width: 100%;
+        }
+
+        .pause-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #555;
+            color: #aaa;
+            padding: 5px 12px;
+            cursor: pointer;
+            pointer-events: auto;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(14px, 3.5vw, 20px);
+            transition: all 0.2s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .pause-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; border-color: #fff; }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 15px;
+            z-index: 20;
+            pointer-events: auto;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            margin-top: 10px;
+            padding: 12px 30px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-family: 'Jersey 20', serif;
+            font-size: clamp(20px, 5vw, 28px);
+            transition: transform 0.1s, background 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn-restart { background: black; color: #fff; font-size: clamp(16px, 4vw, 22px); border: solid 2px #444; }
+        .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
+
+        .share-row {
+            display: flex;
+            gap: 18px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .share-link {
+            color: #fff;
+            transition: opacity 0.2s, transform 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .share-link:hover {
+            opacity: 0.7;
+            transform: translateY(-2px);
+        }
+
+        .share-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        #crt-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        .hidden { display: none !important; }
+
+        .health-bar-container {
+            width: clamp(100px, 25vw, 150px);
+            height: 12px;
+            background: #333;
+            border: 2px solid #fff;
+            margin-bottom: 5px;
+        }
+
+        .health-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.3s, background-color 0.3s; }
+
+        .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
+
+        @keyframes titleColorCycle {
+            0%, 100% { color: #4ade80; text-shadow: 0 0 10px rgba(74, 222, 128, 0.3); }
+            50% { color: #a0f; text-shadow: 0 0 10px rgba(160, 0, 255, 0.3); }
+        }
+
+        .title { 
+            font-size: clamp(2.5rem, 10vw, 4rem); 
+            margin: 0 0 10px 0; 
+            line-height: 1; 
+            letter-spacing: 2px;
+            animation: titleColorCycle 4s ease-in-out infinite;
+        }
+
+        .text-green { color: #4ade80; }
+        .text-red { color: #ef4444; }
+        .text-white { color: #ffffff; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-8 { margin-bottom: 2rem; }
+
+        .joystick-container {
+            position: fixed;
+            bottom: max(30px, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 110px;
+            z-index: 100;
+            display: none; 
+            pointer-events: auto;
+        }
+
+        .joystick-base {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), inset 0 0 10px rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(2px);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .joystick-knob {
+            width: 44px;
+            height: 44px;
+            background: rgba(0, 255, 0, 0.4);
+            border: 2px solid rgba(0, 255, 0, 0.7);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .joystick-container.poisoned .joystick-base {
+            border-color: rgba(160, 0, 255, 0.5);
+            box-shadow: 0 0 15px rgba(160, 0, 255, 0.3), inset 0 0 10px rgba(160, 0, 255, 0.1);
+        }
+        .joystick-container.poisoned .joystick-knob {
+            background: rgba(160, 0, 255, 0.6);
+            border-color: rgba(160, 0, 255, 0.9);
+            box-shadow: 0 0 10px rgba(160, 0, 255, 0.5);
+        }
+
+        @media (pointer: coarse) {
+            .joystick-container { display: block; }
+        }
+
+        .input-name {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Jersey 20', serif;
+            font-size: 48px;
+            width: 140px;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-list { width: 100%; max-width: 400px; margin-top: 20px; font-size: 24px; border-collapse: collapse; }
+        .leaderboard-list tr { border-bottom: 1px solid #333; }
+        .leaderboard-list td { padding: 8px 5px; }
+        .rank-col { color: #0f0; width: 50px; text-align: left; }
+        .name-col { text-align: left; }
+        .score-col { text-align: right; color: #f80; }
+
+        .loading-text { color: #aaa; font-style: italic; }
+
+        @media (max-height: 550px) {
+            .title { font-size: 1.5rem; }
+            .mb-8 { margin-bottom: 0.5rem; }
+            p { font-size: 14px; }
+            .btn { padding: 8px 20px; }
+            .joystick-container { bottom: 10px; width: 80px; height: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="crt-effect"></div>
+
+        <div class="ui-overlay">
+            <div class="hud-top">
+                <div class="stats-group">
+                    <div>SCORE: <span id="scoreVal">0</span></div>
+                    <div>TIME: <span id="timeVal">0s</span></div>
+                </div>
+
+                <div class="health-group">
+                    <div class="health-bar-container">
+                        <div id="healthBar" class="health-bar"></div>
+                    </div>
+                    <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
+                </div>
+            </div>
+            
+            <div class="bottom-ui">
+                <button id="pauseBtn" class="pause-btn hidden" onclick="togglePause()">PAUSE</button>
+            </div>
+        </div>
+
+        <div id="startScreen" class="screen">
+            <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
+            <p style="margin-top: 0; margin-bottom: 1.2rem;">
+                PROTECT THE GEM AT THE BOTTOM.<br>
+                MOVE TENTACLES TO CRUSH THIEVES.<br>
+                AVOID ARROWS!
+            </p>
+            <button class="btn" onclick="startGame()">START</button>
+            <button class="btn btn-secondary" onclick="showLeaderboard()">LEADERBOARD</button>
+            <!--
+            <div class="share-row">
+                <a class="share-link" title="Share on Facebook" onclick="shareGame('facebook')">
+                    <svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a class="share-link" title="Share on Instagram" onclick="shareGame('instagram')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></path>
+                    </svg>
+                </a>
+                <a class="share-link" title="Share on X" onclick="shareGame('x')">
+                    <svg viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24h-2.19L17.61 20.644Z"></path></svg>
+                </a>
+                <a class="share-link" title="Share on Bluesky" onclick="shareGame('bluesky')">
+                    <svg viewBox="0 0 568 501"><path d="M123.1 33.5c84.2 62.8 147.2 181.5 160.9 214.3 13.7-32.8 76.7-151.5 160.9-214.3C491.5 1 568-15 568 76.5c0 19.5-11 143.1-17.5 166.5-23.5 84-118.5 106.5-199 90 101.5 18 206 67.5 125 152-114.5 119.5-182.5-54-187.5-66.5-5 12.5-73 186-187.5 66.5-81-84.5 23.5-134 125-152-80.5 16.5-175.5-6-199-90C6 219.6 0 96 0 76.5 0-15 76.5 1 123.1 33.5Z"/></svg>
+                </a>
+            </div>
+            -->
+            <p style="margin-bottom: 0.5rem; font-size:0.9rem; margin-top: auto;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA
+                <br> MADE WITH <span style="color:red;">&hearts;</span> AND COFFEE</p>
+        </div>
+
+        <div id="pauseScreen" class="screen hidden">
+            <h2 class="text-white mb-4">GAME PAUSED</h2>
+            <button class="btn" onclick="togglePause()">RESUME</button>
+            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+        </div>
+
+        <div id="submitScoreScreen" class="screen hidden">
+            <!-- ID Added for dynamic messaging -->
+            <h1 id="submitMessage" class="text-green mb-2">NEW RECORD!</h1>
+            <p class="mb-4" style="font-size:1.5rem;">SCORE: <span id="submitScoreVal">0</span></p>
+            <input type="text" id="initialsInput" class="input-name" maxlength="3" placeholder="AAA">
+            <button class="btn" onclick="submitScore()">SAVE SCORE</button>
+            <button class="btn btn-restart" onclick="restartFromPause()">RESTART</button>
+        </div>
+
+        <div id="leaderboardScreen" class="screen hidden">
+            <h2 class="text-green mb-2">TOP 50 GUARDIANS</h2>
+            <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
+                <p class="loading-text">FETCHING DATA...</p>
+            </div>
+            <button class="btn" style="margin-top: 20px;" onclick="backToMain()">BACK</button>
+        </div>
+
+        <div id="gameOverScreen" class="screen hidden">
+            <h2 id="gameOverTitle" class="title text-red">GEM STOLEN!</h2>
+            <h2 class="mb-2">SCORE: <span id="finalScore">0</span></h2>
+            <h3 class="mb-6" style="margin-bottom: 1.5rem;">SURVIVED: <span id="finalTime">0</span></h3>
+            <button class="btn" onclick="checkHighScoreFlow()">CONTINUE</button>
+        </div>
+    </div>
+
+    <!-- Virtual Joystick -->
+    <div id="joystick-container" class="joystick-container">
+        <div id="joystick-base" class="joystick-base">
+            <div id="joystick-knob" class="joystick-knob"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const p1 = "AIza";
+        const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
+
+        let config = {
+            apiKey: p1 + p2,
+            authDomain: "tentaguard.firebaseapp.com",
+            projectId: "tentaguard",
+            storageBucket: "tentaguard.firebasestorage.app",
+            messagingSenderId: "713425803349",
+            appId: "1:713425803349:web:ce08c5d70db14a1d949cdc",
+            measurementId: "G-208QVW68RY"
+        };
+
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+            try { config = JSON.parse(__firebase_config); } catch (e) {}
+        }
+
+        const app = initializeApp(config);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
+        let user = null;
+
+        const initAuth = async () => {
+            if (user) return user;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    try {
+                        user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+                    } catch (tokenErr) {
+                        console.warn("Auth token invalid, using anonymous sign-in.");
+                        user = (await signInAnonymously(auth)).user;
+                    }
+                } else {
+                    user = (await signInAnonymously(auth)).user;
+                }
+            } catch (err) { 
+                console.error("Auth initialization failed.", err); 
+            }
+            return user;
+        };
+
+        window.saveHighScore = async (name, score) => {
+            const u = await initAuth();
+            if (!u) throw new Error("Unauthenticated");
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            await addDoc(colRef, { name: name.toUpperCase(), score: score, timestamp: Date.now() });
+        };
+
+        window.fetchLeaderboard = async () => {
+            const u = await initAuth();
+            if (!u) throw new Error("Unauthenticated");
+            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+            const snapshot = await getDocs(colRef);
+            return snapshot.docs.map(doc => doc.data()).sort((a, b) => b.score - a.score).slice(0, 50);
+        };
+    </script>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal');
+        const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
+        const pauseBtn = document.getElementById('pauseBtn'), pauseScreen = document.getElementById('pauseScreen');
+        const startScreen = document.getElementById('startScreen'), gameOverScreen = document.getElementById('gameOverScreen');
+        const submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
+        const initialsInput = document.getElementById('initialsInput');
+
+        const joyContainer = document.getElementById('joystick-container');
+        const joyBase = document.getElementById('joystick-base');
+        const joyKnob = document.getElementById('joystick-knob');
+
+        const AudioFX = {
+            ctx: null,
+            init() { if (this.ctx) return; this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+            playOsc(freq, type, duration, volume, slideTo = null) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, this.ctx.currentTime + duration);
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime); gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + duration);
+            },
+            beep() { this.playOsc(800, 'square', 0.1, 0.05); },
+            splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
+            clink() { this.playOsc(1200, 'triangle', 0.1, 0.1, 800); }, 
+            jump() { this.playOsc(300, 'sine', 0.2, 0.1, 600); },
+            whoosh(vol) { this.playOsc(100, 'sine', 0.3, Math.min(0.08, vol * 0.05), 300); },
+            hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
+            heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
+            powerDown() { [440, 349, 293, 220].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.5), i * 200)); },
+            gemLost() { [440, 311.13, 261.63, 207.65].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); }
+        };
+
+        let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false, hasPlayedEndSound = false; 
+        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = 0, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null;
+        let arenaRotation = 0; 
+        let requestID = null;
+        let spawnThiefTimeout = null, spawnItemTimeout = null;
+        let visualReachScale = 1.0;
+
+        const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
+        let thieves = [], arrows = [], particles = [], items = [];
+        const monsterPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.75 }, gemPos = { x: CANVAS_SIZE / 2, y: CANVAS_SIZE * 0.9 };
+
+        class Tentacle {
+            constructor(side) {
+                this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15;
+                this.baseX = monsterPos.x + (side * 20); this.baseY = monsterPos.y;
+                this.maxReach = (this.numSegments * this.segLength) * 1.35; 
+                this.vx = 0; this.vy = 0; this.friction = 0.96; this.accelBase = 0.08; this.whooshCooldown = 0;
+                for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY });
+            }
+            update(targetX, targetY) {
+                if (isPaused) return;
+                let currentLen = this.segLength * visualReachScale;
+                const speedMod = poisonTimer > 0 ? 0.12 : 0.25;
+                let moveAccel = (isEndingAnimation || isDeathAnimation) ? this.accelBase * 0.05 : this.accelBase * (0.5 + health/200) * speedMod;
+                let tx = targetX + (this.side * 40), ty = targetY;
+                let dxB = tx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
+                let currentMaxReach = this.maxReach * visualReachScale;
+                if (distB > currentMaxReach) { tx = this.baseX + (dxB / distB) * currentMaxReach; ty = this.baseY + (dyB / distB) * currentMaxReach; }
+                this.vx = (this.vx + (tx - this.segments[0].x) * moveAccel) * this.friction;
+                this.vy = (this.vy + (ty - this.segments[0].y) * moveAccel + (isDeathAnimation ? 0.5 : 0)) * this.friction;
+                this.segments[0].x += this.vx; this.segments[0].y += this.vy;
+                const vel = Math.sqrt(this.vx**2 + this.vy**2);
+                if (vel > 12 && this.whooshCooldown <= 0 && gameActive) { AudioFX.whoosh(vel / 20); this.whooshCooldown = 25; }
+                if (this.whooshCooldown > 0) this.whooshCooldown--;
+                for (let i = 1; i < this.numSegments; i++) {
+                    let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, dist = Math.sqrt(dx**2 + dy**2);
+                    if (dist > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/dist) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/dist) * currentLen; }
+                }
+                this.segments[this.numSegments - 1] = { x: this.baseX, y: this.baseY };
+                for (let i = this.numSegments - 2; i >= 0; i--) {
+                    let dx = this.segments[i].x - this.segments[i+1].x, dy = this.segments[i].y - this.segments[i+1].y, angle = Math.atan2(dy, dx);
+                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(angle) * currentLen, y: this.segments[i+1].y + Math.sin(angle) * currentLen };
+                }
+            }
+            draw() {
+                ctx.beginPath(); ctx.lineWidth = 10; ctx.lineCap = ctx.lineJoin = 'round';
+                ctx.strokeStyle = isDeathAnimation ? '#141' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0'));
+                ctx.moveTo(this.baseX, this.baseY);
+                for (let i = this.numSegments - 1; i > 0; i--) {
+                    const midX = (this.segments[i].x + this.segments[i-1].x) / 2, midY = (this.segments[i].y + this.segments[i-1].y) / 2;
+                    ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY);
+                }
+                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke();
+                ctx.fillStyle = isDeathAnimation ? '#020' : '#050';
+                for (let i = 2; i < this.numSegments; i+=3) { ctx.beginPath(); ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2); ctx.fill(); }
+            }
+        }
+
+        const leftTentacle = new Tentacle(-1), rightTentacle = new Tentacle(1);
+
+        class Thief {
+            constructor(type = "ninja") {
+                const sY = Math.random() * 200, side = Math.random() > 0.5 ? 1 : -1;
+                this.y = sY; this.x = side === -1 ? 300 - sY : 300 + sY;
+                this.type = type;
+                this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0;
+                this.shielded = type === "samurai";
+                this.isJumping = false;
+                this.jumpTimer = 0;
+                this.jumpCooldown = 0;
+                this.scale = 1.0;
+                if (this.type === "samurai") { this.speed = 0.5; this.size = 20 * this.mobileScale; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; this.color = "#444"; }
+                else if (this.type === "jumper") { this.speed = 1.2; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
+                else { this.speed = 0.8 + Math.random() * 0.7; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
+                this.shootCooldown = 60 + Math.random() * 120;
+                this.wanderPhase = Math.random() * Math.PI * 2; this.wanderFreq = 0.02 + Math.random() * 0.04;
+                this.wanderAmp = 0.4 + Math.random() * 0.4; this.animFrame = 0;
+                const arrowTypes = ['regular', 'regular', 'fire', 'poison'];
+                this.arrowType = arrowTypes[Math.floor(Math.random() * arrowTypes.length)];
+                if (this.type === "ninja") this.maskColor = this.arrowType === 'regular' ? '#bbb' : (this.arrowType === 'fire' ? '#f80' : '#a0f');
+                else this.maskColor = this.color;
+            }
+            update() {
+                if (isPaused) return;
+                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.x = this.x; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) endGameUI('gem'); } return; }
+                if (isDeathAnimation) return;
+                if (this.type === "samurai") {
+                    if (this.pauseTimer > 0) { this.pauseTimer--; return; }
+                    this.moveTimer--; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; }
+                }
+                if (this.type === "jumper") {
+                    if (this.isJumping) {
+                        this.jumpTimer++; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8;
+                        if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; }
+                    } else if (this.jumpCooldown > 0) { this.jumpCooldown--; }
+                    else { if (Math.sqrt((this.x - monsterPos.x)**2 + (this.y - monsterPos.y)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
+                }
+                this.wanderPhase += this.wanderFreq; this.animFrame += this.speed * 0.15;
+                let dx = gemPos.x - this.x, dy = gemPos.y - this.y;
+                let ang = Math.atan2(dy, dx) + Math.sin(this.wanderPhase) * (this.type === "samurai" ? 0.1 : this.wanderAmp);
+                this.x += Math.cos(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
+                this.y += Math.sin(ang) * (this.isJumping ? this.speed * 2.5 : this.speed);
+                if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
+                if (Math.sqrt(dx**2 + dy**2) < 25) triggerEscape(this);
+            }
+            draw() {
+                const lo = (Math.sin(this.animFrame) * 4) * this.mobileScale, hs = (this.size * this.scale) / 2;
+                if (this.isJumping) { ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2); ctx.fill(); }
+                if (this.type === "samurai") {
+                    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
+                    ctx.fillStyle = '#444'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.8);
+                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - 2, this.y - hs - 5, 4, 6);
+                    if (this.shielded) { ctx.fillStyle = '#889'; ctx.fillRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(this.x - hs * 1.2, this.y - hs * 0.5, hs * 0.4, this.size * this.scale); }
+                    ctx.fillStyle = '#f00'; ctx.fillRect(this.x - hs * 0.4, this.y - hs * 0.4, 2, 2); ctx.fillRect(this.x + hs * 0.2, this.y - hs * 0.4, 2, 2);
+                } else {
+                    const colorBody = this.type === "jumper" ? "#407" : "#333";
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.8, this.y + hs * 0.6 + lo, hs * 0.6, hs * 0.6);
+                    ctx.fillRect(this.x + hs * 0.2, this.y + hs * 0.6 - lo, hs * 0.6, hs * 0.6);
+                    ctx.fillStyle = colorBody; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
+                    ctx.fillStyle = this.maskColor; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.5);
+                    ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6 * this.scale, hs * 0.3);
+                    ctx.fillStyle = '#000'; ctx.fillRect(this.x - hs * 0.5, this.y - hs * 0.25, 1, hs * 0.3); ctx.fillRect(this.x + hs * 0.4, this.y - hs * 0.25, 1, hs * 0.3);
+                }
+            }
+        }
+
+        class Arrow {
+            constructor(x, y, type) {
+                this.x = x; this.y = y; this.type = type; this.speed = 3;
+                let dx = monsterPos.x - x, dy = monsterPos.y - y, dist = Math.sqrt(dx**2 + dy**2);
+                this.vx = (dx/dist) * this.speed; this.vy = (dy/dist) * this.speed; this.active = true;
+            }
+            update() { if (!isPaused) { this.x += this.vx; this.y += this.vy; if (this.y > CANVAS_SIZE) this.active = false; } }
+            draw() { ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f'); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke(); }
+        }
+
+        class Item {
+            constructor() {
+                this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0;
+                const r = leftTentacle.maxReach * 0.75 * 0.9, a = Math.PI + (Math.random() * Math.PI), d = 50 + (Math.random() * (r - 50));
+                this.x = Math.max(50, Math.min(CANVAS_SIZE-50, monsterPos.x + Math.cos(a) * d));
+                this.y = Math.max(50, monsterPos.y + Math.sin(a) * d); this.life = 400;
+            }
+            update() { if (!isPaused) this.life--; }
+            draw() { ctx.fillStyle = '#f00'; ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; ctx.fillText('❤', this.x - 10*this.mobileScale, this.y + 10*this.mobileScale); }
+        }
+
+        function spawnThief() {
+            if(!gameActive || isGameOver) return;
+            if (isPaused) { spawnThiefTimeout = setTimeout(spawnThief, 100); return; }
+            let dice = Math.random();
+            if (score >= 1000 && dice < 0.25) thieves.push(new Thief("jumper"));
+            else if (score >= 500 && dice < 0.5) thieves.push(new Thief("samurai"));
+            else thieves.push(new Thief("ninja"));
+            const spawnRate = Math.max(650, 1400 - (score * 1.5));
+            spawnThiefTimeout = setTimeout(spawnThief, spawnRate);
+        }
+
+        function spawnItem() {
+            if(!gameActive || isGameOver) return;
+            if (isPaused) { spawnItemTimeout = setTimeout(spawnItem, 100); return; }
+            if(Math.random() > 0.7) items.push(new Item());
+            const nextCheck = Math.max(6000, 15000 - (currentTime * 40));
+            spawnItemTimeout = setTimeout(spawnItem, nextCheck);
+        }
+
+        function drawArena() {
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
+            ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+            for(let i=0; i<CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, CANVAS_SIZE); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(CANVAS_SIZE, i); ctx.stroke(); }
+            if(gameActive || isEndingAnimation) {
+                ctx.fillStyle = '#0cf'; ctx.shadowBlur = 15; ctx.shadowColor = '#0cf';
+                ctx.beginPath(); ctx.moveTo(gemPos.x, gemPos.y-15); ctx.lineTo(gemPos.x+15, gemPos.y); ctx.lineTo(gemPos.x, gemPos.y+15); ctx.lineTo(gemPos.x-15, gemPos.y); ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080');
+            ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y, 25, 0, Math.PI*2); ctx.fill();
+            if (isDeathAnimation) {
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(monsterPos.x-15, monsterPos.y-5); ctx.lineTo(monsterPos.x-5, monsterPos.y-5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(monsterPos.x+5, monsterPos.y-5); ctx.lineTo(monsterPos.x+15, monsterPos.y-5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke();
+            } else {
+                let dxL = mouseX - monsterPos.x, dyL = mouseY - monsterPos.y;
+                if (isEndingAnimation && winningThief) { dxL = winningThief.x - monsterPos.x; dyL = winningThief.y - monsterPos.y; }
+                let lookA = Math.atan2(dyL, dxL), lookD = Math.min(2, Math.sqrt(dxL**2 + dyL**2) / 50);
+                let lx = Math.cos(lookA) * 2, ly = Math.sin(lookA) * 2;
+                ctx.fillStyle = '#fff'; ctx.fillRect(monsterPos.x-13, monsterPos.y-9, 7, 7); ctx.fillRect(monsterPos.x+6, monsterPos.y-9, 7, 7);
+                ctx.fillStyle = '#000'; ctx.fillRect(monsterPos.x-11+lx, monsterPos.y-7+ly, 3, 3); ctx.fillRect(monsterPos.x+8+lx, monsterPos.y-7+ly, 3, 3);
+                if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(monsterPos.x, monsterPos.y+12, 8, Math.PI, 0, false); ctx.stroke(); }
+            }
+        }
+
+        function handleCollisions() {
+            if (isGameOver || isPaused) return;
+            for (let i = arrows.length - 1; i >= 0; i--) {
+                const a = arrows[i]; if (Math.sqrt((a.x-monsterPos.x)**2+(a.y-monsterPos.y)**2) < 28) {
+                    AudioFX.hit(); if(a.type === 'regular') health -= 3; else if(a.type === 'fire') health -= 8; else poisonTimer = 600;
+                    for(let j=0; j<15; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: '#f00' });
+                    arrows.splice(i, 1);
+                }
+            }
+            [leftTentacle, rightTentacle].forEach(tentacle => {
+                tentacle.segments.forEach(seg => {
+                    thieves.forEach((thief, tIdx) => {
+                        if (thief.isJumping && thief.scale > 1.2) return;
+                        let hitRadius = 15 * thief.mobileScale;
+                        if (thief.type === "samurai") hitRadius = 25 * thief.mobileScale;
+                        if(Math.sqrt((seg.x - thief.x)**2 + (seg.y - thief.y)**2) < hitRadius) {
+                            if (thief.type === "samurai" && thief.shielded) {
+                                AudioFX.clink(); thief.shielded = false;
+                                for(let j=0; j<15; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: '#889' });
+                                thief.x -= Math.cos(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
+                                thief.y -= Math.sin(Math.atan2(gemPos.y-thief.y, gemPos.x-thief.x)) * 20;
+                            } else {
+                                AudioFX.splat(); thieves.splice(tIdx, 1); 
+                                score += (thief.type === "samurai") ? 50 : (thief.type === "jumper" ? 30 : 10);
+                                for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 20, color: thief.color });
+                            }
+                        }
+                    });
+                    for (let i = arrows.length - 1; i >= 0; i--) {
+                        const a = arrows[i]; if(Math.sqrt((seg.x-a.x)**2 + (seg.y-a.y)**2) < 12) {
+                            AudioFX.hit(); if(a.type === 'regular') health -= 1; else if(a.type === 'fire') health -= 3; else poisonTimer = 600;
+                            arrows.splice(i, 1);
+                        }
+                    }
+                    items.forEach((item, iIdx) => {
+                        if(Math.sqrt((seg.x - item.x)**2 + (seg.y - item.y)**2) < (20 * item.mobileScale)) {
+                            AudioFX.heal(); health = Math.min(100, health + 25); poisonTimer = 0; items.splice(iIdx, 1);
+                        }
+                    });
+                });
+            });
+            if(health <= 0) { health = 0; triggerDeath(); }
+        }
+
+        function togglePause() {
+            if (!gameActive || isGameOver) return;
+            isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE';
+            if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); }
+            else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); }
+        }
+
+        function restartFromPause() { AudioFX.beep(); pauseScreen.classList.add('hidden'); resetGame(); }
+
+        function update() {
+            if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
+            if (gameActive && !isPaused) currentTime = Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000);
+            if (gameActive && !isPaused && score >= 1500) { arenaRotation += 0.001 + (score - 1500) * 0.000005; }
+            
+            const targetScale = (poisonTimer > 0) ? 0.75 : 1.0;
+            const shrinkSpeed = 0.05;
+            visualReachScale += (targetScale - visualReachScale) * shrinkSpeed;
+
+            if(poisonTimer > 0 && !isPaused) poisonTimer--;
+            if (poisonTimer > 0) joyContainer.classList.add('poisoned');
+            else joyContainer.classList.remove('poisoned');
+            let tx, ty;
+            if (isDeathAnimation) { tx = monsterPos.x; ty = monsterPos.y + 120; if (++deathTimer > 100) endGameUI('health'); }
+            else if (isEndingAnimation) { tx = monsterPos.x; ty = monsterPos.y + 50; }
+            else { tx = mouseX; ty = mouseY; }
+            leftTentacle.update(tx, ty); rightTentacle.update(tx, ty);
+            thieves.forEach(t => t.update()); arrows.forEach(a => a.update()); arrows = arrows.filter(a => a.active);
+            items.forEach(it => it.update()); items = items.filter(it => it.life > 0);
+            if (!isPaused) { particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); particles = particles.filter(p => p.life > 0); }
+            handleCollisions();
+            scoreVal.innerText = score; timeVal.innerText = currentTime + 's';
+            healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
+            if(poisonTimer > 0) poisonStatus.classList.remove('hidden'); else poisonStatus.classList.add('hidden');
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath();
+            ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke();
+            ctx.save();
+            ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
+            ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); ctx.clip();
+            drawArena(); leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw());
+            particles.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.life / 20; ctx.fillRect(p.x, p.y, 4, 4); ctx.globalAlpha = 1; });
+            ctx.restore();
+        }
+
+        function gameLoop() { 
+            update(); 
+            draw(); 
+            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) {
+                requestID = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function startGame() { 
+            AudioFX.init(); 
+            AudioFX.beep(); 
+            startScreen.classList.add('hidden'); 
+            joyContainer.classList.remove('hidden'); 
+            pauseBtn.classList.remove('hidden'); 
+            if (requestID) cancelAnimationFrame(requestID);
+            resetGameParams(); 
+            gameActive = true; 
+            startTime = Date.now(); 
+            spawnThief(); 
+            spawnItem(); 
+            gameLoop(); 
+        }
+
+        function resetGameParams() {
+            if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout);
+            if (spawnItemTimeout) clearTimeout(spawnItemTimeout);
+            score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = [];
+            visualReachScale = 1.0; 
+            pauseBtn.innerText = 'PAUSE'; gemPos.x = 300; gemPos.y = 540;
+        }
+
+        function triggerEscape(thief) { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.gemLost(); hasPlayedEndSound = true; } gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; }
+
+        function triggerDeath() { if (isGameOver) return; isGameOver = true; if (!hasPlayedEndSound) { AudioFX.powerDown(); hasPlayedEndSound = true; } gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; }
+
+        function resetGame() { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); startGame(); }
+
+        function endGameUI(reason) {
+            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden');
+            gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!";
+            document.getElementById('finalScore').innerText = score; document.getElementById('finalTime').innerText = currentTime + ' seconds';
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // NEW: Snarky Message Logic
+        function getSnarkyMessage(s) {
+            if (s < 500) return "NOT BAD FOR A WARM-UP, SQUIRT.";
+            if (s < 1000) return "YOU'RE GETTING THE HANG OF THIS, MONSTER.";
+            if (s < 2000) return "THE THIEVES ARE STARTING TO HATE YOU.";
+            if (s < 5000) return "ABSOLUTE MENACE. A TRUE TENTACLE LORD.";
+            return "STOP ALREADY. YOU'RE INSATIABLE.";
+        }
+
+        function checkHighScoreFlow() {
+            if (isGameOver && score > 0) {
+                gameOverScreen.classList.add('hidden'); 
+                submitScoreScreen.classList.remove('hidden');
+                // Set the dynamic message
+                document.getElementById('submitMessage').innerText = getSnarkyMessage(score);
+                document.getElementById('submitScoreVal').innerText = score; 
+                initialsInput.focus();
+            } else { backToMain(); }
+        }
+
+        async function submitScore() {
+            const initials = initialsInput.value.trim() || 'AAA'; AudioFX.beep();
+            submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
+            try { await window.saveHighScore(initials, score); await showLeaderboard(); } catch (err) { backToMain(); }
+        }
+
+        async function showLeaderboard() {
+            AudioFX.beep(); startScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden');
+            const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>';
+            try {
+                const top = await window.fetchLeaderboard();
+                if (!top || top.length === 0) { content.innerHTML = '<p>NO SCORES YET.</p>'; }
+                else {
+                    let h = '<table class="leaderboard-list">';
+                    top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`);
+                    content.innerHTML = h + '</table>';
+                }
+            } catch (err) { 
+                console.error("Fetch failed:", err);
+                content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; 
+            }
+        }
+
+        function backToMain() { AudioFX.beep(); joyContainer.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+        initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') submitScore(); });
+
+        function shareGame(platform) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent("Defend the Gem in Tentaguard! 🐙💎");
+            let shareUrl = '';
+            switch(platform) {
+                case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
+                case 'x': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+                case 'bluesky': shareUrl = `https://bsky.app/intent/compose?text=${text}%20${url}`; break;
+                case 'instagram': shareUrl = `https://www.instagram.com/`; break; 
+            }
+            window.open(shareUrl, '_blank');
+        }
+
+        function handleInput(cX, cY) { 
+            if (!gameActive || isPaused) return; 
+            const r = canvas.getBoundingClientRect(); 
+            let rawX = (cX - r.left) * (600 / r.width); 
+            let rawY = (cY - r.top) * (600 / r.height); 
+            const centerX = 300, centerY = 300;
+            const dx = rawX - centerX, dy = rawY - centerY;
+            const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
+            mouseX = dx * cos - dy * sin + centerX; mouseY = dx * sin + dy * cos + centerY;
+        }
+
+        let joystickActive = false;
+        function updateJoystick(touchX, touchY) {
+            const rect = joyBase.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const maxRadius = rect.width / 2;
+            let dx = touchX - centerX, dy = touchY - centerY;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
+            joyKnob.style.left = `calc(50% + ${dx}px)`;
+            joyKnob.style.top = `calc(50% + ${dy}px)`;
+            const nx = dx / maxRadius, ny = dy / maxRadius;
+            const targetX = 300 + nx * 300, targetY = 300 + ny * 300;
+            const cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
+            const rdx = targetX - 300, rdy = targetY - 300;
+            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300;
+        }
+
+        function resetJoystick() { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; }
+
+        joyBase.addEventListener('touchstart', (e) => { joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+        joyBase.addEventListener('touchmove', (e) => { if (joystickActive) { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); } }, { passive: false });
+        window.addEventListener('touchend', resetJoystick);
+
+        canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
+        canvas.addEventListener('touchmove', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchstart', (e) => { if (joystickActive) return; handleInput(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+
+        draw();
+    </script>
+</body>
+</html>
