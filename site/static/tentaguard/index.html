@@ -394,13 +394,14 @@
         <div id="levelMenuScreen" class="screen hidden">
             <h2 class="title">SELECT LEVEL</h2>
             <div id="levelGrid" class="level-grid"></div>
-            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="window.backToMain()">BACK</button>
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="window.backToMain()">MAIN</button>
         </div>
 
         <div id="pauseScreen" class="screen hidden">
             <h2 class="text-white mb-4">GAME PAUSED</h2>
             <button class="btn" onclick="window.togglePause()">RESUME</button>
             <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
+            <button class="btn btn-secondary" onclick="window.backToMain()">MAIN</button>
         </div>
 
         <div id="submitScoreScreen" class="screen hidden">
@@ -422,15 +423,16 @@
             <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
                 <p class="loading-text">FETCHING DATA...</p>
             </div>
-            <button class="btn" style="margin-top: 20px;" onclick="window.backToMain()">BACK</button>
+            <button class="btn" style="margin-top: 20px;" onclick="window.backToMain()">MAIN</button>
         </div>
 
         <div id="levelClearScreen" class="screen hidden">
             <h1 class="title">LEVEL CLEAR!</h1>
-            <h2 class="mb-4">PREPARE FOR THE NEXT CHALLENGE</h2>
+            <h2 style="font-size: 2rem; color: #f80; margin-bottom: 10px;">SCORE: <span id="clearScoreVal">0</span></h2>
+            <h3 class="mb-4">PREPARE FOR THE NEXT CHALLENGE</h3>
             <button id="nextLevelBtn" class="btn" onclick="window.nextLevel()">CONTINUE</button>
             <button class="btn btn-secondary" onclick="window.checkHighScoreFlow('clear')">SAVE SCORE</button>
-            <button class="btn btn-secondary" onclick="window.backToMain()">MENU</button>
+            <button class="btn btn-secondary" onclick="window.backToMain()">MAIN</button>
         </div>
 
         <div id="gameOverScreen" class="screen hidden">
@@ -584,6 +586,7 @@
                 ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
@@ -924,7 +927,7 @@
             if(health <= 0) { health = 0; window.triggerDeath(); }
         }
 
-        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) unlockedLevels++; document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
+        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) unlockedLevels++; document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); document.getElementById('clearScoreVal').innerText = score; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
         window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); gameLoop(); };
         window.showLevelMenu = () => { AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
         window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
@@ -934,11 +937,20 @@
         window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
         window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
         window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
-        window.checkHighScoreFlow = (source) => { if (score > 0) { gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitMessage').innerText = getSnarkyMessage(score); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); } else window.backToMain(); };
+        window.checkHighScoreFlow = (source) => { 
+            if (score > 0) { 
+                gameOverScreen.classList.add('hidden'); 
+                levelClearScreen.classList.add('hidden'); 
+                submitScoreScreen.classList.remove('hidden'); 
+                document.getElementById('submitMessage').innerText = getSnarkyMessage(score);
+                document.getElementById('submitScoreVal').innerText = score; 
+                initialsInput.focus(); 
+            } else window.backToMain(); 
+        };
         window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
         window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
         window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
-        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; };
+        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; gameActive = false; isPaused = false; };
         window.resetGameParams = (fullReset) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
             if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
@@ -949,9 +961,8 @@
             if (!gameActive || isPaused) return; 
             const r = canvas.getBoundingClientRect(); 
             let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); 
-            // FIXED: Pivot coordinates around arena center (300, 300)
             const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); 
-            mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; 
+            mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 450; 
         }
         function updateJoystick(touchX, touchY) { 
             const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; 
@@ -959,10 +970,9 @@
             if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } 
             joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; 
             const nx = dx / maxRadius, ny = dy / maxRadius;
-            // FIXED: Pivot joystick calculation around arena center
-            const tx = 300 + nx * 300, ty = 300 + ny * 300;
+            const tx = 300 + nx * 300, ty = 450 + ny * 300;
             const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); 
-            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; 
+            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 450; 
         }
         window.onload = () => {
             gameContainer.classList.add('visible');
