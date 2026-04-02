@@ -544,6 +544,7 @@
         let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, unlockedLevels = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
         let arenaRotation = 0, visualReachScale = 1.0, requestID = null, spawnThiefTimeout = null, spawnItemTimeout = null;
         let fireballPowerTimer = 0;
+        let lastTimestamp = 0;
 
         const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
         let thieves = [], arrows = [], particles = [], items = [], obstacles = [], fireballs = [];
@@ -583,7 +584,6 @@
                 ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
@@ -611,9 +611,10 @@
                 this.active = true;
                 this.life = 100;
             }
-            update() {
-                this.x += this.vx; this.y += this.vy;
-                this.life--;
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.life -= dt;
                 if (this.life <= 0 || this.x < 0 || this.x > 600 || this.y < 0 || this.y > 600) this.active = false;
             }
             draw() {
@@ -621,7 +622,6 @@
                 ctx.arc(this.x, this.y, 6, 0, Math.PI*2);
                 ctx.fillStyle = '#f80';
                 ctx.fill();
-                // Subtler inner glow
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, 10, 0, Math.PI*2);
                 ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
@@ -631,15 +631,15 @@
 
         class Tentacle {
             constructor(side) { this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15; this.vx = 0; this.vy = 0; this.fireCooldown = 0; this.baseX = 300 + (side * 20); this.baseY = 450; for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY }); }
-            update(tx, ty) {
+            update(tx, ty, dt) {
                 if (isPaused) return;
                 const realTx = tx + this.side * 40;
                 let currentLen = this.segLength * visualReachScale, speedMod = poisonTimer > 0 ? 0.12 : 0.25;
                 let dxB = realTx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
                 if (distB > this.numSegments * this.segLength * 1.3 * visualReachScale) { const limit = this.numSegments * this.segLength * 1.3 * visualReachScale; dxB = (dxB/distB) * limit; dyB = (dyB/distB) * limit; }
                 
-                let nextX = this.segments[0].x + this.vx;
-                let nextY = this.segments[0].y + this.vy;
+                let nextX = this.segments[0].x + this.vx * dt;
+                let nextY = this.segments[0].y + this.vy * dt;
 
                 obstacles.forEach(obs => {
                     if (obs.collides(nextX, nextY, 12)) {
@@ -655,7 +655,7 @@
                 this.vy = (this.vy + (this.baseY + dyB - this.segments[0].y) * (0.08) * (0.5 + health/200) * speedMod) * 0.96;
 
                 if (fireballPowerTimer > 0) {
-                    if (this.fireCooldown > 0) this.fireCooldown--;
+                    if (this.fireCooldown > 0) this.fireCooldown -= dt;
                     const moveMag = Math.sqrt(this.vx**2 + this.vy**2);
                     if (moveMag > 5 && this.fireCooldown <= 0) {
                         fireballs.push(new Fireball(this.segments[0].x, this.segments[0].y, this.vx, this.vy));
@@ -664,7 +664,8 @@
                     }
                 }
 
-                this.segments[0].x += this.vx; this.segments[0].y += this.vy;
+                this.segments[0].x += this.vx * dt;
+                this.segments[0].y += this.vy * dt;
                 for (let i = 1; i < this.numSegments; i++) { 
                     let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, d = Math.sqrt(dx**2 + dy**2); 
                     if (d > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/d) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/d) * currentLen; } 
@@ -688,34 +689,33 @@
             constructor(type = "ninja") {
                 const sY = Math.random() * 150, side = Math.random() > 0.5 ? 1 : -1;
                 this.y = sY; this.x = 300 + (side * (300 - sY - 40)); this.type = type; this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.shielded = type === "samurai"; this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 0; this.scale = 1.0; this.hitCooldown = 0;
+                this.wanderSpeed = 0.025 + Math.random() * 0.045;
+                this.wanderAmplitude = 0.35 + Math.random() * 0.45;
+                this.wanderPhase = Math.random() * Math.PI * 2;
                 if (this.type === "samurai") { this.speed = 0.4; this.size = 20 * this.mobileScale; this.color = "#444"; this.arrowType = 'regular'; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; }
                 else if (this.type === "jumper") { this.speed = 1.0; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
                 else { this.speed = 0.7 + Math.random() * 0.6; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
                 if (this.type !== "samurai") { let pool = ['regular', 'regular', 'regular', 'regular', 'fire', 'poison']; if (currentLevel === 1) pool.push('regular', 'regular'); this.arrowType = pool[Math.floor(Math.random() * pool.length)]; }
                 this.maskColor = this.type === "ninja" ? (this.arrowType === 'fire' ? '#f80' : (this.arrowType === 'poison' ? '#a0f' : '#bbb')) : this.color;
-                this.shootCooldown = 60 + Math.random() * 120; this.avoidSide = this.x < 300 ? -1 : 1; this.aiPhase = 0; this.wanderPhase = Math.random() * Math.PI * 2;
+                this.shootCooldown = 60 + Math.random() * 120; this.avoidSide = this.x < 300 ? -1 : 1; this.aiPhase = 0; 
             }
-            update() {
+            update(dt) {
                 if (isPaused || isDeathAnimation) return;
-                if (this.hitCooldown > 0) this.hitCooldown--;
-                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) window.endGameUI('gem'); } return; }
-                if (this.type === "samurai") { if (this.pauseTimer > 0) { this.pauseTimer--; return; } this.moveTimer--; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; } }
-                if (this.type === "jumper") { if (this.isJumping) { this.jumpTimer++; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8; if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; } } else if (this.jumpCooldown > 0) this.jumpCooldown--; else if (Math.sqrt((this.x - 300)**2 + (this.y - 450)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
-                
+                if (this.hitCooldown > 0) this.hitCooldown -= dt;
+                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5 * dt; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) window.endGameUI('gem'); } return; }
+                if (this.type === "samurai") { if (this.pauseTimer > 0) { this.pauseTimer -= dt; return; } this.moveTimer -= dt; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; } }
+                if (this.type === "jumper") { if (this.isJumping) { this.jumpTimer += dt; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8; if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; } } else if (this.jumpCooldown > 0) this.jumpCooldown -= dt; else if (Math.sqrt((this.x - 300)**2 + (this.y - 450)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
                 let targetX = gemPos.x, targetY = gemPos.y;
                 if (this.aiPhase === 0) { targetX = this.avoidSide === -1 ? 50 : 550; targetY = 300; if (this.y > 280) this.aiPhase = 1; }
                 else if (this.aiPhase === 1) { targetX = this.avoidSide === -1 ? 180 : 420; targetY = 480; if (this.y > 450) this.aiPhase = 2; }
-                
                 let dx = targetX - this.x, dy = targetY - this.y, targetAng = Math.atan2(dy, dx);
                 if (this.aiPhase < 2 && Math.abs(this.y - 300) < 150) { const dX = Math.abs(this.x - 300); if (dX < 200) targetAng += this.avoidSide * 1.5 * (1 - dX / 200); }
-                
                 let currentSpeed = this.isJumping ? this.speed * 2.5 : this.speed;
                 if (obstacles.some(obs => obs.isShadowed(this.x, this.y))) { currentSpeed *= 0.4; }
-
-                let ang = targetAng + Math.sin(this.wanderPhase += 0.03) * 0.2;
-                let nx = this.x + Math.cos(ang) * currentSpeed;
-                let ny = this.y + Math.sin(ang) * currentSpeed;
-
+                this.wanderPhase += this.wanderSpeed * dt;
+                let ang = targetAng + Math.sin(this.wanderPhase) * this.wanderAmplitude;
+                let nx = this.x + Math.cos(ang) * currentSpeed * dt;
+                let ny = this.y + Math.sin(ang) * currentSpeed * dt;
                 obstacles.forEach(obs => {
                     if (obs.collides(nx, ny, 8)) {
                         const pushDir = Math.atan2(ny - obs.y, nx - obs.x);
@@ -723,10 +723,9 @@
                         ny = obs.y + Math.sin(pushDir) * (obs.radius + 10);
                     }
                 });
-
                 this.x = nx; this.y = ny;
                 const shape = arenaShapes[currentLevel]; if (!shape.isInside(this.x, this.y)) { const dXC = this.x - 300, dYC = this.y - 300, dist = Math.sqrt(dXC**2 + dYC**2); this.x = 300 + dXC * ((dist - 10) / dist); this.y = 300 + dYC * ((dist - 10) / dist); }
-                if (--this.shootCooldown <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
+                if ((this.shootCooldown -= dt) <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
                 if (Math.sqrt((this.x - gemPos.x)**2 + (this.y - gemPos.y)**2) < 25) window.triggerEscape(this);
             }
             draw() { 
@@ -739,7 +738,7 @@
                         ctx.fillStyle = '#889'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
                         const sw = hs * 1.0, sh = this.size * this.scale * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
                         ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); 
-                        ctx.quadraticCurveTo(sx + sw, sy + sh, sx + sw/2, sy + sh); 
+                        ctx.quadraticCurveTo(sx + sw, sy + sh * 0.85, sx + sw/2, sy + sh); 
                         ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); 
                         ctx.closePath(); ctx.fill(); ctx.stroke();
                     }
@@ -755,9 +754,9 @@
 
         class Arrow { 
             constructor(x, y, type) { this.x = x; this.y = y; this.type = type; let dx = 300 - x, dy = 450 - y, dist = Math.sqrt(dx**2 + dy**2); this.vx = (dx/dist) * 3; this.vy = (dy/dist) * 3; this.active = true; } 
-            update() { 
+            update(dt) { 
                 if (!isPaused) { 
-                    this.x += this.vx; this.y += this.vy; 
+                    this.x += this.vx * dt; this.y += this.vy * dt; 
                     if (this.y > CANVAS_SIZE || this.y < 0) this.active = false; 
                     obstacles.forEach(obs => { if (obs.collides(this.x, this.y)) this.active = false; });
                 } 
@@ -774,28 +773,34 @@
                 this.type = type;
                 this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0; 
             } 
-            update() { if (!isPaused) this.life--; } 
+            update(dt) { if (!isPaused) this.life -= dt; } 
             draw() { 
                 ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; 
-                if (this.type === 'heart') {
-                    ctx.fillStyle = '#f00'; ctx.fillText('❤', this.x - 10, this.y + 10); 
-                } else {
-                    ctx.fillStyle = '#f80'; ctx.fillText('🔥', this.x - 10, this.y + 10);
-                }
+                if (this.type === 'heart') { ctx.fillStyle = '#f00'; ctx.fillText('❤', this.x - 10, this.y + 10); } 
+                else { ctx.fillStyle = '#f80'; ctx.fillText('🔥', this.x - 10, this.y + 10); }
             } 
         }
 
-        function spawnThief() { if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnThiefTimeout = setTimeout(spawnThief, 100); return; } let dice = Math.random(), elapsed = LEVEL_TIME - currentTime; if (elapsed >= 60 && dice < 0.25) thieves.push(new Thief("jumper")); else if (elapsed >= 30 && dice < 0.35) thieves.push(new Thief("samurai")); else thieves.push(new Thief("ninja")); spawnThiefTimeout = setTimeout(spawnThief, Math.max(550, 1400 - (elapsed * 9) - (currentLevel * 60))); }
-        
+        function spawnThief() { 
+            if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnThiefTimeout = setTimeout(spawnThief, 100); return; } 
+            const maxDensity = 8 + (currentLevel * 2);
+            if (thieves.length < maxDensity) {
+                let dice = Math.random(), elapsed = LEVEL_TIME - currentTime; 
+                if (elapsed >= 60 && dice < 0.25) thieves.push(new Thief("jumper")); 
+                else if (elapsed >= 30 && dice < 0.35) thieves.push(new Thief("samurai")); 
+                else thieves.push(new Thief("ninja")); 
+            }
+            let elapsed = LEVEL_TIME - currentTime;
+            spawnThiefTimeout = setTimeout(spawnThief, Math.max(600, 1500 - (elapsed * 8) - (currentLevel * 50))); 
+        }
+
         function spawnItem() { 
             if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnItemTimeout = setTimeout(spawnItem, 100); return; } 
             let elapsed = LEVEL_TIME - currentTime;
-            if (elapsed > 45 && Math.random() > 0.8) {
-                items.push(new Item('fireball'));
-            } else if(Math.random() > 0.6) {
-                items.push(new Item('heart')); 
-            }
-            spawnItemTimeout = setTimeout(spawnItem, Math.max(6000, 15000 - (elapsed * 40))); 
+            let heartChance = health < 40 ? 0.85 : 0.55;
+            if (elapsed > 45 && Math.random() > 0.8) items.push(new Item('fireball'));
+            else if(Math.random() > (1 - heartChance)) items.push(new Item('heart')); 
+            spawnItemTimeout = setTimeout(spawnItem, Math.max(5000, 12000 - (elapsed * 45))); 
         }
 
         function getSnarkyMessage(s) {
@@ -806,24 +811,23 @@
             return "STOP ALREADY. YOU'RE INSATIABLE.";
         }
 
-        function update() {
+        function update(dt) {
             if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
             if (gameActive && !isPaused) { 
                 currentTime = LEVEL_TIME - Math.floor((Date.now() - startTime - pauseTimeOffset) / 1000); 
                 if (currentTime <= 0) { currentTime = 0; window.triggerLevelClear(); } 
-                if (fireballPowerTimer > 0) fireballPowerTimer--;
+                if (fireballPowerTimer > 0) fireballPowerTimer -= dt;
             }
-            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + 0.003 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03); }
-            visualReachScale += ((poisonTimer > 0 ? 0.75 : 1.0) - visualReachScale) * 0.05;
-            if(poisonTimer > 0 && !isPaused) poisonTimer--;
+            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + (0.008 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03) * dt); }
+            visualReachScale += ((poisonTimer > 0 ? 0.75 : 1.0) - visualReachScale) * 0.05 * dt;
+            if(poisonTimer > 0 && !isPaused) poisonTimer -= dt;
             let tx = isDeathAnimation ? 300 : mouseX, ty = isDeathAnimation ? 570 : mouseY;
-            if (isDeathAnimation && ++deathTimer > 100) window.endGameUI('health');
-            leftTentacle.update(tx, ty); rightTentacle.update(tx, ty);
-            thieves.forEach(t => t.update()); arrows.forEach(a => a.update()); arrows = arrows.filter(a => a.active); 
-            items.forEach(it => it.update()); items = items.filter(it => it.life > 0);
-            fireballs.forEach(fb => fb.update()); fireballs = fireballs.filter(fb => fb.active);
-            particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; }); 
-            particles = particles.filter(p => p.life > 0);
+            if (isDeathAnimation && (deathTimer += dt) > 100) window.endGameUI('health');
+            leftTentacle.update(tx, ty, dt); rightTentacle.update(tx, ty, dt);
+            thieves.forEach(t => t.update(dt)); arrows.forEach(a => a.update(dt)); arrows = arrows.filter(a => a.active); 
+            items.forEach(it => it.update(dt)); items = items.filter(it => it.life > 0);
+            fireballs.forEach(fb => fb.update(dt)); fireballs = fireballs.filter(fb => fb.active);
+            particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }); particles = particles.filter(p => p.life > 0);
             handleCollisions();
             scoreVal.innerText = score; timeVal.innerText = currentTime + 's'; levelValHUD.innerText = currentLevel;
             healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
@@ -832,14 +836,13 @@
 
         function draw() {
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); const shape = arenaShapes[currentLevel];
-            ctx.save(); ctx.translate(300, 450); ctx.rotate(arenaRotation); ctx.translate(-300, -450);
+            ctx.save(); 
+            ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
             shape.draw(); ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke(); ctx.clip();
             ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)';
             for(let i=0; i<=CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
             if(gameActive || isEndingAnimation) { 
-                ctx.fillStyle = '#0cf';
-                ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill();
-                // Subtler gem glow
+                ctx.fillStyle = '#0cf'; ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill();
                 ctx.beginPath(); ctx.arc(300, gemPos.y, 20, 0, Math.PI*2); ctx.fillStyle = 'rgba(0, 200, 255, 0.15)'; ctx.fill();
             }
             ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080'); ctx.beginPath(); ctx.arc(300, 450, 25, 0, Math.PI*2); ctx.fill();
@@ -856,16 +859,16 @@
             }
             obstacles.forEach(obs => obs.draw());
             leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw()); fireballs.forEach(fb => fb.draw());
-            
-            particles.forEach(p => { 
-                ctx.globalAlpha = p.life / 25;
-                ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); 
-            }); 
-            ctx.globalAlpha = 1.0;
+            particles.forEach(p => { ctx.globalAlpha = p.life / 25; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); }); ctx.globalAlpha = 1.0;
             ctx.restore();
         }
 
-        function gameLoop() { update(); draw(); if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestID = requestAnimationFrame(gameLoop); }
+        function gameLoop(timestamp) { 
+            const dt = lastTimestamp ? (timestamp - lastTimestamp) / 16.66 : 1;
+            lastTimestamp = timestamp;
+            update(dt); draw(); 
+            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestID = requestAnimationFrame(gameLoop); 
+        }
 
         function handleCollisions() {
             if (isGameOver || isPaused) return;
@@ -912,12 +915,8 @@
                 });
                 items.forEach((it, i) => { 
                     if(Math.sqrt((seg.x-it.x)**2+(seg.y-it.y)**2) < 20) { 
-                        if (it.type === 'heart') {
-                            AudioFX.heal(); health = Math.min(100, health+25); poisonTimer = 0; 
-                        } else {
-                            AudioFX.levelUp(); 
-                            fireballPowerTimer = 600; 
-                        }
+                        if (it.type === 'heart') { AudioFX.heal(); health = Math.min(100, health+25); poisonTimer = 0; } 
+                        else { AudioFX.levelUp(); fireballPowerTimer = 600; }
                         items.splice(i, 1); 
                     } 
                 });
@@ -935,28 +934,36 @@
         window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
         window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
         window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
-        window.checkHighScoreFlow = (source) => { 
-            if (score > 0) { 
-                gameOverScreen.classList.add('hidden'); 
-                levelClearScreen.classList.add('hidden'); 
-                submitScoreScreen.classList.remove('hidden'); 
-                document.getElementById('submitMessage').innerText = getSnarkyMessage(score);
-                document.getElementById('submitScoreVal').innerText = score; 
-                initialsInput.focus(); 
-            } else window.backToMain(); 
-        };
+        window.checkHighScoreFlow = (source) => { if (score > 0) { gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitMessage').innerText = getSnarkyMessage(score); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); } else window.backToMain(); };
         window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
         window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
         window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
         window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; };
         window.resetGameParams = (fullReset) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
-            if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0;
+            if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
             obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
         };
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
-        function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 450; }
-        function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius, tx = 300 + nx * 300, ty = 450 + ny * 300, rdx = tx - 300, rdy = ty - 450, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 450; }
+        function handleInput(cX, cY) { 
+            if (!gameActive || isPaused) return; 
+            const r = canvas.getBoundingClientRect(); 
+            let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); 
+            // FIXED: Pivot coordinates around arena center (300, 300)
+            const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); 
+            mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; 
+        }
+        function updateJoystick(touchX, touchY) { 
+            const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; 
+            let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); 
+            if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } 
+            joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; 
+            const nx = dx / maxRadius, ny = dy / maxRadius;
+            // FIXED: Pivot joystick calculation around arena center
+            const tx = 300 + nx * 300, ty = 300 + ny * 300;
+            const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); 
+            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; 
+        }
         window.onload = () => {
             gameContainer.classList.add('visible');
             setTimeout(() => {
@@ -969,11 +976,11 @@
                 }, 50);
             }, 2500);
         };
-        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); joystickActive = true; updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
-        joyBase.addEventListener('touchmove', (e) => { if (joystickActive) { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); } }, { passive: false });
-        window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; joystickActive = false; });
+        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+        joyBase.addEventListener('touchmove', (e) => { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); }, { passive: false });
+        window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; });
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-        canvas.addEventListener('touchmove', (e) => { if (!joystickActive) { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); } }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
     </script>
 </body>
 </html>
