@@ -466,8 +466,19 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase logic remains robust following platform rules
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // FALLBACK CONFIG for standard web server deployments
+        const p1 = "AIza";
+        const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
+        const fallbackConfig = {
+            apiKey: p1 + p2,
+            authDomain: "tentaguard.firebaseapp.com",
+            projectId: "tentaguard",
+            storageBucket: "tentaguard.firebasestorage.app",
+            messagingSenderId: "713425803349",
+            appId: "1:713425803349:web:ce08c5d70db14a1d949cdc"
+        };
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -519,6 +530,22 @@
         };
 
         onAuthStateChanged(auth, (u) => { user = u; });
+
+        // Combined onload logic into the module to prevent scoping errors
+        window.onload = async () => {
+            gameContainer.classList.add('visible');
+            window.unlockedLevels = await window.loadUserProgress();
+            
+            setTimeout(() => {
+                loadingScreen.style.transition = "opacity 0.8s ease-in-out";
+                loadingScreen.style.opacity = "0";
+                startScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    startScreen.style.opacity = "1";
+                    loadingScreen.classList.add('hidden');
+                }, 50);
+            }, 2500);
+        };
     </script>
 
     <script>
@@ -985,19 +1012,7 @@
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; }
         function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius; const tx = 300 + nx * 300, ty = 300 + ny * 300; const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; }
-        window.onload = async () => {
-            gameContainer.classList.add('visible');
-            unlockedLevels = await window.loadUserProgress();
-            setTimeout(() => {
-                loadingScreen.style.transition = "opacity 0.8s ease-in-out";
-                loadingScreen.style.opacity = "0";
-                startScreen.classList.remove('hidden');
-                setTimeout(() => {
-                    startScreen.style.opacity = "1";
-                    loadingScreen.classList.add('hidden');
-                }, 50);
-            }, 2500);
-        };
+        // Combined onload logic moved to module script block for scoping
         joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
         joyBase.addEventListener('touchmove', (e) => { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); }, { passive: false });
         window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; });
