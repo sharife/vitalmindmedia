@@ -466,76 +466,106 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // FALLBACK CONFIG for standard web server deployments
-        const p1 = "AIza";
-        const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
-        const fallbackConfig = {
-            apiKey: p1 + p2,
+        // Firebase Initialization
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIza" + "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk",
             authDomain: "tentaguard.firebaseapp.com",
             projectId: "tentaguard",
             storageBucket: "tentaguard.firebasestorage.app",
             messagingSenderId: "713425803349",
             appId: "1:713425803349:web:ce08c5d70db14a1d949cdc"
         };
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
-        let user = null;
+        let currentUser = null;
 
+        // Ensure Auth is ready before any Firestore operations
         const initAuth = async () => {
-            if (user) return user;
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
-            } else {
-                user = (await signInAnonymously(auth)).user;
+            if (currentUser) return currentUser;
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const result = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = result.user;
+                } else {
+                    const result = await signInAnonymously(auth);
+                    currentUser = result.user;
+                }
+            } catch (err) {
+                console.error("Auth error:", err);
             }
-            return user;
+            return currentUser;
         };
 
         window.saveUserProgress = async (lvl) => {
             const u = await initAuth();
             if (!u) return;
-            const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
-            await setDoc(docRef, { unlockedLevels: lvl }, { merge: true });
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
+                await setDoc(docRef, { unlockedLevels: lvl }, { merge: true });
+            } catch (err) {
+                console.error("Save progress error:", err);
+            }
         };
 
         window.loadUserProgress = async () => {
             const u = await initAuth();
             if (!u) return 1;
-            const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
-            const snap = await getDoc(docRef);
-            return snap.exists() ? snap.data().unlockedLevels : 1;
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
+                const snap = await getDoc(docRef);
+                return snap.exists() ? snap.data().unlockedLevels : 1;
+            } catch (err) {
+                console.error("Load progress error:", err);
+                return 1;
+            }
         };
 
         window.saveHighScore = async (name, score, level) => {
             const u = await initAuth();
             if (!u) return;
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now() });
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now(), uid: u.uid });
+            } catch (err) {
+                console.error("Save highscore error:", err);
+            }
         };
 
         window.fetchLeaderboard = async (targetLevel) => {
             const u = await initAuth();
             if (!u) return [];
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
-            const snapshot = await getDocs(colRef);
-            return snapshot.docs
-                .map(doc => doc.data())
-                .filter(entry => entry.level === targetLevel)
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 50);
+            try {
+                const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                const snapshot = await getDocs(colRef);
+                return snapshot.docs
+                    .map(doc => doc.data())
+                    .filter(entry => entry.level === targetLevel)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 50);
+            } catch (err) {
+                console.error("Fetch leaderboard error:", err);
+                return [];
+            }
         };
 
-        onAuthStateChanged(auth, (u) => { user = u; });
+        onAuthStateChanged(auth, (u) => { currentUser = u; });
 
-        // Combined onload logic into the module to prevent scoping errors
+        // Preloader & Initialization Sequence
         window.onload = async () => {
             gameContainer.classList.add('visible');
-            window.unlockedLevels = await window.loadUserProgress();
             
+            // Wait for auth and progress before hiding loader
+            try {
+                await initAuth();
+                window.unlockedLevels = await window.loadUserProgress();
+            } catch (e) {
+                console.error("Initialization failed:", e);
+                window.unlockedLevels = 1;
+            }
+            
+            // Transition from loading screen
             setTimeout(() => {
                 loadingScreen.style.transition = "opacity 0.8s ease-in-out";
                 loadingScreen.style.opacity = "0";
@@ -544,11 +574,12 @@
                     startScreen.style.opacity = "1";
                     loadingScreen.classList.add('hidden');
                 }, 50);
-            }, 2500);
+            }, 2000);
         };
     </script>
 
     <script>
+        // UI and Canvas Setup
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
         const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal'), levelValHUD = document.getElementById('levelValHUD');
         const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
@@ -1003,16 +1034,17 @@
         window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; gameActive = false; isPaused = false; timeVal.classList.remove('timer-warning'); };
         window.resetGameParams = (fullReset) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
-            if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
+            if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
             mouseX = 300; mouseY = 300; 
             leftTentacle.reset(); rightTentacle.reset();
             timeVal.classList.remove('timer-warning');
             obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
         };
+
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; }
         function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius; const tx = 300 + nx * 300, ty = 300 + ny * 300; const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; }
-        // Combined onload logic moved to module script block for scoping
+
         joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
         joyBase.addEventListener('touchmove', (e) => { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); }, { passive: false });
         window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; });
