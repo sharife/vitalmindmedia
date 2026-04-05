@@ -488,14 +488,12 @@
 
             authPromise = (async () => {
                 try {
-                    // Start sign in process
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
                         await signInAnonymously(auth);
                     }
                     
-                    // Critical: Wait for onAuthStateChanged to fire, confirming internal SDK state is ready
                     return new Promise((resolve) => {
                         const unsubscribe = onAuthStateChanged(auth, (user) => {
                             if (user) {
@@ -503,7 +501,6 @@
                                 resolve(user);
                             }
                         });
-                        // Fail-safe timeout
                         setTimeout(() => resolve(auth.currentUser), 1500);
                     });
                 } catch (err) {
@@ -519,7 +516,6 @@
             const u = await initAuth();
             if (!u) return;
             try {
-                // RULE 1: artifacts/{appId}/users/{userId}/{collectionName}
                 const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
                 await setDoc(docRef, { unlockedLevels: lvl }, { merge: true });
             } catch (err) {
@@ -531,7 +527,6 @@
             const u = await initAuth();
             if (!u) return 1;
 
-            // Internal retry for initial startup permissions race
             const fetchProgress = async (retries = 2) => {
                 try {
                     const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
@@ -558,7 +553,6 @@
             const u = await initAuth();
             if (!u) return;
             try {
-                // RULE 1: artifacts/{appId}/public/data/{collectionName}
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                 await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now(), uid: u.uid });
             } catch (err) {
@@ -572,7 +566,6 @@
             try {
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                 const snapshot = await getDocs(colRef);
-                // RULE 2: Filter in JS memory
                 return snapshot.docs
                     .map(doc => doc.data())
                     .filter(entry => entry.level === targetLevel)
@@ -584,11 +577,8 @@
             }
         };
 
-        // Preloader & Initialization Sequence
         window.onload = async () => {
             gameContainer.classList.add('visible');
-            
-            // Wait for auth and progress before hiding loader
             try {
                 await initAuth();
                 window.unlockedLevels = await window.loadUserProgress();
@@ -597,7 +587,6 @@
                 window.unlockedLevels = 1;
             }
             
-            // Transition from loading screen
             setTimeout(() => {
                 loadingScreen.style.transition = "opacity 0.8s ease-in-out";
                 loadingScreen.style.opacity = "0";
@@ -611,7 +600,6 @@
     </script>
 
     <script>
-        // UI and Canvas Setup
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
         const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal'), levelValHUD = document.getElementById('levelValHUD');
         const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
@@ -625,6 +613,11 @@
         const loadingScreen = document.getElementById('loadingScreen');
         const gameContainer = document.getElementById('game-container');
         const joyContainer = document.getElementById('joystick-container'), joyBase = document.getElementById('joystick-base'), joyKnob = document.getElementById('joystick-knob');
+
+        // Optimization: Cache joystick dimensions to avoid getBoundingClientRect reflows
+        let joyRect = null;
+        function updateJoyRect() { if (joyBase) joyRect = joyBase.getBoundingClientRect(); }
+        window.addEventListener('resize', updateJoyRect);
 
         const AudioFX = {
             ctx: null,
@@ -654,7 +647,7 @@
 
         const LEVEL_TIME = 100;
         let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false; 
-        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, unlockedLevels = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
+        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
         let arenaRotation = 0, visualReachScale = 1.0, requestID = null, spawnThiefTimeout = null, spawnItemTimeout = null;
         let fireballPowerTimer = 0, lastTimestamp = 0;
 
@@ -937,7 +930,10 @@
                 if (currentTime <= 0) { currentTime = 0; window.triggerLevelClear(); } 
                 if (fireballPowerTimer > 0) fireballPowerTimer -= dt;
             }
-            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + (0.008 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03) * dt); }
+            // dt-based rotation to ensure it looks consistent regardless of FPS
+            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { 
+                arenaRotation = Math.min(3 * Math.PI, arenaRotation + (0.008 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03) * dt); 
+            }
             visualReachScale += ((poisonTimer > 0 ? 0.75 : 1.0) - visualReachScale) * 0.05 * dt;
             if(poisonTimer > 0 && !isPaused) poisonTimer -= dt;
             let tx = isDeathAnimation ? 300 : mouseX, ty = isDeathAnimation ? 570 : mouseY;
@@ -984,12 +980,15 @@
             }
             obstacles.forEach(obs => obs.draw());
             leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw()); fireballs.forEach(fb => fb.draw());
+            
+            // Optimization: Simple batching check for particles would be complex, but we can ensure life is managed efficiently
             particles.forEach(p => { ctx.globalAlpha = p.life / 25; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); }); ctx.globalAlpha = 1.0;
             ctx.restore();
         }
 
         function gameLoop(timestamp) { 
-            const dt = lastTimestamp ? Math.min(2.0, (timestamp - lastTimestamp) / 16.66) : 1;
+            // framerate independence fix: increase the dt cap to 5.0 to handle extreme mobile frame drops
+            const dt = lastTimestamp ? Math.min(5.0, (timestamp - lastTimestamp) / 16.66) : 1;
             lastTimestamp = timestamp;
             update(dt); draw(); 
             if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestID = requestAnimationFrame(gameLoop); 
@@ -1052,7 +1051,7 @@
         window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) { unlockedLevels++; window.saveUserProgress(unlockedLevels); } document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); document.getElementById('clearScoreVal').innerText = score; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
         window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); gameLoop(); };
         window.showLevelMenu = () => { AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
-        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
+        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); updateJoyRect(); gameLoop(); };
         window.resetGame = () => { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); window.startGameAtLevel(1); };
         window.restartFromPause = () => { AudioFX.beep(); pauseScreen.classList.add('hidden'); window.resetGame(); };
         window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); } else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); } };
@@ -1075,9 +1074,20 @@
 
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; }
-        function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius; const tx = 300 + nx * 300, ty = 300 + ny * 300; const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; }
+        
+        // Optimized updateJoystick using cached rect
+        function updateJoystick(touchX, touchY) { 
+            if (!joyRect) updateJoyRect();
+            const centerX = joyRect.left + joyRect.width / 2, centerY = joyRect.top + joyRect.height / 2, maxRadius = joyRect.width / 2; 
+            let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); 
+            if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } 
+            joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; 
+            const nx = dx / maxRadius, ny = dy / maxRadius; const tx = 300 + nx * 300, ty = 300 + ny * 300; 
+            const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); 
+            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; 
+        }
 
-        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoyRect(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
         joyBase.addEventListener('touchmove', (e) => { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); }, { passive: false });
         window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; });
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
