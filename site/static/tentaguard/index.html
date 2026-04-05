@@ -479,23 +479,31 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
-        let currentUser = null;
+        
+        let authPromise = null;
 
-        // Ensure Auth is ready before any Firestore operations
+        // Optimized Auth initialization to prevent concurrent requests and race conditions
         const initAuth = async () => {
-            if (currentUser) return currentUser;
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    const result = await signInWithCustomToken(auth, __initial_auth_token);
-                    currentUser = result.user;
-                } else {
-                    const result = await signInAnonymously(auth);
-                    currentUser = result.user;
+            if (auth.currentUser) return auth.currentUser;
+            if (authPromise) return await authPromise;
+
+            authPromise = (async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    // Wait a tiny tick for Firestore to recognize the token
+                    await new Promise(r => setTimeout(r, 50));
+                    return auth.currentUser;
+                } catch (err) {
+                    console.error("Auth error:", err);
+                    return null;
                 }
-            } catch (err) {
-                console.error("Auth error:", err);
-            }
-            return currentUser;
+            })();
+
+            return await authPromise;
         };
 
         window.saveUserProgress = async (lvl) => {
@@ -550,7 +558,9 @@
             }
         };
 
-        onAuthStateChanged(auth, (u) => { currentUser = u; });
+        onAuthStateChanged(auth, (u) => { 
+            // Optional: Handle state change globally if needed
+        });
 
         // Preloader & Initialization Sequence
         window.onload = async () => {
@@ -558,8 +568,12 @@
             
             // Wait for auth and progress before hiding loader
             try {
-                await initAuth();
-                window.unlockedLevels = await window.loadUserProgress();
+                const user = await initAuth();
+                if (user) {
+                    window.unlockedLevels = await window.loadUserProgress();
+                } else {
+                    window.unlockedLevels = 1;
+                }
             } catch (e) {
                 console.error("Initialization failed:", e);
                 window.unlockedLevels = 1;
