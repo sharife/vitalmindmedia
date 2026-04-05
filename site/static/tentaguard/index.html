@@ -35,7 +35,9 @@
             transition: opacity 1.5s ease-in;
         }
 
-        #game-container.visible { opacity: 1; }
+        #game-container.visible {
+            opacity: 1;
+        }
 
         canvas {
             display: block;
@@ -80,7 +82,9 @@
             50% { color: #0f0; text-shadow: 0 0 10px #0f0; }
         }
 
-        .timer-warning { animation: timerFlash 0.5s infinite; }
+        .timer-warning {
+            animation: timerFlash 0.5s infinite;
+        }
 
         .health-group {
             display: flex;
@@ -136,10 +140,14 @@
             z-index: 20;
             pointer-events: auto;
             box-sizing: border-box;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 1s ease-in-out;
         }
 
-        #loadingScreen { z-index: 100; background: #000; opacity: 1; }
+        #loadingScreen {
+            z-index: 100;
+            background: #000;
+            opacity: 1;
+        }
 
         .loader-bar {
             width: 200px;
@@ -179,8 +187,9 @@
         }
 
         .btn:active { transform: scale(0.95); }
-        .btn-restart { background: black; color: #fff; border: solid 2px #444; }
-        .btn-secondary { background: #444; color: #fff; }
+        .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .btn-restart { background: black; color: #fff; font-size: clamp(16px, 4vw, 22px); border: solid 2px #444; }
+        .btn-secondary { background: #444; color: #fff; font-size: clamp(16px, 4vw, 22px); }
 
         .level-grid {
             display: grid;
@@ -202,11 +211,13 @@
         .level-card.unlocked:hover { background: #030; }
         .level-card.locked { opacity: 0.5; cursor: not-allowed; border-style: dashed; }
         .level-card h3 { margin: 0 0 5px 0; color: #0f0; }
+        .level-card.locked h3 { color: #666; }
 
         .leaderboard-tabs {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
+            width: 100%;
             justify-content: center;
         }
 
@@ -216,29 +227,21 @@
             color: #aaa;
             padding: 5px 10px;
             font-family: 'Jersey 20', serif;
+            font-size: 18px;
             cursor: pointer;
         }
-        .tab-btn.active { background: #0f0; color: #000; border-color: #0f0; }
+        .tab-btn.active {
+            background: #0f0;
+            color: #000;
+            border-color: #0f0;
+        }
 
-        .leaderboard-list { width: 100%; max-width: 400px; font-size: 24px; border-collapse: collapse; }
+        .leaderboard-list { width: 100%; max-width: 400px; margin-top: 5px; font-size: 24px; border-collapse: collapse; }
         .leaderboard-list tr { border-bottom: 1px solid #333; }
         .leaderboard-list td { padding: 8px 5px; }
         .rank-col { color: #0f0; width: 50px; text-align: left; }
         .name-col { text-align: left; }
         .score-col { text-align: right; color: #f80; }
-
-        .input-name {
-            background: #111;
-            border: 2px solid #0f0;
-            color: #0f0;
-            font-family: 'Jersey 20', serif;
-            font-size: 48px;
-            width: 140px;
-            text-align: center;
-            text-transform: uppercase;
-            outline: none;
-            margin-bottom: 20px;
-        }
 
         #crt-effect {
             position: absolute;
@@ -259,9 +262,39 @@
             height: 12px;
             background: #333;
             border: 2px solid #fff;
+            margin-bottom: 5px;
         }
 
-        .health-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.3s; }
+        .health-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.3s, background-color 0.3s; }
+
+        .poison-indicator { color: #a0f; font-size: clamp(12px, 3vw, 18px); font-weight: bold; text-shadow: 1px 1px #000; }
+
+        @keyframes titleColorCycle {
+            0%, 100% { color: #4ade80; text-shadow: 0 0 15px rgba(74, 222, 128, 0.5); }
+            50% { color: #a0f; text-shadow: 0 0 15px rgba(160, 0, 255, 0.5); }
+        }
+
+        .title { 
+            font-size: clamp(2.5rem, 10vw, 4.5rem); 
+            margin: 0 0 15px 0; 
+            line-height: 0.95; 
+            letter-spacing: 2px;
+            animation: titleColorCycle 4s ease-in-out infinite;
+        }
+
+        .input-name {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Jersey 20', serif;
+            font-size: 48px;
+            width: 140px;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
 
         .joystick-container {
             position: fixed;
@@ -282,6 +315,9 @@
             border: 2px solid rgba(0, 255, 0, 0.3);
             border-radius: 50%;
             position: relative;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.1), inset 0 0 10px rgba(0, 255, 0, 0.05);
+            backdrop-filter: blur(2px);
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .joystick-knob {
@@ -295,9 +331,24 @@
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+            transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
 
-        @media (pointer: coarse) { .joystick-container { display: block; } }
+        @media (pointer: coarse) {
+            .joystick-container { display: block; }
+        }
+
+        @media (max-height: 550px) {
+            .title { font-size: 2.2rem; }
+            .mb-8 { margin-bottom: 0.5rem; }
+            p { font-size: 14px; }
+            .btn { padding: 8px 20px; }
+            .joystick-container { bottom: 10px; width: 80px; height: 80px; }
+            .level-grid { margin-top: 5px; gap: 8px; }
+            .level-card { padding: 5px; }
+            .input-name { font-size: 32px; width: 100px; }
+        }
     </style>
 </head>
 <body>
@@ -312,13 +363,15 @@
                     <div>SCORE: <span id="scoreVal">0</span></div>
                     <div>TIME: <span id="timeVal">100s</span></div>
                 </div>
+
                 <div class="health-group">
                     <div id="healthBarContainer" class="health-bar-container">
                         <div id="healthBar" class="health-bar"></div>
                     </div>
-                    <div id="poisonStatus" class="poison-indicator hidden" style="color: #a0f;">POISONED!</div>
+                    <div id="poisonStatus" class="poison-indicator hidden">POISONED!</div>
                 </div>
             </div>
+            
             <div class="bottom-ui">
                 <button id="pauseBtn" class="pause-btn hidden" onclick="window.togglePause()">PAUSE</button>
                 <div id="levelDisplayHUD" class="level-indicator hidden">LEVEL: <span id="levelValHUD">1</span></div>
@@ -326,9 +379,9 @@
         </div>
 
         <div id="loadingScreen" class="screen">
-            <div>
-                <h2 style="letter-spacing: 2px; color: #4ade80;">VITAL MIND MEDIA</h2>
-                <p style="color: #666;">PRESENTS</p>
+            <div style="text-align: center;">
+                <h2 style="letter-spacing: 1px; color: #4ade80; font-size: 1.5rem; margin-bottom: 10px;">VITAL MIND MEDIA</h2>
+                <p style="font-size: 1rem; color: #666; margin-top: -10px;">PRESENTS</p>
                 <div class="loader-bar" style="margin: 20px auto;">
                     <div class="loader-progress"></div>
                 </div>
@@ -337,14 +390,14 @@
 
         <div id="startScreen" class="screen hidden" style="opacity: 0;">
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
-            <p style="margin-bottom: 1.2rem; font-size:1.5rem;">
+            <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.5rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
                 LAST 100s TO CLEAR EACH LEVEL.
             </p>
             <button class="btn" onclick="window.startGameAtLevel(1)">START GAME</button>
             <button class="btn btn-secondary" onclick="window.showLevelMenu()">LEVELS</button>
             <button class="btn btn-secondary" onclick="window.showLeaderboard()">LEADERBOARD</button>
-            <p style="margin-top: auto; font-size: 0.9rem;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA</p>
+            <p style="margin-bottom: 0.5rem; font-size:0.9rem; margin-top: auto;">COPYRIGHT &copy; 2026 VITAL MIND MEDIA</p>
         </div>
 
         <div id="levelMenuScreen" class="screen hidden">
@@ -354,7 +407,7 @@
         </div>
 
         <div id="pauseScreen" class="screen hidden">
-            <h2 class="mb-4">GAME PAUSED</h2>
+            <h2 class="text-white mb-4">GAME PAUSED</h2>
             <button class="btn" onclick="window.togglePause()">RESUME</button>
             <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
             <button class="btn btn-secondary" onclick="window.backToMain()">MAIN MENU</button>
@@ -362,10 +415,10 @@
 
         <div id="submitScoreScreen" class="screen hidden">
             <h1 id="submitMessage" class="title" style="font-size:2rem;">NEW RECORD!</h1>
-            <p class="mb-4">SCORE: <span id="submitScoreVal">0</span></p>
+            <p class="mb-4" style="font-size:1.5rem;">SCORE: <span id="submitScoreVal">0</span></p>
             <input type="text" id="initialsInput" class="input-name" maxlength="3" placeholder="AAA">
             <button class="btn" onclick="window.submitScore()">SAVE SCORE</button>
-            <button class="btn btn-restart" onclick="window.backToMain()">MAIN MENU</button>
+            <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
         </div>
 
         <div id="leaderboardScreen" class="screen hidden">
@@ -376,13 +429,16 @@
                 <button class="tab-btn" onclick="window.changeLeaderboardTab(3)">LVL 3</button>
                 <button class="tab-btn" onclick="window.changeLeaderboardTab(4)">LVL 4</button>
             </div>
-            <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;"></div>
+            <div id="leaderboardContent" style="width: 100%; display: flex; justify-content: center; overflow-y: auto; max-height: 60vh;">
+                <p class="loading-text">FETCHING DATA...</p>
+            </div>
             <button class="btn" style="margin-top: 20px;" onclick="window.backToMain()">MAIN MENU</button>
         </div>
 
         <div id="levelClearScreen" class="screen hidden">
             <h1 class="title">LEVEL CLEAR!</h1>
-            <h2 style="font-size: 2rem; color: #f80;">SCORE: <span id="clearScoreVal">0</span></h2>
+            <h2 style="font-size: 2rem; color: #f80; margin-bottom: 10px;">SCORE: <span id="clearScoreVal">0</span></h2>
+            <h3 class="mb-4">PREPARE FOR THE NEXT CHALLENGE</h3>
             <button id="nextLevelBtn" class="btn" onclick="window.nextLevel()">CONTINUE</button>
             <button class="btn btn-secondary" onclick="window.checkHighScoreFlow('clear')">SAVE SCORE</button>
             <button class="btn btn-secondary" onclick="window.backToMain()">MAIN MENU</button>
@@ -390,13 +446,15 @@
 
         <div id="gameOverScreen" class="screen hidden">
             <h2 id="gameOverTitle" class="title">GEM STOLEN!</h2>
-            <h2>SCORE: <span id="finalScore">0</span></h2>
-            <button class="btn" onclick="window.startGameAtLevel(window.currentLevel)">RESTART LEVEL</button>
+            <h2 class="mb-2">SCORE: <span id="finalScore">0</span></h2>
+            <h3 class="mb-6" style="margin-bottom: 1.5rem;">LEVEL REACHED: <span id="finalLevel">1</span></h3>
+            <button class="btn" onclick="window.startGameAtLevel(currentLevel)">RESTART LEVEL</button>
             <button class="btn btn-secondary" onclick="window.checkHighScoreFlow('gameover')">SAVE SCORE</button>
             <button class="btn btn-secondary" onclick="window.backToMain()">MAIN MENU</button>
         </div>
     </div>
 
+    <!-- Virtual Joystick -->
     <div id="joystick-container" class="joystick-container">
         <div id="joystick-base" class="joystick-base">
             <div id="joystick-knob" class="joystick-knob"></div>
@@ -408,7 +466,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Config Fallback logic
+        // FALLBACK CONFIG for standard web server deployments
         const p1 = "AIza";
         const p2 = "SyDuC6FpQR4zJ3fYXvm510NObkYV1-STAHk";
         const fallbackConfig = {
@@ -420,38 +478,32 @@
             appId: "1:713425803349:web:ce08c5d70db14a1d949cdc"
         };
 
-        const config = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
-        const app = initializeApp(config);
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : fallbackConfig;
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tentaguard';
         let user = null;
-        let authReadyPromise = null;
 
-        // Rule 3 - Ensure Auth is resolved before Firestore
-        const ensureAuth = () => {
-            if (authReadyPromise) return authReadyPromise;
-            authReadyPromise = (async () => {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                return auth.currentUser;
-            })();
-            return authReadyPromise;
+        const initAuth = async () => {
+            if (user) return user;
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                user = (await signInWithCustomToken(auth, __initial_auth_token)).user;
+            } else {
+                user = (await signInAnonymously(auth)).user;
+            }
+            return user;
         };
 
         window.saveUserProgress = async (lvl) => {
-            const u = await ensureAuth();
+            const u = await initAuth();
             if (!u) return;
-            // Rule 1 - Strict Paths
             const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
             await setDoc(docRef, { unlockedLevels: lvl }, { merge: true });
         };
 
         window.loadUserProgress = async () => {
-            const u = await ensureAuth();
+            const u = await initAuth();
             if (!u) return 1;
             const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
             const snap = await getDoc(docRef);
@@ -459,18 +511,17 @@
         };
 
         window.saveHighScore = async (name, score, level) => {
-            const u = await ensureAuth();
+            const u = await initAuth();
             if (!u) return;
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now() });
         };
 
         window.fetchLeaderboard = async (targetLevel) => {
-            const u = await ensureAuth();
+            const u = await initAuth();
             if (!u) return [];
             const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
             const snapshot = await getDocs(colRef);
-            // Rule 2 - Fetch all, sort in memory
             return snapshot.docs
                 .map(doc => doc.data())
                 .filter(entry => entry.level === targetLevel)
@@ -480,31 +531,37 @@
 
         onAuthStateChanged(auth, (u) => { user = u; });
 
-        window.addEventListener('load', async () => {
-            document.getElementById('game-container').classList.add('visible');
+        // Combined onload logic into the module to prevent scoping errors
+        window.onload = async () => {
+            gameContainer.classList.add('visible');
             window.unlockedLevels = await window.loadUserProgress();
             
             setTimeout(() => {
-                const ls = document.getElementById('loadingScreen');
-                const ss = document.getElementById('startScreen');
-                ls.style.opacity = "0";
-                ss.classList.remove('hidden');
+                loadingScreen.style.transition = "opacity 0.8s ease-in-out";
+                loadingScreen.style.opacity = "0";
+                startScreen.classList.remove('hidden');
                 setTimeout(() => {
-                    ss.style.opacity = "1";
-                    ls.classList.add('hidden');
-                }, 500);
-            }, 2000);
-        });
+                    startScreen.style.opacity = "1";
+                    loadingScreen.classList.add('hidden');
+                }, 50);
+            }, 2500);
+        };
     </script>
 
     <script>
         const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
-        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal');
-        const healthBar = document.getElementById('healthBar'), pauseBtn = document.getElementById('pauseBtn');
+        const scoreVal = document.getElementById('scoreVal'), timeVal = document.getElementById('timeVal'), levelValHUD = document.getElementById('levelValHUD');
+        const healthBar = document.getElementById('healthBar'), poisonStatus = document.getElementById('poisonStatus');
+        const pauseBtn = document.getElementById('pauseBtn'), pauseScreen = document.getElementById('pauseScreen');
         const startScreen = document.getElementById('startScreen'), gameOverScreen = document.getElementById('gameOverScreen');
         const levelClearScreen = document.getElementById('levelClearScreen'), submitScoreScreen = document.getElementById('submitScoreScreen'), leaderboardScreen = document.getElementById('leaderboardScreen');
-        const levelGrid = document.getElementById('levelGrid'), topHUD = document.getElementById('topHUD'), initialsInput = document.getElementById('initialsInput');
-        const joyBase = document.getElementById('joystick-base'), joyKnob = document.getElementById('joystick-knob');
+        const levelMenuScreen = document.getElementById('levelMenuScreen'), levelGrid = document.getElementById('levelGrid');
+        const levelDisplayHUD = document.getElementById('levelDisplayHUD');
+        const topHUD = document.getElementById('topHUD');
+        const initialsInput = document.getElementById('initialsInput');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const gameContainer = document.getElementById('game-container');
+        const joyContainer = document.getElementById('joystick-container'), joyBase = document.getElementById('joystick-base'), joyKnob = document.getElementById('joystick-knob');
 
         const AudioFX = {
             ctx: null,
@@ -522,24 +579,25 @@
             splat() { this.playOsc(150, 'sawtooth', 0.15, 0.15, 40); },
             clink() { this.playOsc(1200, 'triangle', 0.1, 0.1, 800); }, 
             jump() { this.playOsc(300, 'sine', 0.2, 0.1, 600); },
+            whoosh(vol) { this.playOsc(100, 'sine', 0.3, Math.min(0.08, vol * 0.05), 300); },
             hit() { this.playOsc(200, 'triangle', 0.1, 0.15, 50); },
-            heal() { [523, 659, 783, 1046].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
+            heal() { [523.25, 659.25, 783.99, 1046.50].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sine', 0.2, 0.1), i * 60)); },
             powerDown() { [440, 349, 293, 220].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.5), i * 200)); },
-            gemLost() { [440, 311, 261, 207].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); },
-            levelUp() { [440, 554, 659, 880].forEach((n, i) => setTimeout(() => this.playOsc(n, 'square', 0.3, 0.1), i * 100)); },
+            gemLost() { [440, 311.13, 261.63, 207.65].forEach((n, i) => setTimeout(() => this.playOsc(n, 'sawtooth', 0.4, 0.1, n * 0.8), i * 150)); },
+            levelUp() { [440, 554.37, 659.25, 880].forEach((n, i) => setTimeout(() => this.playOsc(n, 'square', 0.3, 0.1), i * 100)); },
             bounce() { this.playOsc(220, 'triangle', 0.1, 0.1, 150); },
             fireball() { this.playOsc(600, 'sawtooth', 0.1, 0.05, 100); }
         };
 
         const LEVEL_TIME = 100;
         let gameActive = false, isPaused = false, isEndingAnimation = false, isDeathAnimation = false, isGameOver = false; 
-        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
+        let score = 0, startTime = 0, pauseTimeOffset = 0, lastPauseTimestamp = 0, currentTime = LEVEL_TIME, currentLevel = 1, unlockedLevels = 1, health = 100, poisonTimer = 0, mouseX = 300, mouseY = 300, winningThief = null, deathTimer = 0;
         let arenaRotation = 0, visualReachScale = 1.0, requestID = null, spawnThiefTimeout = null, spawnItemTimeout = null;
         let fireballPowerTimer = 0, lastTimestamp = 0;
 
         const CANVAS_SIZE = 600; canvas.width = canvas.height = CANVAS_SIZE;
         let thieves = [], arrows = [], particles = [], items = [], obstacles = [], fireballs = [];
-        const gemPos = { x: 300, y: 540 };
+        const monsterPos = { x: 300, y: 450 }, gemPos = { x: 300, y: 540 };
 
         const arenaShapes = {
             1: { name: "DOOM DIAMOND", draw: () => { ctx.beginPath(); ctx.moveTo(300, 0); ctx.lineTo(600, 300); ctx.lineTo(300, 600); ctx.lineTo(0, 300); ctx.closePath(); }, isInside: (px, py) => (Math.abs(px - 300) + Math.abs(py - 300)) <= 300 },
@@ -551,9 +609,13 @@
         class Obstacle {
             constructor() {
                 const shape = arenaShapes[currentLevel];
-                let valid = false; this.radius = 13; let attempts = 0;
+                let valid = false;
+                this.radius = 13; 
+                let attempts = 0;
                 while (!valid && attempts < 100) {
-                    attempts++; this.x = 100 + Math.random() * 400; this.y = 100 + Math.random() * 250; 
+                    attempts++;
+                    this.x = 100 + Math.random() * 400;
+                    this.y = 100 + Math.random() * 250; 
                     const distToMonster = Math.sqrt((this.x - 300)**2 + (this.y - 450)**2);
                     if (distToMonster < 160) continue; 
                     valid = shape.isInside(this.x - this.radius, this.y - this.radius) && 
@@ -564,71 +626,117 @@
             }
             draw() {
                 const pulse = Math.sin(Date.now() / 200) * 0.1 + 0.9;
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(60, 60, 65, 0.4)'; ctx.fill();
-                ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)'; ctx.lineWidth = 2; ctx.stroke();
-                ctx.beginPath(); ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.8)'; ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(60, 60, 65, 0.4)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(150, 150, 160, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 4 * pulse, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+                ctx.fill();
             }
-            collides(px, py, radius = 0) { return Math.sqrt((px - this.x)**2 + (py - this.y)**2) < (this.radius + radius); }
-            isShadowed(tx, ty) { return Math.sqrt((tx - this.x)**2 + (ty - this.y)**2) < 45 && ((tx - 300) * (this.x - 300) + (ty - 450) * (this.y - 450)) > 0; }
+            collides(px, py, radius = 0) {
+                const dist = Math.sqrt((px - this.x)**2 + (py - this.y)**2);
+                return dist < (this.radius + radius);
+            }
+            isShadowed(tx, ty) {
+                const distToObs = Math.sqrt((tx - this.x)**2 + (ty - this.y)**2);
+                if (distToObs > 45) return false;
+                const dot = ((tx - 300) * (this.x - 300) + (ty - 450) * (this.y - 450));
+                return dot > 0; 
+            }
         }
 
         class Fireball {
             constructor(x, y, vx, vy) {
-                this.x = x; this.y = y; const mag = Math.sqrt(vx**2 + vy**2);
-                this.vx = (vx / mag) * 7; this.vy = (vy / mag) * 7; this.active = true; this.life = 100;
+                this.x = x; this.y = y;
+                const speed = 7;
+                const mag = Math.sqrt(vx**2 + vy**2);
+                this.vx = (vx / mag) * speed;
+                this.vy = (vy / mag) * speed;
+                this.active = true;
+                this.life = 100;
             }
-            update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; this.life -= dt; if (this.life <= 0 || this.x < 0 || this.x > 600 || this.y < 0 || this.y > 600) this.active = false; }
+            update(dt) {
+                this.x += this.vx * dt;
+                this.y += this.vy * dt;
+                this.life -= dt;
+                if (this.life <= 0 || this.x < 0 || this.x > 600 || this.y < 0 || this.y > 600) this.active = false;
+            }
             draw() {
-                ctx.beginPath(); ctx.arc(this.x, this.y, 6, 0, Math.PI*2); ctx.fillStyle = '#f80'; ctx.fill();
-                ctx.beginPath(); ctx.arc(this.x, this.y, 10, 0, Math.PI*2); ctx.fillStyle = 'rgba(255, 0, 0, 0.2)'; ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 6, 0, Math.PI*2);
+                ctx.fillStyle = '#f80';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 10, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                ctx.fill();
             }
         }
 
         class Tentacle {
             constructor(side) { this.side = side; this.segments = []; this.numSegments = 20; this.segLength = 15; this.vx = 0; this.vy = 0; this.fireCooldown = 0; this.baseX = 300 + (side * 20); this.baseY = 450; for(let i=0; i < this.numSegments; i++) this.segments.push({ x: this.baseX, y: this.baseY }); }
-            reset() { for(let i=0; i < this.numSegments; i++) { this.segments[i].x = this.baseX; this.segments[i].y = this.baseY; } this.vx = 0; this.vy = 0; this.fireCooldown = 0; }
+            reset() {
+                for(let i=0; i < this.numSegments; i++) {
+                    this.segments[i].x = this.baseX;
+                    this.segments[i].y = this.baseY;
+                }
+                this.vx = 0; this.vy = 0; this.fireCooldown = 0;
+            }
             update(tx, ty, dt) {
                 if (isPaused) return;
-                const realTx = tx + this.side * 40; let speedMod = poisonTimer > 0 ? 0.12 : 0.25;
+                const realTx = tx + this.side * 40;
+                let currentLen = this.segLength * visualReachScale, speedMod = poisonTimer > 0 ? 0.12 : 0.25;
                 let dxB = realTx - this.baseX, dyB = ty - this.baseY, distB = Math.sqrt(dxB**2 + dyB**2);
-                const limit = this.numSegments * this.segLength * 1.3 * visualReachScale;
-                if (distB > limit) { dxB = (dxB/distB) * limit; dyB = (dyB/distB) * limit; }
-                let nextX = this.segments[0].x + this.vx * dt, nextY = this.segments[0].y + this.vy * dt;
+                if (distB > this.numSegments * this.segLength * 1.3 * visualReachScale) { const limit = this.numSegments * this.segLength * 1.3 * visualReachScale; dxB = (dxB/distB) * limit; dyB = (dyB/distB) * limit; }
+                
+                let nextX = this.segments[0].x + this.vx * dt;
+                let nextY = this.segments[0].y + this.vy * dt;
+
                 obstacles.forEach(obs => {
                     if (obs.collides(nextX, nextY, 12)) {
                         const angle = Math.atan2(nextY - obs.y, nextX - obs.x);
                         const speed = Math.sqrt(this.vx**2 + this.vy**2);
-                        this.vx = Math.cos(angle) * (speed + 2) * 0.6; this.vy = Math.sin(angle) * (speed + 2) * 0.6;
+                        this.vx = Math.cos(angle) * (speed + 2) * 0.6;
+                        this.vy = Math.sin(angle) * (speed + 2) * 0.6;
                         AudioFX.bounce();
                     }
                 });
+
                 this.vx = (this.vx + (this.baseX + dxB - this.segments[0].x) * (0.08) * (0.5 + health/200) * speedMod) * 0.96;
                 this.vy = (this.vy + (this.baseY + dyB - this.segments[0].y) * (0.08) * (0.5 + health/200) * speedMod) * 0.96;
+
                 if (fireballPowerTimer > 0) {
                     if (this.fireCooldown > 0) this.fireCooldown -= dt;
-                    if (Math.sqrt(this.vx**2 + this.vy**2) > 5 && this.fireCooldown <= 0) {
+                    const moveMag = Math.sqrt(this.vx**2 + this.vy**2);
+                    if (moveMag > 5 && this.fireCooldown <= 0) {
                         fireballs.push(new Fireball(this.segments[0].x, this.segments[0].y, this.vx, this.vy));
-                        AudioFX.fireball(); this.fireCooldown = 6;
+                        AudioFX.fireball();
+                        this.fireCooldown = 6;
                     }
                 }
-                this.segments[0].x += this.vx * dt; this.segments[0].y += this.vy * dt;
+
+                this.segments[0].x += this.vx * dt;
+                this.segments[0].y += this.vy * dt;
                 for (let i = 1; i < this.numSegments; i++) { 
                     let dx = this.segments[i].x - this.segments[i-1].x, dy = this.segments[i].y - this.segments[i-1].y, d = Math.sqrt(dx**2 + dy**2); 
-                    if (d > this.segLength * visualReachScale) { this.segments[i].x = this.segments[i-1].x + (dx/d) * this.segLength * visualReachScale; this.segments[i].y = this.segments[i-1].y + (dy/d) * this.segLength * visualReachScale; } 
+                    if (d > currentLen) { this.segments[i].x = this.segments[i-1].x + (dx/d) * currentLen; this.segments[i].y = this.segments[i-1].y + (dy/d) * currentLen; } 
                 }
                 this.segments[this.numSegments - 1] = { x: this.baseX, y: this.baseY };
                 for (let i = this.numSegments - 2; i >= 0; i--) { 
                     let dx = this.segments[i].x - this.segments[i+1].x, dy = this.segments[i].y - this.segments[i+1].y, ang = Math.atan2(dy, dx); 
-                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(ang) * this.segLength * visualReachScale, y: this.segments[i+1].y + Math.sin(ang) * this.segLength * visualReachScale }; 
+                    this.segments[i] = { x: this.segments[i+1].x + Math.cos(ang) * currentLen, y: this.segments[i+1].y + Math.sin(ang) * currentLen }; 
                 }
             }
             draw() {
                 ctx.beginPath(); ctx.lineWidth = 10; ctx.lineCap = ctx.lineJoin = 'round'; 
                 ctx.strokeStyle = isDeathAnimation ? '#141' : (fireballPowerTimer > 0 ? '#f80' : (poisonTimer > 0 ? '#a0f' : (health < 30 ? '#f55' : '#0f0')));
                 ctx.moveTo(this.baseX, this.baseY); for (let i = this.numSegments - 1; i > 0; i--) { const midX = (this.segments[i].x + this.segments[i-1].x) / 2, midY = (this.segments[i].y + this.segments[i-1].y) / 2; ctx.quadraticCurveTo(this.segments[i].x, this.segments[i].y, midX, midY); }
-                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke();
+                ctx.lineTo(this.segments[0].x, this.segments[0].y); ctx.stroke(); ctx.fillStyle = isDeathAnimation ? '#020' : '#050'; for (let i = 2; i < this.numSegments; i+=3) { ctx.beginPath(); ctx.arc(this.segments[i].x, this.segments[i].y, 3, 0, Math.PI*2); ctx.fill(); }
             }
         }
         const leftTentacle = new Tentacle(-1), rightTentacle = new Tentacle(1);
@@ -636,84 +744,128 @@
         class Thief {
             constructor(type = "ninja") {
                 const sY = Math.random() * 150, side = Math.random() > 0.5 ? 1 : -1;
-                this.y = sY; this.x = 300 + (side * (300 - sY - 40)); this.type = type; this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.shielded = type === "samurai";
-                this.wanderSpeed = 0.025 + Math.random() * 0.045; this.wanderAmplitude = 0.35 + Math.random() * 0.45; this.wanderPhase = Math.random() * Math.PI * 2;
-                if (this.type === "samurai") { this.speed = 0.4; this.size = 20 * this.mobileScale; this.color = "#444"; this.moveTimer = 60 + Math.random() * 60; this.pauseTimer = 0; }
+                this.y = sY; this.x = 300 + (side * (300 - sY - 40)); this.type = type; this.mobileScale = window.innerWidth < 600 ? 1.4 : 1.0; this.shielded = type === "samurai"; this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 0; this.scale = 1.0; this.hitCooldown = 0;
+                this.wanderSpeed = 0.025 + Math.random() * 0.045;
+                this.wanderAmplitude = 0.35 + Math.random() * 0.45;
+                this.wanderPhase = Math.random() * Math.PI * 2;
+                if (this.type === "samurai") { this.speed = 0.4; this.size = 20 * this.mobileScale; this.color = "#444"; this.arrowType = 'regular'; this.pauseTimer = 0; this.moveTimer = 60 + Math.random() * 60; }
                 else if (this.type === "jumper") { this.speed = 1.0; this.size = 14 * this.mobileScale; this.color = "#a0f"; }
                 else { this.speed = 0.7 + Math.random() * 0.6; this.size = 12 * this.mobileScale; this.color = "#bbb"; }
-                let pool = ['regular', 'regular', 'fire', 'poison']; this.arrowType = pool[Math.floor(Math.random() * pool.length)];
+                if (this.type !== "samurai") { let pool = ['regular', 'regular', 'regular', 'regular', 'fire', 'poison']; if (currentLevel === 1) pool.push('regular', 'regular'); this.arrowType = pool[Math.floor(Math.random() * pool.length)]; }
                 this.maskColor = this.type === "ninja" ? (this.arrowType === 'fire' ? '#f80' : (this.arrowType === 'poison' ? '#a0f' : '#bbb')) : this.color;
-                this.shootCooldown = 60 + Math.random() * 120; this.aiPhase = 0; this.hitCooldown = 0; this.scale = 1.0;
+                this.shootCooldown = 60 + Math.random() * 120; this.avoidSide = this.x < 300 ? -1 : 1; this.aiPhase = 0; 
             }
             update(dt) {
                 if (isPaused || isDeathAnimation) return;
                 if (this.hitCooldown > 0) this.hitCooldown -= dt;
+                if (isEndingAnimation) { if (this === winningThief) { this.y += 2.5 * dt; gemPos.y = this.y - 10; if (this.y > CANVAS_SIZE + 50) window.endGameUI('gem'); } return; }
                 if (this.type === "samurai") { if (this.pauseTimer > 0) { this.pauseTimer -= dt; return; } this.moveTimer -= dt; if (this.moveTimer <= 0) { this.pauseTimer = 60; this.moveTimer = 120; return; } }
+                if (this.type === "jumper") { if (this.isJumping) { this.jumpTimer += dt; this.scale = 1.0 + Math.sin((this.jumpTimer / 45) * Math.PI) * 0.8; if (this.jumpTimer >= 45) { this.isJumping = false; this.jumpTimer = 0; this.jumpCooldown = 120 + Math.random() * 100; this.scale = 1.0; } } else if (this.jumpCooldown > 0) this.jumpCooldown -= dt; else if (Math.sqrt((this.x - 300)**2 + (this.y - 450)**2) < 200) { this.isJumping = true; AudioFX.jump(); } }
                 let targetX = gemPos.x, targetY = gemPos.y;
-                if (this.aiPhase === 0) { targetX = this.x < 300 ? 50 : 550; targetY = 300; if (this.y > 280) this.aiPhase = 1; }
-                else if (this.aiPhase === 1) { targetX = this.x < 300 ? 180 : 420; targetY = 480; if (this.y > 450) this.aiPhase = 2; }
+                if (this.aiPhase === 0) { targetX = this.avoidSide === -1 ? 50 : 550; targetY = 300; if (this.y > 280) this.aiPhase = 1; }
+                else if (this.aiPhase === 1) { targetX = this.avoidSide === -1 ? 180 : 420; targetY = 480; if (this.y > 450) this.aiPhase = 2; }
                 let dx = targetX - this.x, dy = targetY - this.y, targetAng = Math.atan2(dy, dx);
+                if (this.aiPhase < 2 && Math.abs(this.y - 300) < 150) { const dX = Math.abs(this.x - 300); if (dX < 200) targetAng += this.avoidSide * 1.5 * (1 - dX / 200); }
+                let currentSpeed = this.isJumping ? this.speed * 2.5 : this.speed;
+                if (obstacles.some(obs => obs.isShadowed(this.x, this.y))) { currentSpeed *= 0.4; }
                 this.wanderPhase += this.wanderSpeed * dt;
                 let ang = targetAng + Math.sin(this.wanderPhase) * this.wanderAmplitude;
-                let nx = this.x + Math.cos(ang) * this.speed * dt, ny = this.y + Math.sin(ang) * this.speed * dt;
-                obstacles.forEach(obs => { if (obs.collides(nx, ny, 8)) { const pDir = Math.atan2(ny - obs.y, nx - obs.x); nx = obs.x + Math.cos(pDir) * (obs.radius + 10); ny = obs.y + Math.sin(pDir) * (obs.radius + 10); } });
+                let nx = this.x + Math.cos(ang) * currentSpeed * dt;
+                let ny = this.y + Math.sin(ang) * currentSpeed * dt;
+                obstacles.forEach(obs => {
+                    if (obs.collides(nx, ny, 8)) {
+                        const pushDir = Math.atan2(ny - obs.y, nx - obs.x);
+                        nx = obs.x + Math.cos(pushDir) * (obs.radius + 10);
+                        ny = obs.y + Math.sin(pushDir) * (obs.radius + 10);
+                    }
+                });
                 this.x = nx; this.y = ny;
+                const shape = arenaShapes[currentLevel]; if (!shape.isInside(this.x, this.y)) { const dXC = this.x - 300, dYC = this.y - 300, dist = Math.sqrt(dXC**2 + dYC**2); this.x = 300 + dXC * ((dist - 10) / dist); this.y = 300 + dYC * ((dist - 10) / dist); }
                 if ((this.shootCooldown -= dt) <= 0) { arrows.push(new Arrow(this.x, this.y, this.arrowType)); this.shootCooldown = 150 + Math.random() * 100; }
                 if (Math.sqrt((this.x - gemPos.x)**2 + (this.y - gemPos.y)**2) < 25) window.triggerEscape(this);
             }
-            draw() {
-                const hs = (this.size * this.scale) / 2;
+            draw() { 
+                const hs = (this.size * this.scale) / 2; if (this.isJumping) { ctx.fillStyle = "rgba(0,0,0,0.3)"; ctx.beginPath(); ctx.ellipse(this.x, this.y + 10, hs * 0.8, hs * 0.4, 0, 0, Math.PI * 2); ctx.fill(); } 
                 if (this.type === "samurai") {
-                    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
+                    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale);
+                    ctx.fillStyle = '#444'; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.8);
+                    ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.arc(this.x - hs * 0.4, this.y - hs * 0.2, 2.5, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(this.x + hs * 0.4, this.y - hs * 0.2, 2.5, 0, Math.PI * 2); ctx.fill();
                     if (this.shielded) {
                         ctx.fillStyle = '#889'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
-                        const sw = hs, sh = this.size * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
+                        const sw = hs * 1.0, sh = this.size * this.scale * 0.9, sx = this.x - hs * 1.3, sy = this.y - hs * 0.5;
                         ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + sw, sy); ctx.lineTo(sx + sw, sy + sh * 0.6); 
-                        ctx.quadraticCurveTo(sx + sw, sy + sh * 0.85, sx + sw/2, sy + sh); ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); 
+                        ctx.quadraticCurveTo(sx + sw, sy + sh * 0.85, sx + sw/2, sy + sh); 
+                        ctx.quadraticCurveTo(sx, sy + sh, sx, sy + sh * 0.6); 
                         ctx.closePath(); ctx.fill(); ctx.stroke();
                     }
                 } else {
-                    ctx.fillStyle = this.type === "jumper" ? '#407' : '#333'; ctx.fillRect(this.x - hs, this.y - hs, this.size, this.size);
-                    ctx.fillStyle = this.maskColor; ctx.fillRect(this.x - hs, this.y - hs, this.size, hs * 0.5);
+                    const colorBody = this.type === "jumper" ? '#407' : '#333'; 
+                    ctx.fillStyle = colorBody; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, this.size * this.scale); 
+                    ctx.fillStyle = this.maskColor; ctx.fillRect(this.x - hs, this.y - hs, this.size * this.scale, hs * 0.5); 
+                    ctx.fillStyle = '#eee'; ctx.fillRect(this.x - hs * 0.6, this.y - hs * 0.25, this.size * 0.6 * this.scale, hs * 0.3);
                 }
+                if (this.hitCooldown > 0) { ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.strokeRect(this.x - hs - 2, this.y - hs - 2, this.size * this.scale + 4, this.size * this.scale + 4); }
             }
         }
 
         class Arrow { 
             constructor(x, y, type) { this.x = x; this.y = y; this.type = type; let dx = 300 - x, dy = 450 - y, dist = Math.sqrt(dx**2 + dy**2); this.vx = (dx/dist) * 3; this.vy = (dy/dist) * 3; this.active = true; } 
-            update(dt) { this.x += this.vx * dt; this.y += this.vy * dt; if (this.y > CANVAS_SIZE || this.y < 0) this.active = false; obstacles.forEach(obs => { if (obs.collides(this.x, this.y)) this.active = false; }); } 
+            update(dt) { 
+                if (!isPaused) { 
+                    this.x += this.vx * dt; this.y += this.vy * dt; 
+                    if (this.y > CANVAS_SIZE || this.y < 0) this.active = false; 
+                    obstacles.forEach(obs => { if (obs.collides(this.x, this.y)) this.active = false; });
+                } 
+            } 
             draw() { ctx.lineWidth = 2; ctx.strokeStyle = this.type === 'regular' ? '#fff' : (this.type === 'fire' ? '#f80' : '#a0f'); ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - this.vx*3, this.y - this.vy*3); ctx.stroke(); } 
         }
 
         class Item { 
             constructor(type = 'heart') { 
-                const a = Math.PI + Math.random() * Math.PI; this.x = 300 + Math.cos(a) * (50 + Math.random() * 200); 
-                this.y = 450 + Math.sin(a) * (50 + Math.random() * 100); this.life = 400; this.type = type; this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0; 
+                const a = Math.PI + Math.random() * Math.PI; 
+                this.x = 300 + Math.cos(a) * (50 + Math.random() * 200); 
+                this.y = 450 + Math.sin(a) * (50 + Math.random() * 100); 
+                this.life = 400; 
+                this.type = type;
+                this.mobileScale = window.innerWidth < 600 ? 1.3 : 1.0; 
             } 
             update(dt) { if (!isPaused) this.life -= dt; } 
-            draw() { ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; ctx.fillStyle = this.type === 'heart' ? '#f00' : '#f80'; ctx.fillText(this.type === 'heart' ? '❤' : '🔥', this.x - 10, this.y + 10); } 
+            draw() { 
+                ctx.font = `${Math.floor(24 * this.mobileScale)}px serif`; 
+                if (this.type === 'heart') { ctx.fillStyle = '#f00'; ctx.fillText('❤', this.x - 10, this.y + 10); } 
+                else { ctx.fillStyle = '#f80'; ctx.fillText('🔥', this.x - 10, this.y + 10); }
+            } 
         }
 
         function spawnThief() { 
-            if(!gameActive || isPaused) { if(isPaused) spawnThiefTimeout = setTimeout(spawnThief, 100); return; } 
-            if (thieves.length < 8 + (currentLevel * 2)) {
+            if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnThiefTimeout = setTimeout(spawnThief, 100); return; } 
+            const maxDensity = 8 + (currentLevel * 2);
+            if (thieves.length < maxDensity) {
                 let dice = Math.random(), elapsed = LEVEL_TIME - currentTime; 
                 if (elapsed >= 60 && dice < 0.25) thieves.push(new Thief("jumper")); 
                 else if (elapsed >= 30 && dice < 0.35) thieves.push(new Thief("samurai")); 
                 else thieves.push(new Thief("ninja")); 
             }
-            spawnThiefTimeout = setTimeout(spawnThief, Math.max(600, 1500 - ((LEVEL_TIME - currentTime) * 8) - (currentLevel * 50))); 
+            let elapsed = LEVEL_TIME - currentTime;
+            spawnThiefTimeout = setTimeout(spawnThief, Math.max(600, 1500 - (elapsed * 8) - (currentLevel * 50))); 
         }
 
         function spawnItem() { 
-            if(!gameActive || isPaused) { if(isPaused) spawnItemTimeout = setTimeout(spawnItem, 100); return; } 
+            if(!gameActive || isGameOver || isPaused) { if(isPaused) spawnItemTimeout = setTimeout(spawnItem, 100); return; } 
             let elapsed = LEVEL_TIME - currentTime;
+            let heartChance = health < 40 ? 0.85 : 0.55;
             if (elapsed > 45 && Math.random() > 0.8) items.push(new Item('fireball'));
-            else if(Math.random() > (health < 40 ? 0.15 : 0.45)) items.push(new Item('heart')); 
+            else if(Math.random() > (1 - heartChance)) items.push(new Item('heart')); 
             spawnItemTimeout = setTimeout(spawnItem, Math.max(5000, 12000 - (elapsed * 45))); 
         }
 
-        function getSnarkyMessage(s) { if (s < 500) return "NOT BAD, SQUIRT."; if (s < 1000) return "GOOD MONSTER."; return "TENTACLE LORD."; }
+        function getSnarkyMessage(s) {
+            if (s < 500) return "NOT BAD FOR A WARM-UP, SQUIRT.";
+            if (s < 1000) return "YOU'RE GETTING THE HANG OF THIS, MONSTER.";
+            if (s < 2000) return "THE THIEVES ARE STARTING TO HATE YOU.";
+            if (s < 5000) return "ABSOLUTE MENACE. A TRUE TENTACLE LORD.";
+            return "STOP ALREADY. YOU'RE INSATIABLE.";
+        }
 
         function update(dt) {
             if(!gameActive && !isEndingAnimation && !isDeathAnimation && !isPaused) return;
@@ -722,76 +874,150 @@
                 if (currentTime <= 0) { currentTime = 0; window.triggerLevelClear(); } 
                 if (fireballPowerTimer > 0) fireballPowerTimer -= dt;
             }
-            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + (0.015 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03) * dt); }
+            if (gameActive && !isPaused && currentTime <= 20 && arenaRotation < 3 * Math.PI) { arenaRotation = Math.min(3 * Math.PI, arenaRotation + (0.008 + Math.sin((arenaRotation / (3*Math.PI)) * Math.PI) * 0.03) * dt); }
             visualReachScale += ((poisonTimer > 0 ? 0.75 : 1.0) - visualReachScale) * 0.05 * dt;
             if(poisonTimer > 0 && !isPaused) poisonTimer -= dt;
             let tx = isDeathAnimation ? 300 : mouseX, ty = isDeathAnimation ? 570 : mouseY;
             if (isDeathAnimation && (deathTimer += dt) > 100) window.endGameUI('health');
             leftTentacle.update(tx, ty, dt); rightTentacle.update(tx, ty, dt);
-            thieves.forEach(t => t.update(dt)); arrows.forEach(a => a.update(dt)); fireballs.forEach(fb => fb.update(dt));
-            arrows = arrows.filter(a => a.active); fireballs = fireballs.filter(fb => fb.active); items.forEach(it => it.update(dt)); items = items.filter(it => it.life > 0);
+            thieves.forEach(t => t.update(dt)); arrows.forEach(a => a.update(dt)); arrows = arrows.filter(a => a.active); 
+            items.forEach(it => it.update(dt)); items = items.filter(it => it.life > 0);
+            fireballs.forEach(fb => fb.update(dt)); fireballs = fireballs.filter(fb => fb.active);
             particles.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }); particles = particles.filter(p => p.life > 0);
             handleCollisions();
-            scoreVal.innerText = score; timeVal.innerText = currentTime + 's'; document.getElementById('levelValHUD').innerText = currentLevel;
+            scoreVal.innerText = score; timeVal.innerText = currentTime + 's'; levelValHUD.innerText = currentLevel;
             healthBar.style.width = health + '%'; healthBar.style.backgroundColor = health < 30 ? '#f00' : '#0f0';
-            if (currentTime <= 10 && currentTime > 0) timeVal.classList.add('timer-warning'); else timeVal.classList.remove('timer-warning');
+            if(poisonTimer > 0) poisonStatus.classList.remove('hidden'); else poisonStatus.classList.add('hidden');
+
+            if (gameActive && currentTime <= 10 && currentTime > 0) {
+                timeVal.classList.add('timer-warning');
+            } else {
+                timeVal.classList.remove('timer-warning');
+            }
         }
 
         function draw() {
             ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE); const shape = arenaShapes[currentLevel];
-            ctx.save(); ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
+            ctx.save(); 
+            ctx.translate(300, 300); ctx.rotate(arenaRotation); ctx.translate(-300, -300);
             shape.draw(); ctx.fillStyle = '#222'; ctx.fill(); ctx.strokeStyle = '#555'; ctx.lineWidth = 4; ctx.stroke(); ctx.clip();
-            if(gameActive || isEndingAnimation) { ctx.fillStyle = '#0cf'; ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill(); }
-            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? '#800' : '#080'); ctx.beginPath(); ctx.arc(300, 450, 25, 0, Math.PI*2); ctx.fill();
-            obstacles.forEach(obs => obs.draw()); leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw()); fireballs.forEach(fb => fb.draw());
-            particles.forEach(p => { ctx.globalAlpha = p.life / 25; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); }); 
+            ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            for(let i=0; i<=CANVAS_SIZE; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 600); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
+            if(gameActive || isEndingAnimation) { 
+                ctx.fillStyle = '#0cf'; ctx.beginPath(); ctx.moveTo(300, gemPos.y-15); ctx.lineTo(315, gemPos.y); ctx.lineTo(300, gemPos.y+15); ctx.lineTo(285, gemPos.y); ctx.fill();
+                ctx.beginPath(); ctx.arc(300, gemPos.y, 20, 0, Math.PI*2); ctx.fillStyle = 'rgba(0, 200, 255, 0.15)'; ctx.fill();
+            }
+            ctx.fillStyle = isDeathAnimation ? '#400' : (health < 30 ? (Date.now() % 400 < 200 ? '#f00' : '#080') : '#080'); ctx.beginPath(); ctx.arc(300, 450, 25, 0, Math.PI*2); ctx.fill();
+            if (!isDeathAnimation) {
+                let dxL = mouseX - 300, dyL = mouseY - 300;
+                if (isEndingAnimation && winningThief) { dxL = winningThief.x - 300; dyL = winningThief.y - 300; }
+                let lookA = Math.atan2(dyL, dxL), lx = Math.cos(lookA) * 3, ly = Math.sin(lookA) * 3;
+                ctx.fillStyle = '#fff'; ctx.fillRect(300-13, 450-9, 8, 8); ctx.fillRect(300+6, 450-9, 8, 8);
+                ctx.fillStyle = '#000'; ctx.fillRect(300-11+lx, 450-7+ly, 4, 4); ctx.fillRect(300+8+lx, 450-7+ly, 4, 4);
+                if (isEndingAnimation) { ctx.strokeStyle = '#000'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(300, 450+12, 8, Math.PI, 0, false); ctx.stroke(); }
+            } else {
+                ctx.strokeStyle = '#000'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(300-15, 450-5); ctx.lineTo(300-5, 450-5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(300+5, 450-5); ctx.lineTo(300+15, 450-5); ctx.stroke();
+                ctx.beginPath(); ctx.arc(300, 450+12, 8, Math.PI, 0, false); ctx.stroke();
+            }
+            obstacles.forEach(obs => obs.draw());
+            leftTentacle.draw(); rightTentacle.draw(); thieves.forEach(t => t.draw()); arrows.forEach(a => a.draw()); items.forEach(it => it.draw()); fireballs.forEach(fb => fb.draw());
+            particles.forEach(p => { ctx.globalAlpha = p.life / 25; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 4, 4); }); ctx.globalAlpha = 1.0;
             ctx.restore();
         }
 
-        function gameLoop(t) { const dt = lastTimestamp ? Math.min(2.0, (t - lastTimestamp) / 16.66) : 1; lastTimestamp = t; update(dt); draw(); requestID = requestAnimationFrame(gameLoop); }
-
-        function handleCollisions() {
-            fireballs.forEach(fb => { thieves.forEach((thief, tIdx) => { if (Math.sqrt((fb.x-thief.x)**2 + (fb.y-thief.y)**2) < 20) { thieves.splice(tIdx, 1); score += 10; fb.active = false; AudioFX.splat(); } }); });
-            [leftTentacle, rightTentacle].forEach(tent => tent.segments.forEach(seg => {
-                thieves.forEach((thief, tIdx) => { if (thief.hitCooldown <= 0 && Math.sqrt((seg.x-thief.x)**2+(seg.y-thief.y)**2) < 20) { if(thief.shielded) { thief.shielded = false; thief.hitCooldown = 30; AudioFX.clink(); } else { thieves.splice(tIdx, 1); score += 10; AudioFX.splat(); } } });
-                arrows.forEach((a, i) => { if(Math.sqrt((seg.x-a.x)**2+(seg.y-a.y)**2) < 12) { arrows.splice(i, 1); score = Math.max(0, score-1); AudioFX.hit(); } });
-                items.forEach((it, i) => { if(Math.sqrt((seg.x-it.x)**2+(seg.y-it.y)**2) < 20) { if (it.type === 'heart') { health = Math.min(100, health+25); AudioFX.heal(); } else fireballPowerTimer = 600; items.splice(i, 1); } });
-            }));
-            if(health <= 0 && !isGameOver) window.triggerDeath();
+        function gameLoop(timestamp) { 
+            const dt = lastTimestamp ? Math.min(2.0, (timestamp - lastTimestamp) / 16.66) : 1;
+            lastTimestamp = timestamp;
+            update(dt); draw(); 
+            if(gameActive || isEndingAnimation || isDeathAnimation || isPaused) requestID = requestAnimationFrame(gameLoop); 
         }
 
-        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === window.unlockedLevels && window.unlockedLevels < 4) { window.unlockedLevels++; window.saveUserProgress(window.unlockedLevels); } document.getElementById('clearScoreVal').innerText = score; levelClearScreen.classList.remove('hidden'); topHUD.classList.add('hidden'); };
-        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); topHUD.classList.remove('hidden'); };
-        window.showLevelMenu = async () => { window.unlockedLevels = await window.loadUserProgress(); startScreen.classList.add('hidden'); document.getElementById('levelMenuScreen').classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= window.unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= window.unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
-        window.startGameAtLevel = (lvl) => { currentLevel = lvl; AudioFX.init(); document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); window.resetGameParams(); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); topHUD.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); document.getElementById('levelDisplayHUD').classList.remove('hidden'); if(!requestID) gameLoop(performance.now()); };
-        window.restartFromPause = () => { window.startGameAtLevel(currentLevel); };
-        window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; document.getElementById('pauseScreen').classList.toggle('hidden', !isPaused); if (isPaused) lastPauseTimestamp = Date.now(); else pauseTimeOffset += (Date.now() - lastPauseTimestamp); };
-        window.triggerDeath = () => { isGameOver = true; gameActive = false; isDeathAnimation = true; AudioFX.powerDown(); };
-        window.triggerEscape = () => { isGameOver = true; gameActive = false; isEndingAnimation = true; AudioFX.gemLost(); };
-        window.endGameUI = (reason) => { isDeathAnimation = false; isEndingAnimation = false; document.getElementById('gameOverTitle').innerText = reason === 'health' ? "DESTROYED!" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; gameOverScreen.classList.remove('hidden'); topHUD.classList.add('hidden'); };
-        window.checkHighScoreFlow = () => { submitScoreScreen.classList.remove('hidden'); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); };
-        window.submitScore = async () => { await window.saveHighScore(initialsInput.value || 'AAA', score, currentLevel); window.backToMain(); };
-        window.showLeaderboard = async () => { startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); window.changeLeaderboardTab(1); };
-        window.changeLeaderboardTab = async (lvl) => { const content = document.getElementById('leaderboardContent'); content.innerHTML = 'LOADING...'; const top = await window.fetchLeaderboard(lvl); let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i+1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; };
-        window.backToMain = () => { document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden')); startScreen.classList.remove('hidden'); gameActive = false; isPaused = false; topHUD.classList.add('hidden'); };
-        window.resetGameParams = () => { 
-            health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; deathTimer = 0;
-            thieves = []; arrows = []; fireballs = []; particles = []; items = []; mouseX = 300; mouseY = 300; leftTentacle.reset(); rightTentacle.reset();
-            obstacles = []; for(let i=0; i<currentLevel*2; i++) obstacles.push(new Obstacle());
+        function handleCollisions() {
+            if (isGameOver || isPaused) return;
+            fireballs.forEach(fb => {
+                thieves.forEach((thief, tIdx) => {
+                    if (Math.sqrt((fb.x-thief.x)**2 + (fb.y-thief.y)**2) < 20) {
+                        AudioFX.splat();
+                        for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 25, color: '#f80' });
+                        thieves.splice(tIdx, 1);
+                        score += (thief.type === "samurai" ? 50 : 10);
+                        fb.active = false;
+                    }
+                });
+            });
+            arrows.forEach((a, i) => { 
+                if (Math.sqrt((a.x-300)**2+(a.y-450)**2) < 28) { 
+                    AudioFX.hit(); score = Math.max(0, score - 3);
+                    for(let j=0; j<10; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 20, color: '#f00' });
+                    if(a.type === 'fire') health -= 8; else if(a.type === 'poison') poisonTimer = 600; else health -= 3; arrows.splice(i, 1); 
+                } 
+            });
+            [leftTentacle, rightTentacle].forEach(tentacle => tentacle.segments.forEach(seg => {
+                thieves.forEach((thief, tIdx) => {
+                    if (thief.hitCooldown > 0) return;
+                    if (Math.sqrt((seg.x-thief.x)**2+(seg.y-thief.y)**2) < (thief.type === 'samurai' ? 25 : 15) * thief.mobileScale) {
+                        if(thief.shielded) { 
+                            AudioFX.clink(); thief.shielded = false; thief.hitCooldown = 30; 
+                            for(let j=0; j<15; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 25, color: '#889' });
+                            const ang = Math.atan2(thief.y - 450, thief.x - 300); thief.x += Math.cos(ang) * 40; thief.y += Math.sin(ang) * 40; 
+                        }
+                        else { 
+                            AudioFX.splat(); 
+                            for(let j=0; j<10; j++) particles.push({ x: thief.x, y: thief.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: thief.color });
+                            thieves.splice(tIdx, 1); score += (thief.type === "samurai" ? 50 : 10); 
+                        }
+                    }
+                });
+                arrows.forEach((a, i) => { 
+                    if(Math.sqrt((seg.x-a.x)**2+(seg.y-a.y)**2) < 12) { 
+                        AudioFX.hit(); score = Math.max(0, score - 1); 
+                        for(let j=0; j<5; j++) particles.push({ x: a.x, y: a.y, vx: (Math.random()-0.5)*5, vy: (Math.random()-0.5)*5, life: 15, color: '#0f0' });
+                        if(a.type === 'fire') health -= 3; else if(a.type === 'poison') poisonTimer = 600; else health -= 1; arrows.splice(i, 1); 
+                    } 
+                });
+                items.forEach((it, i) => { 
+                    if(Math.sqrt((seg.x-it.x)**2+(seg.y-it.y)**2) < 20) { 
+                        if (it.type === 'heart') { AudioFX.heal(); health = Math.min(100, health+25); poisonTimer = 0; } 
+                        else { AudioFX.levelUp(); fireballPowerTimer = 600; }
+                        items.splice(i, 1); 
+                    } 
+                });
+            }));
+            if(health <= 0) { health = 0; window.triggerDeath(); }
+        }
+
+        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) { unlockedLevels++; window.saveUserProgress(unlockedLevels); } document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); document.getElementById('clearScoreVal').innerText = score; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
+        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); gameLoop(); };
+        window.showLevelMenu = () => { AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
+        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); gameLoop(); };
+        window.resetGame = () => { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); window.startGameAtLevel(1); };
+        window.restartFromPause = () => { AudioFX.beep(); pauseScreen.classList.add('hidden'); window.resetGame(); };
+        window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); } else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); } };
+        window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
+        window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
+        window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
+        window.checkHighScoreFlow = (source) => { if (score > 0) { gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitMessage').innerText = getSnarkyMessage(score); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); } else window.backToMain(); };
+        window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
+        window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
+        window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
+        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; gameActive = false; isPaused = false; timeVal.classList.remove('timer-warning'); };
+        window.resetGameParams = (fullReset) => { 
+            if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
+            if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; hasPlayedEndSound = false; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
+            mouseX = 300; mouseY = 300; 
+            leftTentacle.reset(); rightTentacle.reset();
+            timeVal.classList.remove('timer-warning');
+            obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
         };
+        initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
         function handleInput(cX, cY) { if (!gameActive || isPaused) return; const r = canvas.getBoundingClientRect(); let rawX = (cX - r.left) * (600 / r.width), rawY = (cY - r.top) * (600 / r.height); const dx = rawX - 300, dy = rawY - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = dx * cos - dy * sin + 300; mouseY = dx * sin + dy * cos + 300; }
-        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); e.preventDefault(); }, { passive: false });
-        joyBase.addEventListener('touchmove', (e) => { 
-            const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxR = rect.width / 2;
-            let dx = e.touches[0].clientX - centerX, dy = e.touches[0].clientY - centerY, dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > maxR) { dx *= maxR/dist; dy *= maxR/dist; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`;
-            const nx = dx/maxR, ny = dy/maxR, tx = 300 + nx * 300, ty = 300 + ny * 300;
-            const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation);
-            mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300;
-        }, { passive: false });
+        function updateJoystick(touchX, touchY) { const rect = joyBase.getBoundingClientRect(), centerX = rect.left + rect.width / 2, centerY = rect.top + rect.height / 2, maxRadius = rect.width / 2; let dx = touchX - centerX, dy = touchY - centerY, dist = Math.sqrt(dx*dx + dy*dy); if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; } joyKnob.style.left = `calc(50% + ${dx}px)`; joyKnob.style.top = `calc(50% + ${dy}px)`; const nx = dx / maxRadius, ny = dy / maxRadius; const tx = 300 + nx * 300, ty = 300 + ny * 300; const rdx = tx - 300, rdy = ty - 300, cos = Math.cos(-arenaRotation), sin = Math.sin(-arenaRotation); mouseX = rdx * cos - rdy * sin + 300; mouseY = rdx * sin + rdy * cos + 300; }
+        // Combined onload logic moved to module script block for scoping
+        joyBase.addEventListener('touchstart', (e) => { AudioFX.init(); updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.stopPropagation(); }, { passive: false });
+        joyBase.addEventListener('touchmove', (e) => { updateJoystick(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); e.stopPropagation(); }, { passive: false });
         window.addEventListener('touchend', () => { joyKnob.style.left = '50%'; joyKnob.style.top = '50%'; });
         canvas.addEventListener('mousemove', (e) => handleInput(e.clientX, e.clientY));
-        canvas.addEventListener('touchmove', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { handleInput(e.touches[0].clientX, e.touches[0].clientY); if (gameActive && !isPaused) e.preventDefault(); }, { passive: false });
     </script>
 </body>
 </html>
