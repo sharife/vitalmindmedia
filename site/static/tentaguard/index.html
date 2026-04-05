@@ -482,21 +482,30 @@
         
         let authPromise = null;
 
-        // Optimized Auth initialization to prevent concurrent requests and race conditions
+        // Optimized Auth initialization with robust Settling state
         const initAuth = async () => {
-            if (auth.currentUser) return auth.currentUser;
             if (authPromise) return await authPromise;
 
             authPromise = (async () => {
                 try {
+                    // Start sign in process
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                         await signInWithCustomToken(auth, __initial_auth_token);
                     } else {
                         await signInAnonymously(auth);
                     }
-                    // Wait a tiny tick for Firestore to recognize the token
-                    await new Promise(r => setTimeout(r, 50));
-                    return auth.currentUser;
+                    
+                    // Critical: Wait for onAuthStateChanged to fire, confirming internal SDK state is ready
+                    return new Promise((resolve) => {
+                        const unsubscribe = onAuthStateChanged(auth, (user) => {
+                            if (user) {
+                                unsubscribe();
+                                resolve(user);
+                            }
+                        });
+                        // Fail-safe timeout
+                        setTimeout(() => resolve(auth.currentUser), 1500);
+                    });
                 } catch (err) {
                     console.error("Auth error:", err);
                     return null;
@@ -510,6 +519,7 @@
             const u = await initAuth();
             if (!u) return;
             try {
+                // RULE 1: artifacts/{appId}/users/{userId}/{collectionName}
                 const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
                 await setDoc(docRef, { unlockedLevels: lvl }, { merge: true });
             } catch (err) {
@@ -520,10 +530,24 @@
         window.loadUserProgress = async () => {
             const u = await initAuth();
             if (!u) return 1;
+
+            // Internal retry for initial startup permissions race
+            const fetchProgress = async (retries = 2) => {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
+                    const snap = await getDoc(docRef);
+                    return snap.exists() ? snap.data().unlockedLevels : 1;
+                } catch (err) {
+                    if (retries > 0) {
+                        await new Promise(r => setTimeout(r, 300));
+                        return fetchProgress(retries - 1);
+                    }
+                    throw err;
+                }
+            };
+
             try {
-                const docRef = doc(db, 'artifacts', appId, 'users', u.uid, 'progress', 'current');
-                const snap = await getDoc(docRef);
-                return snap.exists() ? snap.data().unlockedLevels : 1;
+                return await fetchProgress();
             } catch (err) {
                 console.error("Load progress error:", err);
                 return 1;
@@ -534,6 +558,7 @@
             const u = await initAuth();
             if (!u) return;
             try {
+                // RULE 1: artifacts/{appId}/public/data/{collectionName}
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                 await addDoc(colRef, { name: name.toUpperCase(), score: score, level: level, timestamp: Date.now(), uid: u.uid });
             } catch (err) {
@@ -547,6 +572,7 @@
             try {
                 const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'leaderboard');
                 const snapshot = await getDocs(colRef);
+                // RULE 2: Filter in JS memory
                 return snapshot.docs
                     .map(doc => doc.data())
                     .filter(entry => entry.level === targetLevel)
@@ -558,24 +584,16 @@
             }
         };
 
-        onAuthStateChanged(auth, (u) => { 
-            // Optional: Handle state change globally if needed
-        });
-
         // Preloader & Initialization Sequence
         window.onload = async () => {
             gameContainer.classList.add('visible');
             
             // Wait for auth and progress before hiding loader
             try {
-                const user = await initAuth();
-                if (user) {
-                    window.unlockedLevels = await window.loadUserProgress();
-                } else {
-                    window.unlockedLevels = 1;
-                }
+                await initAuth();
+                window.unlockedLevels = await window.loadUserProgress();
             } catch (e) {
-                console.error("Initialization failed:", e);
+                console.error("Initialization sequence failed:", e);
                 window.unlockedLevels = 1;
             }
             
@@ -588,7 +606,7 @@
                     startScreen.style.opacity = "1";
                     loadingScreen.classList.add('hidden');
                 }, 50);
-            }, 2000);
+            }, 1800);
         };
     </script>
 
