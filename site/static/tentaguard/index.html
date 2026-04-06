@@ -403,7 +403,7 @@
 
         <div id="startScreen" class="screen hidden">
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
-            <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.5rem;">
+            <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.2rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
                 LAST 100s TO CLEAR EACH LEVEL.<br>
                 CRUSH THIEVES! AVOID ARROWS!
@@ -696,7 +696,7 @@
             2: { name: "OCTAGAUNTLET", draw: () => { ctx.beginPath(); for(let i=0; i<8; i++){ const a = (i * Math.PI / 4) + Math.PI/8; ctx.lineTo(300 + Math.cos(a) * 300, 300 + Math.sin(a) * 300); } ctx.closePath(); }, isInside: (px, py) => { const dx = Math.abs(px - 300), dy = Math.abs(py - 300), s = 300 * Math.cos(Math.PI/8); return dx <= s && dy <= s && (dx + dy) <= 300 * Math.sqrt(2) * Math.cos(Math.PI/8); } },
             3: { name: "TRAPEZOID OF FEAR", draw: () => { ctx.beginPath(); ctx.moveTo(200, 20); ctx.lineTo(400, 20); ctx.lineTo(580, 580); ctx.lineTo(20, 580); ctx.closePath(); }, isInside: (px, py) => { if (py < 20 || py > 580) return false; const widthAtY = 200 + (py - 20) * (380 / 560); return px >= (300 - widthAtY) && px <= (300 + widthAtY); } },
             4: { 
-                name: "RUB EL HIZB", 
+                name: "VOID STAR", 
                 draw: () => { 
                     ctx.beginPath(); 
                     for(let i=0; i<16; i++){ 
