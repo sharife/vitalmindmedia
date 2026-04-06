@@ -66,6 +66,8 @@
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .stats-group {
@@ -106,6 +108,8 @@
             text-shadow: 2px 2px #000;
             pointer-events: none;
             margin-bottom: 5px;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .pause-btn {
@@ -120,6 +124,7 @@
             transition: all 0.2s;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            opacity: 0;
         }
 
         .pause-btn:hover { background: rgba(255, 255, 255, 0.2); color: #fff; border-color: #fff; }
@@ -140,7 +145,13 @@
             z-index: 20;
             pointer-events: auto;
             box-sizing: border-box;
-            transition: opacity 1s ease-in-out;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* Specific snap-on snap-off for pause screen */
+        #pauseScreen {
+            transition: none !important;
         }
 
         #loadingScreen {
@@ -306,6 +317,8 @@
             z-index: 100;
             display: none; 
             pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .joystick-base {
@@ -388,7 +401,7 @@
             </div>
         </div>
 
-        <div id="startScreen" class="screen hidden" style="opacity: 0;">
+        <div id="startScreen" class="screen hidden">
             <h1 class="title" style="margin-top: auto;">TENTAGUARD</h1>
             <p style="margin-top: 0; margin-bottom: 1.2rem; font-size:1.5rem;">
                 PROTECT THE GEM AT THE BOTTOM.<br>
@@ -406,7 +419,7 @@
             <button class="btn btn-secondary" style="margin-top: 20px;" onclick="window.backToMain()">MAIN MENU</button>
         </div>
 
-        <div id="pauseScreen" class="screen hidden">
+        <div id="pauseScreen" class="screen hidden" style="background: rgba(0,0,0,0.85);">
             <h2 class="text-white mb-4">GAME PAUSED</h2>
             <button class="btn" onclick="window.togglePause()">RESUME</button>
             <button class="btn btn-restart" onclick="window.restartFromPause()">RESTART</button>
@@ -593,6 +606,7 @@
                 setTimeout(() => {
                     startScreen.style.opacity = "1";
                     loadingScreen.classList.add('hidden');
+                    window.currentActiveScreenId = 'startScreen';
                 }, 50);
             }, 1800);
         };
@@ -616,6 +630,30 @@
         let joyRect = null;
         function updateJoyRect() { if (joyBase) joyRect = joyBase.getBoundingClientRect(); }
         window.addEventListener('resize', updateJoyRect);
+
+        // Track active screen for transitions
+        window.currentActiveScreenId = 'loadingScreen';
+
+        // Transition helper
+        window.fadeToScreen = (toId, fromId = window.currentActiveScreenId) => {
+            const from = fromId ? document.getElementById(fromId) : null;
+            const to = toId ? document.getElementById(toId) : null;
+
+            if (from) {
+                from.style.opacity = "0";
+                setTimeout(() => {
+                    from.classList.add('hidden');
+                    if (to) {
+                        to.classList.remove('hidden');
+                        setTimeout(() => { to.style.opacity = "1"; }, 50);
+                    }
+                }, 500);
+            } else if (to) {
+                to.classList.remove('hidden');
+                setTimeout(() => { to.style.opacity = "1"; }, 50);
+            }
+            window.currentActiveScreenId = toId;
+        };
 
         const AudioFX = {
             ctx: null,
@@ -658,7 +696,7 @@
             2: { name: "OCTAGAUNTLET", draw: () => { ctx.beginPath(); for(let i=0; i<8; i++){ const a = (i * Math.PI / 4) + Math.PI/8; ctx.lineTo(300 + Math.cos(a) * 300, 300 + Math.sin(a) * 300); } ctx.closePath(); }, isInside: (px, py) => { const dx = Math.abs(px - 300), dy = Math.abs(py - 300), s = 300 * Math.cos(Math.PI/8); return dx <= s && dy <= s && (dx + dy) <= 300 * Math.sqrt(2) * Math.cos(Math.PI/8); } },
             3: { name: "TRAPEZOID OF FEAR", draw: () => { ctx.beginPath(); ctx.moveTo(200, 20); ctx.lineTo(400, 20); ctx.lineTo(580, 580); ctx.lineTo(20, 580); ctx.closePath(); }, isInside: (px, py) => { if (py < 20 || py > 580) return false; const widthAtY = 200 + (py - 20) * (380 / 560); return px >= (300 - widthAtY) && px <= (300 + widthAtY); } },
             4: { 
-                name: "VOID STAR", 
+                name: "RUB EL HIZB", 
                 draw: () => { 
                     ctx.beginPath(); 
                     for(let i=0; i<16; i++){ 
@@ -823,7 +861,7 @@
                 this.wanderAmplitude = 0.35 + Math.random() * 0.45;
                 this.wanderPhase = Math.random() * Math.PI * 2;
                 if (this.type === "samurai") { 
-                    this.speed = 0.7; // Faster speed
+                    this.speed = 0.7;
                     this.size = 20 * this.mobileScale; 
                     this.color = "#444"; 
                     this.arrowType = 'regular'; 
@@ -847,7 +885,7 @@
                     } 
                     this.moveTimer -= dt; 
                     if (this.moveTimer <= 0) { 
-                        this.pauseTimer = 40; // Reduced pause
+                        this.pauseTimer = 40; 
                         this.moveTimer = 120; 
                         return; 
                     } 
@@ -1080,28 +1118,201 @@
             if(health <= 0) { health = 0; window.triggerDeath(); }
         }
 
-        window.triggerLevelClear = () => { gameActive = false; AudioFX.levelUp(); if (currentLevel === unlockedLevels && unlockedLevels < 4) { unlockedLevels++; window.saveUserProgress(unlockedLevels); } document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); document.getElementById('clearScoreVal').innerText = score; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); levelClearScreen.classList.remove('hidden'); };
-        window.nextLevel = () => { currentLevel++; levelClearScreen.classList.add('hidden'); window.resetGameParams(false); gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); gameLoop(); };
-        window.showLevelMenu = () => { AudioFX.init(); AudioFX.beep(); startScreen.classList.add('hidden'); levelMenuScreen.classList.remove('hidden'); levelGrid.innerHTML = ''; for (let i = 1; i <= 4; i++) { const card = document.createElement('div'); card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); levelGrid.appendChild(card); } };
-        window.startGameAtLevel = (lvl) => { AudioFX.init(); currentLevel = lvl; startScreen.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); if (requestID) cancelAnimationFrame(requestID); window.resetGameParams(false); score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); updateJoyRect(); gameLoop(); };
-        window.resetGame = () => { AudioFX.beep(); gameOverScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); window.startGameAtLevel(1); };
-        window.restartFromPause = () => { AudioFX.beep(); pauseScreen.classList.add('hidden'); window.resetGame(); };
-        window.togglePause = () => { if (!gameActive || isGameOver) return; isPaused = !isPaused; AudioFX.init(); AudioFX.beep(); pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; if (isPaused) { pauseScreen.classList.remove('hidden'); lastPauseTimestamp = Date.now(); } else { pauseScreen.classList.add('hidden'); pauseTimeOffset += (Date.now() - lastPauseTimestamp); } };
-        window.triggerEscape = (thief) => { if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
-        window.triggerDeath = () => { if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; arrows = []; items = []; fireballs = []; levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); };
-        window.endGameUI = (reason) => { gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; document.getElementById('finalScore').innerText = score; document.getElementById('finalLevel').innerText = currentLevel; gameOverScreen.classList.remove('hidden'); };
-        window.checkHighScoreFlow = (source) => { if (score > 0) { gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); submitScoreScreen.classList.remove('hidden'); document.getElementById('submitMessage').innerText = getSnarkyMessage(score); document.getElementById('submitScoreVal').innerText = score; initialsInput.focus(); } else window.backToMain(); };
-        window.submitScore = async () => { const init = initialsInput.value.trim() || 'AAA'; AudioFX.init(); AudioFX.beep(); submitScoreScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.saveHighScore(init, score, currentLevel); await window.changeLeaderboardTab(currentLevel); };
-        window.changeLeaderboardTab = async (lvl) => { AudioFX.beep(); document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); const content = document.getElementById('leaderboardContent'); content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; try { const top = await window.fetchLeaderboard(lvl); if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; else { let h = '<table class="leaderboard-list">'; top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); content.innerHTML = h + '</table>'; } } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } };
-        window.showLeaderboard = async () => { AudioFX.beep(); startScreen.classList.add('hidden'); leaderboardScreen.classList.remove('hidden'); await window.changeLeaderboardTab(1); };
-        window.backToMain = () => { AudioFX.beep(); joyContainer.classList.add('hidden'); levelMenuScreen.classList.add('hidden'); leaderboardScreen.classList.add('hidden'); gameOverScreen.classList.add('hidden'); levelClearScreen.classList.add('hidden'); pauseScreen.classList.add('hidden'); submitScoreScreen.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); topHUD.classList.add('hidden'); startScreen.classList.remove('hidden'); startScreen.style.opacity = "1"; gameActive = false; isPaused = false; timeVal.classList.remove('timer-warning'); };
-        window.resetGameParams = (fullReset) => { 
+        window.triggerLevelClear = () => { 
+            gameActive = false; AudioFX.levelUp(); 
+            if (currentLevel === unlockedLevels && unlockedLevels < 4) { 
+                unlockedLevels++; window.saveUserProgress(unlockedLevels); 
+            } 
+            document.getElementById('nextLevelBtn').classList.toggle('hidden', currentLevel >= 4); 
+            document.getElementById('clearScoreVal').innerText = score; 
+            topHUD.style.opacity = "0";
+            levelDisplayHUD.style.opacity = "0";
+            pauseBtn.style.opacity = "0";
+            setTimeout(() => {
+                topHUD.classList.add('hidden');
+                levelDisplayHUD.classList.add('hidden');
+                pauseBtn.classList.add('hidden');
+                window.fadeToScreen('levelClearScreen', null);
+            }, 500);
+        };
+
+        window.nextLevel = () => { 
+            currentLevel++; 
+            window.fadeToScreen(null, 'levelClearScreen');
+            setTimeout(() => {
+                window.resetGameParams(false, true); 
+                gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); 
+                topHUD.classList.remove('hidden'); levelDisplayHUD.classList.remove('hidden'); pauseBtn.classList.remove('hidden');
+                setTimeout(() => {
+                    topHUD.style.opacity = "1"; levelDisplayHUD.style.opacity = "1"; pauseBtn.style.opacity = "1";
+                }, 50);
+                gameLoop();
+            }, 500);
+        };
+
+        window.showLevelMenu = () => { 
+            AudioFX.beep(); 
+            levelGrid.innerHTML = ''; 
+            for (let i = 1; i <= 4; i++) { 
+                const card = document.createElement('div'); 
+                card.className = `level-card ${i <= unlockedLevels ? 'unlocked' : 'locked'}`; 
+                card.innerHTML = `<h3>LVL ${i}</h3><p>${arenaShapes[i].name}</p>`; 
+                if (i <= unlockedLevels) card.onclick = () => window.startGameAtLevel(i); 
+                levelGrid.appendChild(card); 
+            } 
+            window.fadeToScreen('levelMenuScreen');
+        };
+
+        window.startGameAtLevel = (lvl) => { 
+            AudioFX.init(); 
+            const currentMenu = window.currentActiveScreenId;
+            // Only fade if coming from a full menu screen
+            if (currentMenu) window.fadeToScreen(null, currentMenu); 
+
+            setTimeout(() => {
+                currentLevel = lvl; 
+                joyContainer.classList.remove('hidden'); pauseBtn.classList.remove('hidden'); 
+                levelDisplayHUD.classList.remove('hidden'); topHUD.classList.remove('hidden'); 
+                setTimeout(() => {
+                    joyContainer.style.opacity = "1"; pauseBtn.style.opacity = "1";
+                    levelDisplayHUD.style.opacity = "1"; topHUD.style.opacity = "1";
+                }, 50);
+
+                if (requestID) cancelAnimationFrame(requestID); 
+                window.resetGameParams(false, true); 
+                score = 0; gameActive = true; startTime = Date.now(); spawnThief(); spawnItem(); updateJoyRect(); gameLoop(); 
+            }, (currentMenu ? 500 : 0));
+        };
+
+        window.resetGame = () => { 
+            AudioFX.beep(); 
+            window.fadeToScreen(null, window.currentActiveScreenId);
+            setTimeout(() => window.startGameAtLevel(1), 500);
+        };
+
+        window.restartFromPause = () => { 
+            AudioFX.beep(); 
+            isPaused = false;
+            // Snap pause screen away instantly
+            pauseScreen.classList.add('hidden');
+            pauseScreen.style.opacity = "0";
+            pauseBtn.innerText = 'PAUSE';
+            // Restart the level immediately
+            window.startGameAtLevel(currentLevel);
+        };
+
+        window.togglePause = () => { 
+            if (!gameActive || isGameOver) return; 
+            AudioFX.init(); AudioFX.beep(); 
+            isPaused = !isPaused; 
+            pauseBtn.innerText = isPaused ? 'RESUME' : 'PAUSE'; 
+            if (isPaused) { 
+                // Snap pause screen on instantly
+                pauseScreen.classList.remove('hidden'); 
+                pauseScreen.style.opacity = "1";
+                lastPauseTimestamp = Date.now(); 
+            } else { 
+                // Snap pause screen off instantly
+                pauseScreen.style.opacity = "0";
+                pauseScreen.classList.add('hidden');
+                pauseTimeOffset += (Date.now() - lastPauseTimestamp); 
+            } 
+        };
+
+        window.triggerEscape = (thief) => { 
+            if (isGameOver) return; isGameOver = true; AudioFX.gemLost(); gameActive = false; isEndingAnimation = true; winningThief = thief; 
+            arrows = []; items = []; fireballs = []; 
+            topHUD.style.opacity = "0"; levelDisplayHUD.style.opacity = "0"; pauseBtn.style.opacity = "0"; joyContainer.style.opacity = "0";
+        };
+
+        window.triggerDeath = () => { 
+            if (isGameOver) return; isGameOver = true; AudioFX.powerDown(); gameActive = false; isDeathAnimation = true; deathTimer = 0; 
+            arrows = []; items = []; fireballs = []; 
+            topHUD.style.opacity = "0"; levelDisplayHUD.style.opacity = "0"; pauseBtn.style.opacity = "0"; joyContainer.style.opacity = "0";
+        };
+
+        window.endGameUI = (reason) => { 
+            gameActive = false; isEndingAnimation = false; isDeathAnimation = false; isPaused = false; 
+            gameOverTitle.innerText = reason === 'health' ? "GAME OVER" : "GEM STOLEN!"; 
+            document.getElementById('finalScore').innerText = score; 
+            document.getElementById('finalLevel').innerText = currentLevel; 
+            window.fadeToScreen('gameOverScreen', null);
+        };
+
+        window.checkHighScoreFlow = (source) => { 
+            if (score > 0) { 
+                document.getElementById('submitMessage').innerText = getSnarkyMessage(score); 
+                document.getElementById('submitScoreVal').innerText = score; 
+                window.fadeToScreen('submitScoreScreen');
+                setTimeout(() => initialsInput.focus(), 600);
+            } else window.backToMain(); 
+        };
+
+        window.submitScore = async () => { 
+            const init = initialsInput.value.trim() || 'AAA'; 
+            AudioFX.init(); AudioFX.beep(); 
+            window.fadeToScreen('leaderboardScreen');
+            await window.saveHighScore(init, score, currentLevel); 
+            await window.changeLeaderboardTab(currentLevel); 
+        };
+
+        window.changeLeaderboardTab = async (lvl) => { 
+            AudioFX.beep(); 
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i + 1 === lvl)); 
+            const content = document.getElementById('leaderboardContent'); 
+            content.innerHTML = '<p class="loading-text">FETCHING DATA...</p>'; 
+            try { 
+                const top = await window.fetchLeaderboard(lvl); 
+                if (!top || top.length === 0) content.innerHTML = `<p>NO SCORES FOR LVL ${lvl} YET.</p>`; 
+                else { 
+                    let h = '<table class="leaderboard-list">'; 
+                    top.forEach((s, i) => h += `<tr><td class="rank-col">#${i + 1}</td><td class="name-col">${s.name}</td><td class="score-col">${s.score}</td></tr>`); 
+                    content.innerHTML = h + '</table>'; 
+                } 
+            } catch (err) { content.innerHTML = '<p class="text-red">ERROR CONNECTING</p>'; } 
+        };
+
+        window.showLeaderboard = async () => { AudioFX.beep(); window.fadeToScreen('leaderboardScreen'); await window.changeLeaderboardTab(1); };
+
+        window.backToMain = () => { 
+            AudioFX.beep(); 
+            
+            if (requestID) cancelAnimationFrame(requestID);
+            ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            window.resetGameParams(false, false); 
+
+            // Snap off pause screen instantly if visible
+            pauseScreen.classList.add('hidden');
+            pauseScreen.style.opacity = "0";
+
+            // Reset flags
+            isPaused = false;
+            gameActive = false;
+            isGameOver = false;
+            isEndingAnimation = false;
+            isDeathAnimation = false;
+            pauseBtn.innerText = 'PAUSE';
+
+            // Handle hiding gameplay UI
+            topHUD.style.opacity = "0"; levelDisplayHUD.style.opacity = "0"; pauseBtn.style.opacity = "0"; joyContainer.style.opacity = "0";
+            setTimeout(() => {
+                topHUD.classList.add('hidden'); levelDisplayHUD.classList.add('hidden'); pauseBtn.classList.add('hidden'); joyContainer.classList.add('hidden');
+            }, 500);
+            
+            window.fadeToScreen('startScreen'); 
+            timeVal.classList.remove('timer-warning'); 
+        };
+
+        window.resetGameParams = (fullReset, isStarting = false) => { 
             if (spawnThiefTimeout) clearTimeout(spawnThiefTimeout); if (spawnItemTimeout) clearTimeout(spawnItemTimeout); 
             if (fullReset) { currentLevel = 1; } score = 0; health = 100; poisonTimer = 0; arenaRotation = 0; isEndingAnimation = false; isDeathAnimation = false; isGameOver = false; isPaused = false; pauseTimeOffset = 0; deathTimer = 0; winningThief = null; thieves = []; arrows = []; particles = []; items = []; fireballs = []; visualReachScale = 1.0; currentTime = LEVEL_TIME; pauseBtn.innerText = 'PAUSE'; gemPos.y = 540; fireballPowerTimer = 0; lastTimestamp = 0;
             mouseX = 300; mouseY = 300; 
             leftTentacle.reset(); rightTentacle.reset();
             timeVal.classList.remove('timer-warning');
-            obstacles = []; const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
+            obstacles = []; 
+            if (isStarting) {
+                const numObs = currentLevel * 2; for(let i=0; i<numObs; i++) obstacles.push(new Obstacle());
+            }
         };
 
         initialsInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') window.submitScore(); });
