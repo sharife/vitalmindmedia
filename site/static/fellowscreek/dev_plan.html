@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellows Creek — Development Plan</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark mode palette (matching logic map v3) ─────────────────
+   Background:  #121212
+   Surface:     #1c2529  (card background)
+   Border base: #333     (subtle structural lines)
+
+   Accent colours:
+     slate-blue  #1a1e32  / text #a8ccec / sub #7aa8d0
+     sage-green  #162419  / text #96d4ae / sub #68aa82
+     ochre       #231a0d  / text #e0a85a / sub #b07c38
+     rust/coral  #231110  / text #e08870 / sub #b05e48
+     steel/gray  #1c2529  / text #c2dce6 / sub #8aaab8
+     ocean-blue  #111c2a  / text #80c4e8 / sub #5096c0
+     moss-green  #141c10  / text #9ed07e / sub #6ea050
+   ──────────────────────────────────────────────────────────── */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* rem anchor */
+  background: #121212;
+  color: #8aaab8;
+  padding: 2rem;
+  min-width: 780px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4f7; }
+.subtitle { font-size: 1.0rem; color: #7fa8b8; margin-bottom: 2rem; line-height: 1.6; }
+
+/* ── Section labels ────────────────────────────────────────── */
+.section { margin-bottom: 2.5rem; }
+.section-label {
+  font-size: 0.79rem; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #555;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Scope dividers ────────────────────────────────────────── */
+.scope-divider {
+  font-size: 0.79rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #555;
+  padding: 0.5rem 0; border-top: 0.5px solid #333;
+  margin-top: 0.25rem; margin-bottom: 0.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.scope-total { font-size: 0.86rem; font-weight: 500; }
+.scope-total-blue  { color: #7aa8d0; }
+.scope-total-purple { color: #a8ccec; }
+.scope-total-amber { color: #e0a85a; }
+
+/* ── Colour token classes ──────────────────────────────────── */
+.c-gray   { background:#1c2529; border-color:#5e8090; }
+.c-gray   .nt { color:#c2dce6; } .c-gray   .ns { color:#8aaab8; }
+.c-purple { background:#1a1e32; border-color:#7a6ed0; }
+.c-purple .nt { color:#a8ccec; } .c-purple .ns { color:#7aa8d0; }
+.c-teal   { background:#162419; border-color:#3da874; }
+.c-teal   .nt { color:#96d4ae; } .c-teal   .ns { color:#68aa82; }
+.c-amber  { background:#231a0d; border-color:#c9883a; }
+.c-amber  .nt { color:#e0a85a; } .c-amber  .ns { color:#b07c38; }
+.c-coral  { background:#231110; border-color:#c0604a; }
+.c-coral  .nt { color:#e08870; } .c-coral  .ns { color:#b05e48; }
+.c-blue   { background:#111c2a; border-color:#4a9ec8; }
+.c-blue   .nt { color:#80c4e8; } .c-blue   .ns { color:#5096c0; }
+.c-green  { background:#141c10; border-color:#6aaa44; }
+.c-green  .nt { color:#9ed07e; } .c-green  .ns { color:#6ea050; }
+
+/* ── Base card ─────────────────────────────────────────────── */
+.card {
+  border: 1px solid #5e8090;
+  border-radius: 8px;
+  padding: 13px 15px;
+  background: #1c2529;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Summary stat cards ────────────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.stat-card {
+  background: #1c2529;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: center;
+}
+.stat-val { font-size: 1.44rem; font-weight: 600; color: #eef4f7; margin-bottom: 2px; }
+.stat-sub { font-size: 0.86rem; color: #8aaab8; }
+
+/* ── Stack grid (tech stack, AI tools) ────────────────────── */
+.stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.stack-card {
+  background: #1c2529;
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 11px 15px 13px;
+}
+.stack-layer {
+  font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #555; margin-bottom: 6px;
+}
+.stack-name { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 3px; }
+.stack-reason { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+
+/* ── Phase cards ───────────────────────────────────────────── */
+.phase-card {
+  border: 1px solid;
+  border-radius: 8px;
+  padding: 13px 15px;
+  margin-bottom: 0.75rem;
+  transition: filter .15s;
+}
+.phase-card:hover { filter: brightness(1.08); }
+.phase-card.changed { border-left-width: 4px; padding-left: 13px; }
+
+.phase-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 12px; margin-bottom: 0.75rem;
+}
+.phase-left { display: flex; align-items: center; gap: 10px; }
+
+.phase-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.79rem; font-weight: 600; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+/* Phase number colour variants */
+.p1 { background:#162419; color:#96d4ae; border-color:#3da874; }
+.p2 { background:#111c2a; color:#80c4e8; border-color:#4a9ec8; }
+.p3 { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+.p4 { background:#1a1e32; color:#a8ccec; border-color:#7a6ed0; }
+.p5 { background:#231110; color:#e08870; border-color:#c0604a; }
+.p6 { background:#141c10; color:#9ed07e; border-color:#6aaa44; }
+.p7 { background:#1c2529; color:#c2dce6; border-color:#5e8090; }
+.pS { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+
+.phase-title { font-size: 1.0rem; font-weight: 600; color: #c2dce6; }
+.phase-subtitle { font-size: 0.86rem; color: #8aaab8; margin-top: 2px; line-height: 1.5; }
+
+.phase-meta { text-align: right; flex-shrink: 0; }
+.phase-weeks { font-size: 0.93rem; font-weight: 500; color: #c2dce6; }
+.phase-cost  { font-size: 0.86rem; color: #8aaab8; }
+
+/* ── New badge ─────────────────────────────────────────────── */
+.new-badge {
+  font-size: 0.72rem; font-weight: 500; padding: 1px 7px;
+  border-radius: 10px; margin-left: 6px; vertical-align: middle;
+  background: #162419; color: #96d4ae; border: 1px solid #3da874;
+}
+
+/* ── Scope tags ────────────────────────────────────────────── */
+.scope-tag {
+  font-size: 0.72rem; font-weight: 500; padding: 2px 7px;
+  border-radius: 10px; margin-left: 5px; vertical-align: middle;
+  border: 1px solid #333;
+}
+.scope1-tag { background:#111c2a; color:#7aa8d0; border-color:#4a9ec8; }
+.scope2-tag { background:#1a1e32; color:#a8ccec; border-color:#7a6ed0; }
+.scopeS-tag { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+
+/* ── Deliverable chips ─────────────────────────────────────── */
+.deliverables { display: flex; flex-wrap: wrap; gap: 6px; }
+.deliverable {
+  font-size: 0.79rem; padding: 3px 8px;
+  background: #121212; border: 1px solid #333;
+  border-radius: 4px; color: #8aaab8;
+}
+
+/* ── Budget bars ───────────────────────────────────────────── */
+.budget-section-label {
+  font-size: 0.79rem; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #555;
+  margin: 16px 0 10px;
+}
+.budget-section-label:first-child { margin-top: 0; }
+.budget-bar-wrap { margin-bottom: 10px; }
+.budget-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.budget-label { font-size: 0.93rem; color: #c2dce6; }
+.budget-val   { font-size: 0.93rem; font-weight: 500; color: #8aaab8; }
+.bar-bg { height: 5px; background: #1c2529; border-radius: 3px; overflow: hidden; border: 1px solid #333; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.total-row {
+  display: flex; justify-content: space-between;
+  padding-top: 12px; border-top: 0.5px solid #333; margin-top: 8px;
+}
+.total-label { font-size: 1.0rem; font-weight: 600; color: #eef4f7; }
+.total-val   { font-size: 1.0rem; font-weight: 600; color: #96d4ae; }
+
+/* ── Risk rows ─────────────────────────────────────────────── */
+.risk-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 9px 0; border-bottom: 0.5px solid #333;
+}
+.risk-row:last-child { border-bottom: none; }
+.risk-pill {
+  font-size: 0.72rem; font-weight: 500; padding: 2px 7px;
+  border-radius: 10px; flex-shrink: 0; margin-top: 2px;
+  border: 1px solid #333;
+}
+.risk-high { background:#231110; color:#e08870; border-color:#c0604a; }
+.risk-med  { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+.risk-low  { background:#141c10; color:#9ed07e; border-color:#6aaa44; }
+.risk-label { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 2px; }
+.risk-mitigation { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+
+/* ── Decision cards (2-col grid) ───────────────────────────── */
+.decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.decision-card {
+  background: #1c2529; border: 1px solid; border-radius: 8px;
+  padding: 13px 15px;
+}
+.decision-title { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 4px; }
+.decision-body  { font-size: 0.86rem; color: #8aaab8; line-height: 1.6; }
+
+/* ── AI tool cards ─────────────────────────────────────────── */
+.ai-cat  { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #555; margin-bottom: 6px; }
+.ai-tool { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 2px; }
+.ai-use  { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+
+/* ── nt / ns shorthands (match logic map) ──────────────────── */
+.nt { font-size: 1.0rem; font-weight: 600; margin-bottom: 0.25rem; }
+.ns { font-size: 0.86rem; line-height: 1.55; }
+</style>
+</head>
+<body>
+
+<h1>Fellows Creek — Development Plan</h1>
+<br />
+<!-- ── Project summary ─────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Project summary</div>
+  <div class="stat-grid">
+    <div class="stat-card c-gray">
+      <div class="stat-val">50</div>
+      <div class="stat-sub">weeks (core)</div>
+    </div>
+    <div class="stat-card c-blue">
+      <div class="stat-val">+8</div>
+      <div class="stat-sub">weeks Spanish</div>
+    </div>
+    <div class="stat-card c-teal">
+      <div class="stat-val">$148.9k</div>
+      <div class="stat-sub">core budget</div>
+    </div>
+    <div class="stat-card c-amber">
+      <div class="stat-val">+$7.5k</div>
+      <div class="stat-sub">Spanish budget</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Tech stack ──────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Recommended tech stack</div>
+  <div class="stack-grid">
+    <div class="stack-card c-blue">
+      <div class="stack-layer">Frontend</div>
+      <div class="stack-name nt">React + TypeScript</div>
+      <div class="stack-reason ns">Component-based UI maps cleanly to role dashboards. TS catches bugs early in a complex multiplayer state machine. i18n-ready for Spanish.</div>
+    </div>
+    <div class="stack-card c-teal">
+      <div class="stack-layer">Game rendering</div>
+      <div class="stack-name nt">PixiJS</div>
+      <div class="stack-reason ns">WebGL-based 2D renderer ideal for the isometric tile map, animated water states, and real-time updates without heavy 3D overhead.</div>
+    </div>
+    <div class="stack-card c-purple">
+      <div class="stack-layer">Multiplayer</div>
+      <div class="stack-name nt">Colyseus</div>
+      <div class="stack-reason ns">Purpose-built multiplayer game server with room management and authoritative state sync. Stable across language clients (critical for Spanish launch).</div>
+    </div>
+    <div class="stack-card c-gray">
+      <div class="stack-layer">Backend</div>
+      <div class="stack-name nt">Node.js + Express</div>
+      <div class="stack-reason ns">Native Colyseus match. Fast iteration and easily deployable on Fly.io for low-latency WebSocket connections.</div>
+    </div>
+    <div class="stack-card c-gray">
+      <div class="stack-layer">Database</div>
+      <div class="stack-name nt">Supabase (Postgres)</div>
+      <div class="stack-reason ns">Player sessions, game state snapshots, analytics. Built-in auth and locale field to support language preferences post-launch.</div>
+    </div>
+    <div class="stack-card c-amber">
+      <div class="stack-layer">Localization</div>
+      <div class="stack-name nt">react-i18next</div>
+      <div class="stack-reason ns">Industry-standard i18n library for React. Handles Spanish text expansion (20–30% longer), dynamic variables, and runtime language toggle.</div>
+    </div>
+    <div class="stack-card c-green">
+      <div class="stack-layer">Asset pipeline</div>
+      <div class="stack-name nt">Aseprite + TexturePacker</div>
+      <div class="stack-reason ns">Aseprite for isometric tile creation. TexturePacker bundles sprites into atlases. Plan for text-free art assets to simplify Spanish localization.</div>
+    </div>
+    <div class="stack-card c-gray">
+      <div class="stack-layer">Hosting</div>
+      <div class="stack-name nt">Vercel + Fly.io</div>
+      <div class="stack-reason ns">Vercel for zero-config frontend deploys with instant language-toggle support. Fly.io for the persistent WebSocket game server with auto-scaling.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AI tools ────────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">AI-assisted development tools</div>
+  <div class="stack-grid">
+    <div class="stack-card c-blue">
+      <div class="ai-cat">Code generation</div>
+      <div class="ai-tool nt">Claude / Cursor</div>
+      <div class="ai-use ns">Scaffold boilerplate, write water simulation logic, generate Colyseus room handlers. Also useful for translating scientific logic maps into pseudocode.</div>
+    </div>
+    <div class="stack-card c-teal">
+      <div class="ai-cat">Scientific research</div>
+      <div class="ai-tool nt">Elicit / Consensus</div>
+      <div class="ai-use ns">AI-powered literature search tools to accelerate the Phase 1 review of river hydrology and geomorphology papers.</div>
+    </div>
+    <div class="stack-card c-gray">
+      <div class="ai-cat">Art &amp; assets</div>
+      <div class="ai-tool nt">Midjourney / SD</div>
+      <div class="ai-use ns">Generate concept art for isometric tiles as engineering placeholders during phases 2–4, before final production art arrives in Phase 5.</div>
+    </div>
+    <div class="stack-card c-purple">
+      <div class="ai-cat">Game design</div>
+      <div class="ai-tool nt">Claude</div>
+      <div class="ai-use ns">Balance budget numbers across 4 asymmetric roles, generate climate event scripts, and draft tutorial text in both English and Spanish.</div>
+    </div>
+    <div class="stack-card c-amber">
+      <div class="ai-cat">Localization</div>
+      <div class="ai-tool nt">DeepL + Claude</div>
+      <div class="ai-use ns">First-pass Spanish translation, then Claude for domain review of hydrological and agricultural terms (e.g. culvert, hydrodynamics, riparian buffer).</div>
+    </div>
+    <div class="stack-card c-green">
+      <div class="ai-cat">UX research</div>
+      <div class="ai-tool nt">Dovetail AI</div>
+      <div class="ai-use ns">Auto-transcribe and theme-code all six playtesting workshops, surfacing friction patterns across both English and Spanish sessions.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Development phases ──────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Development phases</div>
+
+  <!-- Scope 1 -->
+  <div class="scope-divider">
+    <span>Scope 1 — prototype <span class="scope-tag scope1-tag">Weeks 1–24</span></span>
+    <span class="scope-total scope-total-blue">$76,410</span>
+  </div>
+
+  <div class="phase-card c-teal changed">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p1">1</div>
+        <div>
+          <div class="phase-title">Scientific research &amp; expert consultation <span class="new-badge">Extended</span></div>
+          <div class="phase-subtitle">Hydrology and geomorphology in real science — extra time for field validation and expert iteration</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 1–6</div>
+        <div class="phase-cost">$7,000</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Literature review</span>
+      <span class="deliverable">Hydrologist interviews</span>
+      <span class="deliverable">Wood debris field validation</span>
+      <span class="deliverable">Water logic map</span>
+      <span class="deliverable">Engineering handoff doc</span>
+      <span class="deliverable">Expert review of logic map</span>
+    </div>
+  </div>
+
+  <div class="phase-card c-blue changed">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p2">2</div>
+        <div>
+          <div class="phase-title">Foundation &amp; game board <span class="new-badge">Extended → Wks 7–12</span></div>
+          <div class="phase-subtitle">Core visual layout and multiplayer engine — extra time for Colyseus state machine and isometric renderer</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 7–12</div>
+        <div class="phase-cost">incl. in $30k</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">PixiJS isometric tile engine</span>
+      <span class="deliverable">Colyseus game server</span>
+      <span class="deliverable">Role selection UI</span>
+      <span class="deliverable">Player dashboard shell</span>
+      <span class="deliverable">Real-time state sync</span>
+      <span class="deliverable">Supabase schema</span>
+      <span class="deliverable">i18n architecture (react-i18next)</span>
+    </div>
+  </div>
+
+  <div class="phase-card c-amber">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p3">3</div>
+        <div>
+          <div class="phase-title">Bringing the creek to life <span class="new-badge">Extended</span></div>
+          <div class="phase-subtitle">Water simulation, wood logic, Farmer + Ecologist roles — most technically complex phase</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 13–22</div>
+        <div class="phase-cost">$20,000</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Research-backed water flow sim</span>
+      <span class="deliverable">Fallen wood mechanic</span>
+      <span class="deliverable">Log classification system</span>
+      <span class="deliverable">Jam structure check logic</span>
+      <span class="deliverable">Flood risk track</span>
+      <span class="deliverable">Infrastructure placement</span>
+      <span class="deliverable">Farmer role logic</span>
+      <span class="deliverable">Ecologist role logic</span>
+      <span class="deliverable">Scoring metrics</span>
+      <span class="deliverable">Admin balance panel</span>
+    </div>
+  </div>
+
+  <div class="phase-card c-purple changed">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p4">4</div>
+        <div>
+          <div class="phase-title">Playable prototype <span class="new-badge">Internal only</span></div>
+          <div class="phase-subtitle">Vertical slice + stakeholder &amp; expert playtesting</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 23–24</div>
+        <div class="phase-cost">$1,910</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">30-min game loop</span>
+      <span class="deliverable">Randomized map gen</span>
+      <span class="deliverable">Cloud deployment</span>
+      <span class="deliverable">Expert validation workshops</span>
+      <span class="deliverable">Physics feedback</span>
+      <span class="deliverable">Iteration backlog</span>
+    </div>
+  </div>
+
+  <!-- Mid-project buffer -->
+  <div class="scope-divider" style="margin-top:1.5rem;">
+    <span>Mid-project buffer — playtesting &amp; iteration <span class="scope-tag scope1-tag">Weeks 25–32</span></span>
+    <span class="scope-total scope-total-blue">incl. in Scope 1</span>
+  </div>
+
+  <div class="phase-card c-gray changed">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p4" style="background:#162419;color:#96d4ae;border-color:#3da874;">4B</div>
+        <div>
+          <div class="phase-title">Mid-project playtesting &amp; iteration <span class="new-badge">New</span></div>
+          <div class="phase-subtitle">Dedicated 8-week buffer between Scope 1 and Scope 2 — fix physics, rebalance simulation, incorporate expert feedback before full production begins</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 25–32</div>
+        <div class="phase-cost">incl. in $77k</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Extended expert review sessions</span>
+      <span class="deliverable">Water simulation tuning</span>
+      <span class="deliverable">Wood mechanic calibration</span>
+      <span class="deliverable">Role feedback incorporation</span>
+      <span class="deliverable">Scoring system revision</span>
+      <span class="deliverable">Community stakeholder workshops</span>
+      <span class="deliverable">Revised scope 2 backlog</span>
+    </div>
+  </div>
+
+  <!-- Scope 2 -->
+  <div class="scope-divider" style="margin-top:1.5rem;">
+    <span>Scope 2 — full production <span class="scope-tag scope2-tag">Weeks 33–50</span></span>
+    <span class="scope-total scope-total-purple">$72,500</span>
+  </div>
+
+  <div class="phase-card c-coral">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p5">5</div>
+        <div>
+          <div class="phase-title">Full production &amp; feature expansion <span class="new-badge">Extended</span></div>
+          <div class="phase-subtitle">All roles, climate events, final art &amp; audio — extended to absorb scope 2 backlog from mid-project testing</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 33–42</div>
+        <div class="phase-cost">$43k + $15k</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Road Manager role</span>
+      <span class="deliverable">Land Manager role</span>
+      <span class="deliverable">Climate disruptions</span>
+      <span class="deliverable">Final animated tilesets</span>
+      <span class="deliverable">Environmental soundscapes</span>
+      <span class="deliverable">i18n architecture prep</span>
+      <span class="deliverable">Tutorial system</span>
+      <span class="deliverable">Analytics event logging</span>
+    </div>
+  </div>
+
+  <div class="phase-card c-green">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p6">6</div>
+        <div>
+          <div class="phase-title">Full-scale playtesting &amp; final balancing <span class="new-badge">Extended</span></div>
+          <div class="phase-subtitle">All four roles, climate events, economy tuning — extra week for deeper role asymmetry calibration</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 43–47</div>
+        <div class="phase-cost">$2,000 + $5k</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">4-role playtest workshops</span>
+      <span class="deliverable">Climate event testing</span>
+      <span class="deliverable">Economy balancing</span>
+      <span class="deliverable">Role ability tuning</span>
+      <span class="deliverable">Final bug fixing</span>
+      <span class="deliverable">Comprehensive QA</span>
+    </div>
+  </div>
+
+  <div class="phase-card c-gray">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num p7">7</div>
+        <div>
+          <div class="phase-title">Deployment &amp; launch <span class="new-badge">Extended</span></div>
+          <div class="phase-subtitle">Public release, live monitoring, and post-launch stability window</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Weeks 48–50</div>
+        <div class="phase-cost">incl. in $7.5k</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Public web deployment</span>
+      <span class="deliverable">Server scaling</span>
+      <span class="deliverable">Launch monitoring</span>
+      <span class="deliverable">Performance QA</span>
+      <span class="deliverable">Post-launch hotfix window</span>
+    </div>
+  </div>
+
+  <!-- Spanish -->
+  <div class="scope-divider" style="margin-top:1.5rem;">
+    <span>Spanish localization — post-launch <span class="scope-tag scopeS-tag">+6–8 weeks</span></span>
+    <span class="scope-total scope-total-amber">$7,500</span>
+  </div>
+
+  <div class="phase-card c-amber changed">
+    <div class="phase-header">
+      <div class="phase-left">
+        <div class="phase-num pS">S</div>
+        <div>
+          <div class="phase-title">Spanish implementation <span class="new-badge">Post-launch</span></div>
+          <div class="phase-subtitle">Full localization with native Spanish-speaking technical staff embedded — external LQA and translation costs reduced accordingly</div>
+        </div>
+      </div>
+      <div class="phase-meta">
+        <div class="phase-weeks">Post-launch</div>
+        <div class="phase-cost">$7,500</div>
+      </div>
+    </div>
+    <div class="deliverables">
+      <span class="deliverable">Technical/scientific translation</span>
+      <span class="deliverable">UI layout adjustment (+25% text)</span>
+      <span class="deliverable">Art asset re-localization</span>
+      <span class="deliverable">Native LQA review</span>
+      <span class="deliverable">Language toggle UI</span>
+      <span class="deliverable">Multiplayer cross-language QA</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Budget ───────────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Budget allocation — full project</div>
+  <div class="card c-gray" style="padding:16px 18px;">
+
+    <div class="budget-section-label">Scope 1 (incl. mid-project buffer) — $76,410</div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Programming (core app + multiplayer)</span><span class="budget-val">$30,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#1D9E75;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Mechanics &amp; simulation</span><span class="budget-val">$20,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:33%;background:#5096c0;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">UI design &amp; custom art</span><span class="budget-val">$10,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:17%;background:#b05e48;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Infrastructure (8 months, incl. mid-project buffer)</span><span class="budget-val">$7,500</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#8aaab8;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Scientific research &amp; expert interviews</span><span class="budget-val">$7,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:11%;background:#7aa8d0;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Prototype playtesting workshops</span><span class="budget-val">$1,910</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:3%;background:#6ea050;"></div></div>
+    </div>
+
+    <div class="budget-section-label">Scope 2 — $72,500</div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Programming (remaining roles + climate events)</span><span class="budget-val">$43,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:71%;background:#1D9E75;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Final art &amp; audio</span><span class="budget-val">$15,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:25%;background:#b05e48;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Infrastructure (launch + 3 months)</span><span class="budget-val">$7,500</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#8aaab8;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Economy balancing &amp; QA</span><span class="budget-val">$5,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:8%;background:#b07c38;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Full-scale playtesting</span><span class="budget-val">$2,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:3%;background:#6ea050;"></div></div>
+    </div>
+
+    <div class="budget-section-label">Spanish localization — $7,500</div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Technical &amp; scientific translation</span><span class="budget-val">$1,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:7%;background:#e0a85a;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">UI/UX layout adjustment</span><span class="budget-val">$3,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:21%;background:#e0a85a;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Linguistic quality assurance (LQA)</span><span class="budget-val">$2,000</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:14%;background:#e0a85a;"></div></div>
+    </div>
+    <div class="budget-bar-wrap">
+      <div class="budget-row"><span class="budget-label">Deployment &amp; final polish</span><span class="budget-val">$1,500</span></div>
+      <div class="bar-bg"><div class="bar-fill" style="width:10%;background:#e0a85a;"></div></div>
+    </div>
+
+    <div class="total-row">
+      <span class="total-label">Total (core + Spanish)</span>
+      <span class="total-val">$156,410</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Risks ────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Key risks &amp; mitigations</div>
+  <div class="card c-gray" style="padding:4px 15px;">
+    <div class="risk-row">
+      <span class="risk-pill risk-high">High</span>
+      <div>
+        <div class="risk-label">Research-to-code translation (new Phase 1 risk)</div>
+        <div class="risk-mitigation">The science team must produce a concrete "logic map" document — not just research notes — before Phase 2 begins. Engineer should attend at least one expert interview to ask implementation-specific questions.</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-pill risk-high">High</span>
+      <div>
+        <div class="risk-label">Water simulation complexity</div>
+        <div class="risk-mitigation">Use a tile-based flow approximation rather than true fluid dynamics. The Phase 1 logic map should define the minimum viable physics rules — scope these tightly before Phase 3 begins.</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-pill risk-high">High</span>
+      <div>
+        <div class="risk-label">Multiplayer state conflicts</div>
+        <div class="risk-mitigation">Authoritative server model via Colyseus from day one. Clients send intents, server owns truth. Verify this holds across English and Spanish clients during Spanish QA.</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-pill risk-med">Med</span>
+      <div>
+        <div class="risk-label">Spanish text expansion breaking UI</div>
+        <div class="risk-mitigation">Build all UI components with flexible-width containers from Phase 2 onward. Avoid fixed-width text buttons. Use react-i18next from the start so the toggle is a post-launch config change, not a rewrite.</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-pill risk-med">Med</span>
+      <div>
+        <div class="risk-label">Role balance (4 asymmetric players)</div>
+        <div class="risk-mitigation">Build an admin panel to adjust budget numbers without code deploys. Use Phase 4 and Phase 6 workshop data to calibrate in two rounds before launch.</div>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-pill risk-low">Low</span>
+      <div>
+        <div class="risk-label">Post-launch server costs</div>
+        <div class="risk-mitigation">~$170/month. Fly.io auto-scales down during off-hours. Budget a 6-month hosting reserve (~$1,020) into the Scope 2 infrastructure allocation.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Key decisions ────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Key decisions to make before Phase 2</div>
+  <div class="decision-grid">
+    <div class="decision-card c-blue">
+      <div class="decision-title nt">i18n architecture — decide now</div>
+      <div class="decision-body ns">Even though Spanish is post-launch, baking react-i18next into the component architecture in Phase 2 costs almost nothing. Retrofitting it after launch could require touching every UI component.</div>
+    </div>
+    <div class="decision-card c-teal">
+      <div class="decision-title nt">Text-free art assets</div>
+      <div class="decision-body ns">Direct the 2D artist to avoid embedded English text in tiles (signs, labels, map overlays). This eliminates an entire Spanish localization cost category and speeds up the post-launch timeline.</div>
+    </div>
+    <div class="decision-card c-gray">
+      <div class="decision-title nt">Classroom vs. public audience</div>
+      <div class="decision-body ns">Affects auth model and session management. A facilitated workshop needs a simple room-code join flow; a public release needs accounts, persistence, and content moderation.</div>
+    </div>
+    <div class="decision-card c-amber">
+      <div class="decision-title nt">Analytics schema for SMRCD</div>
+      <div class="decision-body ns">Define which player choices and outcomes to log from day one. Supabase can capture this cheaply, but only if the schema is designed upfront — retrofitting analytics is costly.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

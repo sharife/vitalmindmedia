@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellows Creek — Fallen Wood Logic Map v3</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Dark mode palette ─────────────────────────────────────────
+   Background:  #141c1f  (near-black with a blue-green tint)
+   Surface:     #1e2a2e  (card background)
+   Border base: #2e3f44  (subtle structural lines)
+
+   Accent colours — muted, desaturated, easy to distinguish:
+     slate-blue  #3d5a80  / text #8ab4d4   (classification, decision)
+     sage-green  #2d5a3d  / text #7bbf93   (teal: habitat, ecologist, leave)
+     ochre       #5a3e1b  / text #c9934a   (amber: cut, road mgr, jam-check)
+     rust        #5a2a1e  / text #c97a62   (coral: remove, flood, infra)
+     steel       #2e3f44  / text #7a9aa8   (gray: trigger, small, parallel)
+     ocean       #1e3a5a  / text #6aaed6   (blue: water system)
+     moss        #2a4020  / text #8ab86a   (green: farmer)
+   ──────────────────────────────────────────────────────────── */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* rem anchor */
+  background: #121212;
+  color: #333;
+  min-width: 780px;
+}
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4f7; }
+.subtitle { font-size: 1.0rem; color: #7fa8b8; margin-bottom: 2rem; line-height: 1.6; }
+
+/* ── Colour tokens ─────────────────────────────────────────── */
+/* Border is the PRIMARY colour cue; background tint reinforces it.
+   .nt = title (bright accent)  .ns = subtitle (readable mid-contrast) */
+.c-gray   { background:#1c2529; border-color:#5e8090; }
+.c-gray   .nt { color:#c2dce6; } .c-gray   .ns { color:#8aaab8; }
+
+.c-purple { background:#1a1e32; border-color:#7a6ed0; }
+.c-purple .nt { color:#a8ccec; } .c-purple .ns { color:#7aa8d0; }
+
+.c-teal   { background:#162419; border-color:#3da874; }
+.c-teal   .nt { color:#96d4ae; } .c-teal   .ns { color:#68aa82; }
+
+.c-amber  { background:#231a0d; border-color:#c9883a; }
+.c-amber  .nt { color:#e0a85a; } .c-amber  .ns { color:#b07c38; }
+
+.c-coral  { background:#231110; border-color:#c0604a; }
+.c-coral  .nt { color:#e08870; } .c-coral  .ns { color:#b05e48; }
+
+.c-blue   { background:#111c2a; border-color:#4a9ec8; }
+.c-blue   .nt { color:#80c4e8; } .c-blue   .ns { color:#5096c0; }
+
+.c-green  { background:#141c10; border-color:#6aaa44; }
+.c-green  .nt { color:#9ed07e; } .c-green  .ns { color:#6ea050; }
+
+/* ── Node card ─────────────────────────────────────────────── */
+.node {
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 8px;
+  padding: 11px 15px 13px;
+  cursor: pointer;
+  transition: filter .15s, transform .15s;
+  position: relative;
+  flex: 1;
+}
+.node:hover { filter: brightness(1.14); transform: translateY(-1px); }
+.nt { font-size: 1.0rem; font-weight: 600; margin-bottom: 0.25rem; }
+.ns { font-size: 0.86rem; line-height: 1.55; }
+
+/* ── Layout ────────────────────────────────────────────────── */
+.flow { display: flex; flex-direction: column; gap: 0; }
+.row  { display: flex; gap: 10px; align-items: stretch; }
+.row.center { justify-content: center; }
+.row.center .node { flex: none; }
+
+.gap { flex-shrink: 0; }
+
+.section-lbl {
+  text-align: center; font-size: 0.79rem; color: #555;
+  letter-spacing: .06em; padding: 2px 0;
+}
+
+/* ── Overlay SVG ──────────────────────────────────────────── */
+#arrow-layer {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; overflow: visible;
+}
+#diagram-wrap { position: relative; }
+
+/* ── Core tension ─────────────────────────────────────────── */
+.tension {
+  border: 2px solid #5e8090; background: #1c2529;
+  border-radius: 8px; padding: 13px 20px;
+  text-align: center; cursor: pointer; transition: filter .15s;
+}
+.tension:hover { filter: brightness(1.14); }
+.tension .nt { color:#c2dce6; font-size:1.0rem; font-weight:600; margin-bottom:0.3rem; }
+.tension .ns { color:#8aaab8; font-size:0.86rem; line-height:1.6; }
+
+/* ── Legend ───────────────────────────────────────────────── */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem;
+  margin-top: 1.5rem; font-size: 0.8rem; color: #999;
+  align-items: flex-start;
+}
+.legend-group { display: flex; flex-direction: column; gap: 0.3rem; }
+.legend-group-label {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: .07em;
+  text-transform: uppercase; color: #555; margin-bottom: 0.15rem;
+}
+.legend-item { display: flex; align-items: center; gap: 0.55rem; color: #aaa; }
+/* Swatch: dark chip with thick left border in the class colour */
+.ls {
+  width: 2rem; height: 1.1rem;
+  border-radius: 3px; flex-shrink: 0;
+  border: 1.5px solid transparent;
+  border-left-width: 4px;
+}
+.ls-gray   { background:#1c2529; border-color:#5e8090; }
+.ls-purple { background:#1a1e32; border-color:#7a6ed0; }
+.ls-teal   { background:#162419; border-color:#3da874; }
+.ls-amber  { background:#231a0d; border-color:#c9883a; }
+.ls-coral  { background:#231110; border-color:#c0604a; }
+.ls-blue   { background:#111c2a; border-color:#4a9ec8; }
+.ls-green  { background:#141c10; border-color:#6aaa44; }
+.ls-dash   { background:transparent; border:1.5px dashed #555; border-left-width:1.5px; }
+
+.footnote { font-size:0.75rem; color:#555; font-style:italic; margin-top:0.875rem; line-height:1.6; }
+
+/* ── Modal ────────────────────────────────────────────────── */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 100;
+  align-items: center; justify-content: center; padding: 2rem;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: #1a1e22; border: 1px solid #333;
+  border-radius: 12px; padding: 28px 32px;
+  max-width: 520px; width: 100%; max-height: 80vh;
+  overflow-y: auto; position: relative;
+  box-shadow: 0 8px 40px rgba(0,0,0,.5);
+}
+.modal-close {
+  position: absolute; top:16px; right:18px;
+  background:none; border:none; font-size:1.44rem;
+  cursor:pointer; color:#888; line-height:1;
+}
+.modal-close:hover { color:#d4dfe3; }
+.modal-tag {
+  display:inline-block; font-size:0.72rem; font-weight:500;
+  letter-spacing:.06em; text-transform:uppercase;
+  padding:2px 8px; border-radius:10px; margin-bottom:10px;
+}
+.modal h2 { font-size:1.22rem; font-weight:600; margin-bottom:0.5rem; color:#eef4f7; }
+.modal-desc { font-size:1.0rem; color:#b8d0da; line-height:1.65; margin-bottom:1.125rem; }
+.modal h3 { font-size:0.79rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#5a7a88; margin-bottom:0.5rem; }
+.modal ul { padding-left:18px; }
+.modal ul li { font-size:0.93rem; color:#b8d0da; line-height:1.65; margin-bottom:0.3rem; }
+.modal-section { margin-bottom:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Fellows Creek — Fallen Wood Logic Map v3</h1>
+<p class="subtitle">
+  Log classification by size and orientation, three player decisions, cascading system effects, and the long-term flood risk accumulation track.<br>
+  Click any box for detail and open research questions. Diameter thresholds from Phase 1 literature review (Elicit scan).
+</p>
+
+<div id="diagram-wrap">
+  <!-- D3 draws arrows into this SVG overlay -->
+  <svg id="arrow-layer">
+    <defs>
+      <marker id="ah-gray"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#5e8090" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#5a82a8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-teal"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#4d8f65" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-coral"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#8f4f3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    </defs>
+  </svg>
+
+  <div class="flow">
+
+    <!-- R1: Trigger -->
+    <div class="row center">
+      <div class="node c-gray" id="n-trigger" style="width:340px;" onclick="openModal('trigger')">
+        <div class="nt">Log falls in the creek</div>
+        <div class="ns">Random event — any player's reach</div>
+      </div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <!-- R2: Classification -->
+    <div class="row">
+      <div class="node c-purple" id="n-classify" style="text-align:center;" onclick="openModal('classify')">
+        <div class="nt">Log classified on arrival</div>
+        <div class="ns">Diameter &amp; length vs. channel width &times; orientation (blocking / partial / parallel)</div>
+      </div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <!-- R3: Size buckets -->
+    <div class="row">
+      <div class="node c-gray"  id="n-small"  onclick="openModal('small')">
+        <div class="nt">Small (&lt;10 cm dia.)</div>
+        <div class="ns">Short or unanchored pieces also qualify. Debris only — low habitat value regardless of angle.</div>
+      </div>
+      <div class="node c-teal"  id="n-medium" onclick="openModal('medium')">
+        <div class="nt">Medium (15–30 cm dia.)</div>
+        <div class="ns">Only ~6% form pools at this size — habitat value depends on orientation &amp; channel width.</div>
+      </div>
+      <div class="node c-teal"  id="n-large"  onclick="openModal('large')">
+        <div class="nt">Large (&gt;60 cm dia.)</div>
+        <div class="ns">OR channel-spanning / bank-anchored at any size. ~43% of pieces form pools — check orientation.</div>
+      </div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <!-- R4: Orientation outcomes -->
+    <div class="row">
+      <div class="node c-gray"  id="n-parallel"       onclick="openModal('parallel')">
+        <div class="nt">Parallel to flow</div>
+        <div class="ns">Habitat value: none. Treat as small log regardless of size.</div>
+      </div>
+      <div class="node c-teal"  id="n-blocking-med"   onclick="openModal('blocking-med')">
+        <div class="nt">Blocking / partial — medium</div>
+        <div class="ns">Habitat value: medium. Leave recommended.</div>
+      </div>
+      <div class="node c-teal"  id="n-blocking-large" onclick="openModal('blocking-large')">
+        <div class="nt">Blocking / partial — large</div>
+        <div class="ns">Habitat value: high — until jam spans channel &amp; forms backwater. Check blockage ratio.</div>
+      </div>
+    </div>
+
+    <div class="section-lbl" style="margin-top:6px;">— classification complete — player now decides —</div>
+    <div style="height:48px;"></div>
+
+    <!-- R5: Player decision -->
+    <div class="row">
+      <div class="node c-purple" id="n-decision" style="text-align:center;" onclick="openModal('decision')">
+        <div class="nt">Player decision</div>
+        <div class="ns">Choose: leave in place / cut &amp; send downstream / remove entirely</div>
+      </div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <!-- R6: Actions -->
+    <div class="row">
+      <div class="node c-teal"  id="n-leave"  onclick="openModal('leave')">
+        <div class="nt">Leave in place</div>
+        <div class="ns">Free — habitat benefit if size/orientation qualify. May trigger jam check if reach is accumulating.</div>
+      </div>
+      <div class="node c-amber" id="n-cut"    onclick="openModal('cut')">
+        <div class="nt">Cut &amp; send downstream</div>
+        <div class="ns">Low cost — debris risk transfers to others.</div>
+      </div>
+      <div class="node c-coral" id="n-remove" onclick="openModal('remove')">
+        <div class="nt">Remove entirely</div>
+        <div class="ns">High cost — clears reach but raises flood risk track.</div>
+      </div>
+    </div>
+
+    <div class="section-lbl" style="margin-top:6px;">— cascades to shared systems —</div>
+    <div style="height:36px;"></div>
+
+    <!-- R6b: Jam structure check (only relevant when Leave chosen) -->
+    <div class="row center">
+      <div class="node c-amber" id="n-jam-check" style="width:420px;text-align:center;" onclick="openModal('jam-check')">
+        <div class="nt">Jam structure check</div>
+        <div class="ns">Does the accumulated wood span the channel and form a step or backwater? If blockage ratio is high → flood risk track also rises. If not → habitat benefit only.</div>
+      </div>
+    </div>
+    <div style="height:36px;"></div>
+
+    <!-- R7: Shared systems + flood risk track -->
+    <div class="row">
+      <div class="node c-blue"  id="n-water"       onclick="openModal('water')">
+        <div class="nt">Water system</div>
+        <div class="ns">Flow rate, flood risk, irrigation availability.</div>
+      </div>
+      <div class="node c-teal"  id="n-habitat"     onclick="openModal('habitat')">
+        <div class="nt">Habitat system</div>
+        <div class="ns">Fish &amp; wildlife score, bank stability.</div>
+      </div>
+      <div class="node c-coral" id="n-infra"       onclick="openModal('infra')">
+        <div class="nt">Infrastructure</div>
+        <div class="ns">Bridge &amp; road damage, culvert blockage risk.</div>
+      </div>
+      <div class="node c-coral" id="n-flood-track" onclick="openModal('flood-track')" style="border-style:dashed;border-color:#c0604a;">
+        <div class="nt">Flood risk track +1</div>
+        <div class="ns">Raised by removal — or by a jam crossing the blockage-ratio threshold. Amplifies storm events.</div>
+      </div>
+    </div>
+
+    <div class="section-lbl" style="margin-top:6px;">— player metric impacts —</div>
+    <div style="height:48px;"></div>
+
+    <!-- R8: Player roles -->
+    <div class="row">
+      <div class="node c-green"  id="n-farmer"   onclick="openModal('farmer')">
+        <div class="nt">Farmer</div>
+        <div class="ns">Irrigation access affected by flow rate and availability.</div>
+      </div>
+      <div class="node c-teal"   id="n-ecologist" onclick="openModal('ecologist')">
+        <div class="nt">Ecologist</div>
+        <div class="ns">Fish score rises or falls with wood choice and habitat condition.</div>
+      </div>
+      <div class="node c-amber"  id="n-road-mgr"  onclick="openModal('road-mgr')">
+        <div class="nt">Road manager</div>
+        <div class="ns">Log jams cause bridge damage and repair costs.</div>
+      </div>
+      <div class="node c-purple" id="n-land-mgr"  onclick="openModal('land-mgr')">
+        <div class="nt">Land manager</div>
+        <div class="ns">Storm amplification if flood risk track is elevated.</div>
+      </div>
+    </div>
+
+    <div style="height:56px;"></div>
+
+    <!-- R9: Core tension -->
+    <div class="tension" id="n-tension" onclick="openModal('tension')">
+      <div class="nt">Core design tension</div>
+      <div class="ns">Cheap short-term fix (cut/remove) harms others now or later. Best outcome (leave) requires trust and correct classification.</div>
+    </div>
+
+  </div><!-- /flow -->
+</div><!-- /diagram-wrap -->
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-group">
+    <div class="legend-group-label">Events &amp; decisions</div>
+    <div class="legend-item"><div class="ls ls-gray"></div>Event / structural</div>
+    <div class="legend-item"><div class="ls ls-purple"></div>Classification / decision</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-label">Actions &amp; outcomes</div>
+    <div class="legend-item"><div class="ls ls-teal"></div>Ecological benefit</div>
+    <div class="legend-item"><div class="ls ls-amber"></div>Downstream risk</div>
+    <div class="legend-item"><div class="ls ls-coral"></div>Direct cost / flood pressure</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-label">Shared systems</div>
+    <div class="legend-item"><div class="ls ls-blue"></div>Water system</div>
+    <div class="legend-item"><div class="ls ls-teal"></div>Habitat system</div>
+    <div class="legend-item"><div class="ls ls-coral"></div>Infrastructure / flood track</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-label">Player roles</div>
+    <div class="legend-item"><div class="ls ls-green"></div>Farmer</div>
+    <div class="legend-item"><div class="ls ls-teal"></div>Ecologist</div>
+    <div class="legend-item"><div class="ls ls-amber"></div>Road manager</div>
+    <div class="legend-item"><div class="ls ls-purple"></div>Land manager</div>
+  </div>
+  <div class="legend-group">
+    <div class="legend-group-label">Arrow style</div>
+    <div class="legend-item"><div class="ls ls-dash"></div>Delayed / accumulating</div>
+  </div>
+</div>
+<p class="footnote">
+  * Diameter thresholds from Phase 1 Elicit scan (coastal BC field studies). Pool-formation rates: ~6% at 15–30 cm dia., ~43% at &gt;60 cm dia.<br>
+  Length is secondary to diameter — a short, thick, bank-anchored log outperforms a long thin one. Calibrate to Fellows Creek channel width in expert interviews.
+</p>
+
+</div><!-- /wrap -->
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeOnBackdrop(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- D3 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+// ─────────────────────────────────────────────────────────────
+// EDGE DEFINITIONS
+// Each edge: { from, to, style }
+//   style: 'solid' | 'dashed'
+//   color: marker id suffix
+//   from/to: element id strings
+//   anchor: optional override { from: 'bottom-left' etc }
+// ─────────────────────────────────────────────────────────────
+const EDGES = [
+  // Trigger → Classify
+  { from:'n-trigger',       to:'n-classify',       color:'gray'  },
+
+  // Classify → 3 size buckets
+  { from:'n-classify',      to:'n-small',           color:'purple'},
+  { from:'n-classify',      to:'n-medium',          color:'purple'},
+  { from:'n-classify',      to:'n-large',           color:'purple'},
+
+  // Size → orientation (medium & large → their blocking boxes)
+  { from:'n-medium',        to:'n-blocking-med',    color:'teal'  },
+  { from:'n-large',         to:'n-blocking-large',  color:'teal'  },
+
+  // Large → parallel (dashed: parallel large = treated as small)
+  { from:'n-large',         to:'n-parallel',        color:'gray', style:'dashed' },
+
+  // Small → parallel (same row; skip — implied by label)
+  // Direct: small → parallel not needed visually (they're same row)
+
+  // Orientation → Decision
+  { from:'n-parallel',      to:'n-decision',        color:'gray'  },
+  { from:'n-blocking-med',  to:'n-decision',        color:'gray'  },
+  { from:'n-blocking-large',to:'n-decision',        color:'gray'  },
+
+  // Decision → 3 actions
+  { from:'n-decision',      to:'n-leave',           color:'purple'},
+  { from:'n-decision',      to:'n-cut',             color:'purple'},
+  { from:'n-decision',      to:'n-remove',          color:'purple'},
+
+  // Actions → shared systems (Leave routes via jam-check)
+  { from:'n-leave',         to:'n-jam-check',       color:'teal'  },
+  { from:'n-jam-check',     to:'n-habitat',         color:'teal'  },
+  { from:'n-jam-check',     to:'n-water',           color:'gray'  },
+  { from:'n-jam-check',     to:'n-flood-track',     color:'coral', style:'dashed'},
+  { from:'n-cut',           to:'n-infra',           color:'gray'  },
+  { from:'n-remove',        to:'n-water',           color:'gray'  },
+
+  // Remove → flood risk track (dashed, delayed)
+  { from:'n-remove',        to:'n-flood-track',     color:'coral', style:'dashed'},
+
+  // Systems → roles
+  { from:'n-water',         to:'n-farmer',          color:'gray'  },
+  { from:'n-habitat',       to:'n-ecologist',       color:'gray'  },
+  { from:'n-infra',         to:'n-road-mgr',        color:'gray'  },
+  { from:'n-flood-track',   to:'n-land-mgr',        color:'coral', style:'dashed'},
+
+  // All roles → tension
+  { from:'n-farmer',        to:'n-tension',         color:'gray'  },
+  { from:'n-ecologist',     to:'n-tension',         color:'gray'  },
+  { from:'n-road-mgr',      to:'n-tension',         color:'gray'  },
+  { from:'n-land-mgr',      to:'n-tension',         color:'gray'  },
+];
+
+// ─────────────────────────────────────────────────────────────
+// DRAW EDGES WITH D3
+// ─────────────────────────────────────────────────────────────
+function drawEdges() {
+  const wrap = document.getElementById('diagram-wrap');
+  const svg  = d3.select('#arrow-layer');
+
+  // Size the overlay to match the diagram wrapper
+  const wRect = wrap.getBoundingClientRect();
+  svg.attr('width', wRect.width).attr('height', wRect.height);
+
+  // Remove previously drawn paths
+  svg.selectAll('path.edge').remove();
+
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+
+  EDGES.forEach(edge => {
+    const fromEl = document.getElementById(edge.from);
+    const toEl   = document.getElementById(edge.to);
+    if (!fromEl || !toEl) return;
+
+    const fR = fromEl.getBoundingClientRect();
+    const tR = toEl.getBoundingClientRect();
+
+    // Positions relative to diagram-wrap (accounting for scroll)
+    const fx = fR.left - wRect.left + scrollX;
+    const fy = fR.top  - wRect.top  + scrollY;
+    const fw = fR.width, fh = fR.height;
+
+    const tx = tR.left - wRect.left + scrollX;
+    const ty = tR.top  - wRect.top  + scrollY;
+    const tw = tR.width, th = tR.height;
+
+    // Default: bottom-centre of source → top-centre of target
+    let x1 = fx + fw / 2;
+    let y1 = fy + fh;
+    let x2 = tx + tw / 2;
+    let y2 = ty;
+
+    // If source and target are in the same horizontal band
+    // (top of target is above bottom of source + threshold),
+    // use side exits instead to avoid overlapping same-row boxes.
+    const sameRow = Math.abs((fy + fh/2) - (ty + th/2)) < fh * 0.8;
+
+    if (sameRow) {
+      // Route left-to-right or right-to-left via sides
+      if (fx < tx) {
+        x1 = fx + fw; y1 = fy + fh/2;
+        x2 = tx;      y2 = ty + th/2;
+      } else {
+        x1 = fx;      y1 = fy + fh/2;
+        x2 = tx + tw; y2 = ty + th/2;
+      }
+    }
+
+    // Control points for a smooth cubic bezier
+    const dy = Math.abs(y2 - y1);
+    const dx = Math.abs(x2 - x1);
+    let cp1x, cp1y, cp2x, cp2y;
+
+    if (sameRow) {
+      // Horizontal S-curve
+      const mid = (x1 + x2) / 2;
+      cp1x = mid; cp1y = y1;
+      cp2x = mid; cp2y = y2;
+    } else {
+      // Vertical: control points bend toward the target horizontally
+      const bend = Math.min(dy * 0.5, 60);
+      cp1x = x1; cp1y = y1 + bend;
+      cp2x = x2; cp2y = y2 - bend;
+    }
+
+    const d = `M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
+    const color = { gray:'#5e8090', purple:'#5a82a8', teal:'#4d8f65', coral:'#8f4f3a' }[edge.color] || '#9c9a92';
+    const markerId = `ah-${edge.color}`;
+
+    svg.append('path')
+      .attr('class', 'edge')
+      .attr('d', d)
+      .attr('fill', 'none')
+      .attr('stroke', color)
+      .attr('stroke-width', edge.color === 'coral' ? 1.5 : 1.2)
+      .attr('stroke-dasharray', edge.style === 'dashed' ? '5,3' : null)
+      .attr('marker-end', `url(#${markerId})`);
+  });
+}
+
+// Redraw on load and resize
+window.addEventListener('load',   () => { drawEdges(); setTimeout(drawEdges, 150); });
+window.addEventListener('resize', drawEdges);
+
+// ─────────────────────────────────────────────────────────────
+// MODAL DATA
+// ─────────────────────────────────────────────────────────────
+const NODES = {
+  'jam-check': {
+    tag:'Structural threshold', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    title:'Jam structure check',
+    desc:'When a log is left in place, the game checks whether the accumulation has crossed from passive habitat roughness into active hydraulic control. The transition is not about log count — it\'s about geometry: does the jam now span the channel and form a step or backwater? If yes, flood risk rises even though the original decision was "Leave."',
+    details:[
+      'Key variable: blockage ratio — the proportion of the channel cross-section obstructed by wood.',
+      'In one case-study/model, a 75% blockage produced only ~0.3 m of backwater rise at low flow. Effect is larger at flood stage.',
+      'The inflection point is structural: a channel-spanning, step-forming jam behaves like a hydraulic control, not just roughness.',
+      'In game terms: leaving a single qualifying log = habitat benefit only. But if that reach already holds several large blocking logs, the jam-check fires and may also raise the flood risk track.',
+      'Practical simplification: trigger the jam-check when ≥2 large blocking logs occupy the same reach tile.',
+    ],
+    questions:[
+      'What is the channel width of Fellows Creek? This determines the blockage ratio for a given log diameter.',
+      'Expert calibration: at what number of large logs in a single reach should the game trigger a jam-structure penalty?',
+      'Should the jam-check be transparent to players (shown as a warning) or a hidden mechanic they have to discover?',
+      'Is the 75% blockage / 0.3 m backwater figure from the Elicit study applicable to Fellows Creek\'s slope and discharge regime?',
+      'Should log jams that form naturally (player chose Leave multiple times) be treated differently from engineered log jams placed by the Ecologist?',
+    ]
+  },
+
+  trigger: {
+    tag:'Event trigger', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    title:'Log falls in the creek',
+    desc:'Logs enter the creek randomly each turn and with increased probability after storm events. Any player\'s reach can receive a log. The type, size, and orientation are determined on arrival.',
+    details:[
+      'Frequency should increase during storm turns — expert calibration needed.',
+      'A single storm could drop multiple logs, testing player bandwidth.',
+      'Log arrival is the primary trigger for the fallen-wood decision chain.',
+    ],
+    questions:[
+      'How quickly does a cleared reach re-accumulate debris naturally?',
+      'What factors govern natural debris accumulation rate (slope, riparian density, storm frequency)?',
+      'Should log arrival rate scale with upstream land cover (forested vs. cleared)?',
+    ]
+  },
+  classify: {
+    tag:'Classification', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    title:'Log classified on arrival',
+    desc:'Each log is assessed on two axes: (1) its size class by diameter, and (2) its orientation relative to flow. The combination determines its baseline habitat value before the player decides what to do.',
+    details:[
+      'Diameter is the primary proxy for pool-forming potential (field studies confirm this over length).',
+      'Orientation is the secondary filter — even a large log loses most habitat value if it lies parallel to flow.',
+      'Bank-anchoring and channel-spanning override the diameter threshold for small or medium logs.',
+    ],
+    questions:[
+      'What is the actual channel width of Fellows Creek? This determines whether a "medium" log can span it.',
+      'Should the game show players the classification, or require them to infer it?',
+      'How much uncertainty to build in — should orientation be ambiguous sometimes?',
+    ]
+  },
+  small: {
+    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    title:'Small log (<10 cm diameter)',
+    desc:'Below the meaningful hydraulic threshold. These logs, and any short or unanchored pieces regardless of diameter, act as simple debris. They contribute little to pool formation or habitat value.',
+    details:[
+      'Inventory threshold in the literature: >10 cm dia. and >2 m long to count as LWD at all.',
+      'Unanchored pieces — even if large — behave like small logs in flow.',
+      'In game terms: small logs are low-stakes. The decision still matters at scale (accumulation effects).',
+    ],
+    questions:[
+      'Should the game make small logs "free to remove" to reduce cognitive load?',
+      'Do small logs contribute meaningfully to log-jam formation downstream if cut and sent?',
+    ]
+  },
+  medium: {
+    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Medium log (15–30 cm diameter)',
+    desc:'Pool-forming potential is low but non-zero (~6% of pieces in this range formed pools in coastal BC field studies). Habitat value is orientation-dependent — a perpendicular, bank-anchored medium log in a small channel can punch above its weight class.',
+    details:[
+      '~6% pool-formation rate at this diameter range (coastal BC study).',
+      'Orientation and channel width are the decisive variables at this size.',
+      'In narrow channels, a medium log spanning the full width behaves like a large log.',
+    ],
+    questions:[
+      'What is the typical channel width of Fellows Creek reaches — narrow enough that medium logs can span it?',
+      'Should orientation be shown to the player, or hidden to create uncertainty?',
+      'Expert calibration needed: at what channel width does a 20 cm log "become" meaningful?',
+    ]
+  },
+  large: {
+    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Large log (>60 cm diameter)',
+    desc:'High pool-forming potential (~43% of pieces at this diameter formed pools in field studies). Any log that is channel-spanning or bank-anchored, regardless of its diameter, should be treated in this category.',
+    details:[
+      '~43% pool-formation rate at >60 cm diameter (coastal BC study).',
+      'Bank-anchored and channel-spanning logs at any size override the diameter rule.',
+      'Multi-piece aggregates (log jams) should also be classified here for habitat scoring.',
+      'Perpendicular + large = highest habitat value in the system.',
+    ],
+    questions:[
+      'Are logs >60 cm dia. realistic in Fellows Creek\'s riparian zone, or should the threshold be lower?',
+      'Should log jams be treated as a separate class from single large pieces?',
+      'What is a realistic salmon habitat score delta from a single large blocking log?',
+    ]
+  },
+  parallel: {
+    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    title:'Parallel to flow',
+    desc:'A log aligned with the current direction creates minimal flow deflection and does not form scour pools. Its habitat value is negligible regardless of diameter — treat it as a small log for scoring purposes.',
+    details:[
+      'Parallel logs still contribute to bank stabilisation marginally over long timescales.',
+      'They can still become part of a log jam if they collect other debris.',
+      'In game terms: parallel = low ecological cost to remove, but still not free.',
+    ],
+    questions:[
+      'Should parallel large logs still have a small non-zero habitat value to reward leaving them?',
+      'What is the realistic probability a log falls parallel vs. perpendicular in a typical reach?',
+    ]
+  },
+  'blocking-med': {
+    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Blocking / partial — medium log',
+    desc:'A medium log oriented perpendicular or at an angle to flow creates some deflection and may form a shallow pool. Habitat value is moderate. Leaving it is recommended but not as strongly as for large logs.',
+    details:[
+      'Pool depth and scour extent are smaller than for large blocking logs.',
+      'May accumulate additional debris over time, upgrading its effective class.',
+      'Removing a blocking medium log has a moderate but not catastrophic ecological cost.',
+    ],
+    questions:[
+      'What is a realistic salmon habitat score delta for a medium blocking log over one season?',
+      'Should the game allow players to "secure" (anchor) a medium log to increase its habitat value?',
+    ]
+  },
+  'blocking-large': {
+    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Blocking / partial — large log',
+    desc:'The highest-value configuration in the system. A large log perpendicular to flow forces significant scour, creates deep pools, and provides critical salmon resting and spawning habitat. Leaving it is strongly recommended.',
+    details:[
+      'A single large blocking log can raise habitat score meaningfully over one season.',
+      'Removing it has a lagged cost — habitat quality degrades over 1–5 years post-removal.',
+      'Multi-piece jams anchored by a large log are even more valuable ecologically.',
+    ],
+    questions:[
+      'Expert calibration: if a player removes all large blocking logs from a 1 km reach, what is a realistic salmon habitat score change over 1 season? Over 5 years?',
+      'Should the game model the gradual habitat recovery if a reach is later allowed to re-accumulate debris?',
+    ]
+  },
+  decision: {
+    tag:'Player decision', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    title:'Player decision point',
+    desc:'After classification, the active player chooses one of three actions. The choice is binding for that log and triggers downstream consequences in the shared systems.',
+    details:[
+      'Three options: Leave in place / Cut & send downstream / Remove entirely.',
+      'Cost, ecological impact, and risk profile differ significantly between options.',
+      'The "correct" choice depends on role — what helps the Ecologist may burden the Road Manager.',
+    ],
+    questions:[
+      'Should the player always see the classification result, or should there be a "hidden information" variant?',
+      'Is there a 4th option — "secure in place" (anchoring/staking) — that upgrades habitat value at a cost?',
+      'How do we make the trade-offs legible without over-tutorialising?',
+    ]
+  },
+  leave: {
+    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Leave in place',
+    desc:'The log stays where it fell. No budget cost. If the log qualifies (size and orientation), the Habitat system gains points. Flow is altered at that tile.',
+    details:[
+      'Best ecological outcome when size/orientation qualify.',
+      'May create a minor flow obstruction that slightly reduces upstream irrigation availability.',
+      'Log jam risk exists if additional logs accumulate on top — track this as a secondary state.',
+    ],
+    questions:[
+      'Should "Leave" always be free, or should there be a small "management monitoring" cost?',
+      'How does a log jam in one reach affect flow rate and flood risk in adjacent reaches?',
+    ]
+  },
+  cut: {
+    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    title:'Cut & send downstream',
+    desc:'The log is cut into smaller pieces and allowed to float downstream. Low budget cost to the acting player, but the debris risk is transferred to the next reach downstream.',
+    details:[
+      'The receiving player gets a log (now fragmented — smaller effective size class).',
+      'Fragmented pieces are less likely to form pools but more likely to jam culverts.',
+      'In aggregate, many cut-and-sent logs sharply raise Infrastructure damage risk downstream.',
+    ],
+    questions:[
+      'How far downstream do cut log effects propagate under normal flow vs. storm events?',
+      'Should the game penalise repeated cut-and-send from the same player (social norm mechanic)?',
+      'What is the realistic culvert blockage risk from fragmented vs. whole logs?',
+    ]
+  },
+  remove: {
+    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    title:'Remove entirely',
+    desc:'The log is removed from the creek and disposed of on land. Higher budget cost. The reach is cleared, removing both the habitat benefit and any flow obstruction — but the Flood risk track increases by 1.',
+    details:[
+      'Highest short-term benefit to the acting player (clear reach, no log jam risk).',
+      'Flood risk track accumulation is the long-term cost — affects all players during storm events.',
+      'Repeated removal from the same reach compounds the flood risk multiplier.',
+    ],
+    questions:[
+      'What is a realistic budget cost for log removal in a small coastal watershed?',
+      'At what flood risk track level should storm amplification become noticeable to players?',
+      'Should the flood risk track decay slowly over time if no further removals occur?',
+    ]
+  },
+  'flood-track': {
+    tag:'Accumulating effect', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    title:'Flood risk track',
+    desc:'A shared counter that increases by 1 each time any player removes a log entirely. When a storm event fires, the damage multiplier scales with the current flood risk track value.',
+    details:[
+      'Models the real mechanism: LWD slows water velocity and attenuates peak flow.',
+      'A reach stripped of LWD delivers water faster downstream, raising flood peak timing and intensity.',
+      'The track creates a collective action problem — individual removals are rational, collective removals are catastrophic.',
+    ],
+    questions:[
+      'How does upstream land use (cleared vs. forested) compound the flood risk track effect?',
+      'What is a realistic lag time between removal and flood peak change in a small coastal watershed?',
+      'Should the track be visible to all players, or hidden until a storm event reveals the consequence?',
+      'Expert calibration: if 10 large logs are removed from a 1 km reach, what is the realistic change in flood peak timing?',
+    ]
+  },
+  water: {
+    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#6aaed6',
+    title:'Water system',
+    desc:'Governs flow rate, flood risk, and irrigation availability across all reaches. Affected by wood decisions, infrastructure placement, and climate events.',
+    details:[
+      'Higher flow rate = more irrigation availability for Farmer, but also higher flood risk.',
+      'Channelised reaches move water faster — good for flood drainage, bad for habitat and peak attenuation.',
+      'Riparian buffer width measurably reduces agricultural sediment and nutrient runoff.',
+    ],
+    questions:[
+      'What percentage of seasonal creek flow can a small farm draw before meaningfully affecting fish passage?',
+      'At what flow rate does creek self-purification (dilution of agricultural runoff) break down?',
+      'How do channelised vs. meandering creek sections compare in flood peak timing and intensity?',
+    ]
+  },
+  habitat: {
+    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Habitat system',
+    desc:'Tracks fish & wildlife score and bank stability across the watershed. Primarily driven by large woody debris decisions and riparian buffer health.',
+    details:[
+      'Large blocking logs are the single highest-impact positive action for habitat score.',
+      'Bank stability is a secondary metric — eroded banks reduce habitat score over time.',
+      'Fish passage requires minimum flow rate — habitat score can be high but passage still blocked.',
+    ],
+    questions:[
+      'What are measurable differences in salmon habitat quality between a reach with LWD vs. one that has been cleared?',
+      'What is the minimum riparian buffer an ecologist would consider meaningful — 5m? 20m?',
+      'Should wildlife score be separate from fish score, or combined?',
+    ]
+  },
+  infra: {
+    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    title:'Infrastructure',
+    desc:'Tracks bridge and road damage risk and culvert blockage probability. Driven primarily by log jam formation from cut-and-sent debris.',
+    details:[
+      'Culverts are the primary failure point — undersized culverts block under debris load.',
+      'Bridge damage accumulates from repeated log jam events, not single incidents.',
+      'Road manager\'s core tension: clearing debris protects infrastructure but may shift debris downstream.',
+    ],
+    questions:[
+      'What are primary failure modes for rural road culverts during storm events?',
+      'What design specs prevent culvert failure — pipe diameter, inlet design, debris deflectors?',
+      'What is a realistic repair cost and timeline for a culvert that fails during a storm?',
+    ]
+  },
+  farmer: {
+    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab86a',
+    title:'Farmer',
+    desc:'Primary concern: irrigation access. Wants consistent flow rate and water availability. Threatened by drought events and by flow reductions from log jams or upstream diversions.',
+    details:[
+      'Wants logs removed or managed to maintain clear channels for water diversion.',
+      'Benefits from riparian buffers (filter agricultural runoff) but may resist the land cost.',
+      'In drought years, irrigation draw competes directly with fish passage minimums.',
+    ],
+    questions:[
+      'At what point would a hydrologist say a farmer\'s irrigation draw is genuinely threatening fish passage — 10% of flow? 30%?',
+      'What is a realistic water storage pond size and cost for a small coastal farm?',
+      'How should the game model seasonal flow variation (wet season vs. dry season)?',
+    ]
+  },
+  ecologist: {
+    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    title:'Ecologist',
+    desc:'Primary concern: fish and wildlife score. Wants large blocking logs left in place, riparian buffers maintained, and flow rates sufficient for salmon passage.',
+    details:[
+      'Benefits most from the "Leave in place" action on large blocking logs.',
+      'Threatened by repeated removal (flood risk track) and by irrigation overuse in drought.',
+      'May have tools to plant riparian vegetation or add engineered log jams.',
+    ],
+    questions:[
+      'If a player removes all LWD from a 1 km reach, what is a realistic change in salmon habitat score over one season? Over five years?',
+      'What is the minimum viable riparian buffer that an ecologist would consider "meaningful"?',
+      'Should the ecologist be able to add logs (from the riparian zone) as a positive action?',
+    ]
+  },
+  'road-mgr': {
+    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    title:'Road manager',
+    desc:'Primary concern: infrastructure integrity. Wants debris managed to prevent culvert blockage and bridge damage. Threatened by log jams from cut-and-sent debris.',
+    details:[
+      'Has budget to upgrade culverts and bridges — higher-spec infrastructure is more resistant.',
+      'Faces a timing problem: debris arrives suddenly during storms, repair costs are acute.',
+      'Cut-and-sent logs from upstream players directly increase the Road Manager\'s costs.',
+    ],
+    questions:[
+      'What is a realistic repair cost and timeline for a culvert failure during a storm?',
+      'What culvert design specifications prevent failure under debris load?',
+      'Should culvert upgrades be a permanent improvement or require maintenance spending?',
+    ]
+  },
+  'land-mgr': {
+    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    title:'Land manager',
+    desc:'Primary concern: flood and fire risk on managed land. Threatened by high flood risk track values. Benefits from maintained riparian buffers and upstream LWD that attenuates peak flow.',
+    details:[
+      'The flood risk track is the primary variable affecting land manager outcomes.',
+      'Storm amplification at high flood risk track = property and crop damage.',
+      'May have tools to plant riparian buffers or create floodplain storage areas.',
+    ],
+    questions:[
+      'How does upstream land use (cleared vs. forested vs. farmed) affect speed and magnitude of downstream flood peaks?',
+      'What is the typical lag time between a storm event and peak flood stage in a small coastal watershed like Fellows Creek?',
+      'Should the land manager be able to purchase flood insurance (risk transfer mechanic)?',
+    ]
+  },
+  tension: {
+    tag:'Design principle', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    title:'Core design tension',
+    desc:'The fundamental dilemma driving player interaction: individual rationality conflicts with collective outcomes.',
+    details:[
+      'Cut/remove is almost always the cheapest short-term choice for the acting player.',
+      'But cut transfers risk to downstream players; remove degrades the shared flood risk track.',
+      'Leave is the best collective outcome but requires trust that other players will reciprocate.',
+      'This mirrors the real social dynamic in the SMRCD community — fear of being punished, need to rebuild trust.',
+    ],
+    questions:[
+      'How do we make the collective cost of repeated removal legible without being preachy?',
+      'Should there be a negotiation mechanic — players can agree to coordinate on Leave choices?',
+      'Does the game need a "reputation" system to incentivise cooperation across rounds?',
+      'How does the facilitated workshop format change the dynamics vs. unsupervised play?',
+    ]
+  },
+};
+
+// ─────────────────────────────────────────────────────────────
+// MODAL LOGIC
+// ─────────────────────────────────────────────────────────────
+function openModal(id) {
+  const data = NODES[id];
+  if (!data) return;
+  const tagStyle = `background:${data.tagColor};border:1px solid ${data.tagBorder};color:${data.tagText || data.tagBorder};`;
+  let html = `<div class="modal-tag" style="${tagStyle}">${data.tag}</div><h2>${data.title}</h2><p class="modal-desc">${data.desc}</p>`;
+  if (data.details?.length) {
+    html += `<div class="modal-section"><h3>Game mechanics notes</h3><ul>`;
+    data.details.forEach(d => { html += `<li>${d}</li>`; });
+    html += `</ul></div>`;
+  }
+  if (data.questions?.length) {
+    html += `<div class="modal-section"><h3>Open research questions</h3><ul>`;
+    data.questions.forEach(q => { html += `<li>${q}</li>`; });
+    html += `</ul></div>`;
+  }
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+function closeOnBackdrop(e) { if (e.target === document.getElementById('modal-backdrop')) closeModal(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
