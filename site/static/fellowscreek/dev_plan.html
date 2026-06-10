@@ -233,6 +233,17 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
 /* ── nt / ns shorthands (match logic map) ──────────────────── */
 .nt { font-size: 1.0rem; font-weight: 600; margin-bottom: 0.25rem; }
 .ns { font-size: 0.86rem; line-height: 1.55; }
+
+/* ── Mechanics cards ───────────────────────────────────────── */
+.mech-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.mech-card { background:#1c2529; border:1px solid; border-radius:8px; padding:13px 15px; }
+.mech-title { font-size:1.0rem; font-weight:600; color:#c2dce6; margin-bottom:6px; }
+.mech-body { font-size:0.86rem; color:#8aaab8; line-height:1.6; margin-bottom:10px; }
+.mech-body:last-child { margin-bottom:0; }
+.mech-split { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.mech-sub { background:#121212; border:1px solid #333; border-radius:6px; padding:10px 12px; }
+.mech-sub-label { font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:#555; margin-bottom:5px; }
+.mech-sub-body { font-size:0.82rem; color:#8aaab8; line-height:1.55; }
 </style>
 </head>
 <body>
@@ -262,6 +273,40 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   </div>
 </div>
 
+<!-- ── Core game mechanics ─────────────────────────────────── -->
+<div class="section">
+  <div class="section-label">Core game mechanics</div>
+
+  <div class="mech-grid">
+
+    <div class="mech-card c-purple">
+      <div class="mech-title nt">Turn-based play for four asymmetric roles</div>
+      <div class="mech-body ns">The game is turn-based with four players (Farmer, Ecologist, Road Manager, Land Manager). Player activities are divided into two categories that determine when they may be performed:</div>
+      <div class="mech-split">
+        <div class="mech-sub">
+          <div class="mech-sub-label">Major activities</div>
+          <div class="mech-sub-body">High-impact actions that change the state of the watershed — e.g. removing a log, building a well. Permitted only during the active player's turn.</div>
+        </div>
+        <div class="mech-sub">
+          <div class="mech-sub-label">Minor activities</div>
+          <div class="mech-sub-body">Low-impact upkeep and observation — e.g. repairing a road, watering plants, measuring water quality. Permitted at any time, on or off turn.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mech-card c-blue">
+      <div class="mech-title nt">Square-tile game board with terrain &amp; state</div>
+      <div class="mech-body ns">The board is built from square tiles, each with an assigned ID. Every tile carries a defined terrain type (forest, field, town, creek, etc.) and a set of potential states (thriving, degraded, flooded, dry, etc.). Tile state is the primary surface through which the water simulation, wood logic, and role actions express their effects — making the tile/state model the shared data structure underlying both gameplay and analytics.</div>
+    </div>
+
+    <div class="mech-card c-teal">
+      <div class="mech-title nt">Retro pixel-art presentation with explorable world</div>
+      <div class="mech-body ns">Visuals use pixelated artwork in the style of a retro arcade game, in the vein of <em>Japan Rural Adventure</em> (Apple Arcade). Characters walk around the world and see only part of the environment at a time (a viewport, not the full board), and can open a full overview map from the main menu. This framing informs the isometric renderer, camera/viewport handling, and the menu-accessed map view.</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ── Tech stack ──────────────────────────────────────────── -->
 <div class="section">
   <div class="section-label">Recommended tech stack</div>
@@ -274,7 +319,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
     <div class="stack-card c-teal">
       <div class="stack-layer">Game rendering</div>
       <div class="stack-name nt">PixiJS</div>
-      <div class="stack-reason ns">WebGL-based 2D renderer ideal for the isometric tile map, animated water states, and real-time updates without heavy 3D overhead.</div>
+      <div class="stack-reason ns">WebGL-based 2D renderer ideal for the square-tile board, pixel-art retro presentation, animated water/tile states, and a per-character viewport with real-time updates without heavy 3D overhead.</div>
     </div>
     <div class="stack-card c-purple">
       <div class="stack-layer">Multiplayer</div>
@@ -299,7 +344,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
     <div class="stack-card c-green">
       <div class="stack-layer">Asset pipeline</div>
       <div class="stack-name nt">Aseprite + TexturePacker</div>
-      <div class="stack-reason ns">Aseprite for isometric tile creation. TexturePacker bundles sprites into atlases. Plan for text-free art assets to simplify Spanish localization.</div>
+      <div class="stack-reason ns">Aseprite for retro pixel-art tile and character creation (referencing the <em>Japan Rural Adventure</em> aesthetic). TexturePacker bundles sprites into atlases. Plan for text-free art assets to simplify Spanish localization.</div>
     </div>
     <div class="stack-card c-gray">
       <div class="stack-layer">Hosting</div>
@@ -326,7 +371,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
     <div class="stack-card c-gray">
       <div class="ai-cat">Art &amp; assets</div>
       <div class="ai-tool nt">Midjourney / SD</div>
-      <div class="ai-use ns">Generate concept art for isometric tiles as engineering placeholders during phases 2–4, before final production art arrives in Phase 5.</div>
+      <div class="ai-use ns">Generate concept art for square pixel-art tiles as engineering placeholders during phases 2–4, before final production art arrives in Phase 5.</div>
     </div>
     <div class="stack-card c-purple">
       <div class="ai-cat">Game design</div>
@@ -386,7 +431,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
         <div class="phase-num p2">2</div>
         <div>
           <div class="phase-title">Foundation &amp; game board <span class="new-badge">Extended → Wks 7–12</span></div>
-          <div class="phase-subtitle">Core visual layout and multiplayer engine — extra time for Colyseus state machine and isometric renderer</div>
+          <div class="phase-subtitle">Core visual layout and multiplayer engine — square-tile board, per-character viewport + menu map, extra time for Colyseus state machine and pixel-art renderer</div>
         </div>
       </div>
       <div class="phase-meta">
@@ -395,7 +440,9 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
       </div>
     </div>
     <div class="deliverables">
-      <span class="deliverable">PixiJS isometric tile engine</span>
+      <span class="deliverable">PixiJS square-tile engine</span>
+      <span class="deliverable">Tile ID / terrain / state model</span>
+      <span class="deliverable">Per-character viewport + menu map</span>
       <span class="deliverable">Colyseus game server</span>
       <span class="deliverable">Role selection UI</span>
       <span class="deliverable">Player dashboard shell</span>
@@ -411,7 +458,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
         <div class="phase-num p3">3</div>
         <div>
           <div class="phase-title">Bringing the creek to life <span class="new-badge">Extended</span></div>
-          <div class="phase-subtitle">Water simulation, wood logic, Farmer + Ecologist roles — most technically complex phase</div>
+          <div class="phase-subtitle">Water simulation, wood logic, Farmer + Ecologist roles (each with a unique special skill) — most technically complex phase</div>
         </div>
       </div>
       <div class="phase-meta">
@@ -426,8 +473,11 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
       <span class="deliverable">Jam structure check logic</span>
       <span class="deliverable">Flood risk track</span>
       <span class="deliverable">Infrastructure placement</span>
+      <span class="deliverable">Turn engine (major/minor activity gating)</span>
       <span class="deliverable">Farmer role logic</span>
+      <span class="deliverable">Farmer skill: storage pond</span>
       <span class="deliverable">Ecologist role logic</span>
+      <span class="deliverable">Ecologist skill: anchor logs to bank</span>
       <span class="deliverable">Scoring metrics</span>
       <span class="deliverable">Admin balance panel</span>
     </div>
@@ -500,7 +550,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
         <div class="phase-num p5">5</div>
         <div>
           <div class="phase-title">Full production &amp; feature expansion <span class="new-badge">Extended</span></div>
-          <div class="phase-subtitle">All roles, climate events, final art &amp; audio — extended to absorb scope 2 backlog from mid-project testing</div>
+          <div class="phase-subtitle">All roles (Road + Land Manager special skills), climate events, final art &amp; audio — extended to absorb scope 2 backlog from mid-project testing</div>
         </div>
       </div>
       <div class="phase-meta">
@@ -510,7 +560,9 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
     </div>
     <div class="deliverables">
       <span class="deliverable">Road Manager role</span>
+      <span class="deliverable">Road Mgr skill: debris deflector</span>
       <span class="deliverable">Land Manager role</span>
+      <span class="deliverable">Land Mgr skill: open floodplain</span>
       <span class="deliverable">Climate disruptions</span>
       <span class="deliverable">Final animated tilesets</span>
       <span class="deliverable">Environmental soundscapes</span>
@@ -712,7 +764,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
       <span class="risk-pill risk-med">Med</span>
       <div>
         <div class="risk-label">Role balance (4 asymmetric players)</div>
-        <div class="risk-mitigation">Build an admin panel to adjust budget numbers without code deploys. Use Phase 4 and Phase 6 workshop data to calibrate in two rounds before launch.</div>
+        <div class="risk-mitigation">Build an admin panel to adjust budget numbers without code deploys. Each role's unique special skill (Farmer pond, Ecologist anchoring, Road Mgr deflector, Land Mgr floodplain) widens the balancing surface — expose skill costs/effects in the panel too. Use Phase 4 and Phase 6 workshop data to calibrate in two rounds before launch.</div>
       </div>
     </div>
     <div class="risk-row">

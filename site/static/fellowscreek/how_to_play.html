@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellows Creek — How to Play</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Palette (matches dev plan v5 + logic map v3) ─────────────
+   bg #121212 · surface #1c2529 · border #333
+   slate-blue  text #a8ccec  · sage #96d4ae · ochre #e0a85a
+   coral #e08870 · steel #c2dce6 · ocean #80c4e8 · moss #9ed07e
+   ──────────────────────────────────────────────────────────── */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  background: #121212;
+  color: #8aaab8;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 880px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── Masthead ──────────────────────────────────────────────── */
+.masthead {
+  border: 1px solid #5e8090;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #16242c 0%, #121b13 100%);
+  padding: 26px 28px 24px;
+  margin-bottom: 2rem;
+}
+.eyebrow {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #68aa82; margin-bottom: 0.6rem;
+}
+h1 { font-size: 1.7rem; font-weight: 700; color: #eef4f7; margin-bottom: 0.45rem; letter-spacing: -0.01em; }
+.tagline { font-size: 1.04rem; color: #96d4ae; font-weight: 500; margin-bottom: 0.5rem; }
+.lede { font-size: 0.95rem; color: #8aaab8; max-width: 60ch; }
+
+/* ── Section scaffold ──────────────────────────────────────── */
+.section { margin-bottom: 2.25rem; }
+.section-label {
+  font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: #5e8090;
+  margin-bottom: 0.9rem; padding-bottom: 0.4rem;
+  border-bottom: 1px solid #2a3338;
+  display: flex; align-items: baseline; gap: 0.6rem;
+}
+.section-label .num {
+  font-size: 0.7rem; color: #3da874; font-weight: 700;
+  border: 1px solid #2a4a36; border-radius: 4px;
+  padding: 1px 6px; background: #14201a;
+}
+p.body { font-size: 0.95rem; color: #a8bcc6; margin-bottom: 0.75rem; }
+p.body:last-child { margin-bottom: 0; }
+.body strong { color: #c2dce6; font-weight: 600; }
+em { color: #96d4ae; font-style: italic; }
+
+/* ── Goal callout ──────────────────────────────────────────── */
+.goal {
+  border: 1px solid #3da874; border-left-width: 4px;
+  border-radius: 8px; background: #14201a;
+  padding: 16px 18px;
+}
+.goal .goal-title { font-size: 1.0rem; font-weight: 700; color: #96d4ae; margin-bottom: 0.4rem; }
+.goal p { font-size: 0.95rem; color: #a8bcc6; }
+
+/* ── Card grid ─────────────────────────────────────────────── */
+.grid { display: grid; gap: 12px; }
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-4 { grid-template-columns: repeat(2, 1fr); }
+.card {
+  background: #1c2529; border: 1px solid #2e3b41;
+  border-radius: 8px; padding: 14px 16px;
+}
+.card .ct { font-size: 0.98rem; font-weight: 600; margin-bottom: 0.3rem; }
+.card .cs { font-size: 0.88rem; color: #8aaab8; }
+.card .cs + .cs { margin-top: 0.5rem; }
+
+/* ── Role cards (accent per role) ──────────────────────────── */
+.role { border-left: 4px solid; }
+.role-farmer   { border-left-color: #62c2c2; } .role-farmer .ct   { color: #62c2c2; }
+.role-eco      { border-left-color: #f2c869; } .role-eco .ct      { color: #f2c869; }
+.role-road     { border-left-color: #e08d3c; } .role-road .ct     { color: #e08d3c; }
+.role-land     { border-left-color: #8eae36; } .role-land .ct     { color: #8eae36; }
+.role-goal { font-size: 0.84rem; color: #c2dce6; margin-top: 0.55rem; }
+.role-goal::before { content: "Wants: "; color: #5e8090; font-weight: 600; }
+.skill {
+  margin-top: 0.7rem; padding-top: 0.65rem;
+  border-top: 1px solid #2a3338;
+}
+.skill-label {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #5e8090;
+  display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.25rem;
+}
+.skill-label::before { content: "★"; font-size: 0.7rem; }
+.skill-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
+.skill-desc { font-size: 0.84rem; color: #8aaab8; }
+.role-farmer .skill-name { color: #62c2c2; }
+.role-eco    .skill-name { color: #f2c869; }
+.role-road   .skill-name { color: #e08d3c; }
+.role-land   .skill-name { color: #8eae36; }
+
+/* ── Action split (major / minor) ──────────────────────────── */
+.action-card { border-top: 4px solid; }
+.action-major { border-top-color: #e08870; }
+.action-major .ct { color: #e08870; }
+.action-minor { border-top-color: #80c4e8; }
+.action-minor .ct { color: #80c4e8; }
+.when { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.when-major { color: #b05e48; }
+.when-minor { color: #5096c0; }
+.examples { list-style: none; }
+.examples li { font-size: 0.88rem; color: #a8bcc6; padding: 3px 0 3px 18px; position: relative; }
+.examples li::before { content: "›"; position: absolute; left: 4px; color: #5e8090; }
+
+/* ── Wood decision row ─────────────────────────────────────── */
+.wood { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.wood .card { text-align: left; }
+.wood .verdict { font-size: 0.78rem; font-weight: 600; margin-top: 0.5rem; }
+.v-good { color: #96d4ae; } .v-warn { color: #e0a85a; } .v-bad { color: #e08870; }
+
+/* ── Metrics ───────────────────────────────────────────────── */
+.metric-block { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.metric-head { font-size: 0.84rem; font-weight: 600; color: #c2dce6; margin-bottom: 0.5rem; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 0.82rem; padding: 3px 10px; border-radius: 12px;
+  background: #121212; border: 1px solid #333; color: #a8bcc6;
+}
+.chip.env { border-color: #2a4a36; color: #96d4ae; }
+
+/* ── Turn flow ─────────────────────────────────────────────── */
+.flow { display: flex; flex-direction: column; gap: 8px; }
+.step { display: flex; gap: 12px; align-items: flex-start; }
+.step-num {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  background: #14201a; border: 1px solid #3da874; color: #96d4ae;
+  font-size: 0.78rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-body { font-size: 0.92rem; color: #a8bcc6; padding-top: 1px; }
+.step-body b { color: #c2dce6; }
+
+/* ── Season banner ─────────────────────────────────────────── */
+.seasons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.season { border-radius: 8px; padding: 14px 16px; border: 1px solid; }
+.season-wet { background: #111c2a; border-color: #4a9ec8; }
+.season-wet .st { color: #80c4e8; }
+.season-dry { background: #231a0d; border-color: #c9883a; }
+.season-dry .st { color: #e0a85a; }
+.st { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.35rem; }
+.season p { font-size: 0.87rem; color: #a8bcc6; }
+
+/* ── Facilitator notes (collapsible) ───────────────────────── */
+details.facilitator {
+  border: 1px dashed #5e8090; border-radius: 8px;
+  background: #161d21; margin-top: 0.75rem; overflow: hidden;
+}
+details.facilitator > summary {
+  cursor: pointer; list-style: none;
+  padding: 12px 16px; font-size: 0.82rem; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase; color: #8aaab8;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+details.facilitator > summary::-webkit-details-marker { display: none; }
+details.facilitator > summary::before {
+  content: "▸"; color: #5e8090; transition: transform .15s;
+}
+details.facilitator[open] > summary::before { transform: rotate(90deg); }
+details.facilitator > summary:hover { color: #c2dce6; }
+.fac-tag {
+  font-size: 0.66rem; padding: 1px 7px; border-radius: 10px;
+  background: #1a1e32; color: #a8ccec; border: 1px solid #7a6ed0;
+  letter-spacing: 0.06em;
+}
+.fac-body { padding: 4px 16px 16px; border-top: 1px solid #2a3338; }
+.fac-body p { font-size: 0.88rem; color: #93a7b1; margin-bottom: 0.6rem; }
+.fac-body p:last-child { margin-bottom: 0; }
+.fac-body strong { color: #b8cdd6; }
+.fac-body .src { font-size: 0.78rem; color: #5e8090; font-style: italic; }
+
+/* ── Footer ────────────────────────────────────────────────── */
+.foot {
+  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #2a3338;
+  font-size: 0.78rem; color: #5e8090; text-align: center; line-height: 1.7;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  body { padding: 1.25rem 1rem 3rem; }
+  h1 { font-size: 1.4rem; }
+  .grid-2, .grid-4, .wood, .metric-block, .seasons { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Masthead ──────────────────────────────────────────────── -->
+<div class="masthead">
+  <div class="eyebrow">How to Play</div>
+  <h1>Fellows Creek</h1>
+  <div class="tagline">Build your life along the creek — and help everyone prosper.</div>
+  <p class="lede">Fellows Creek runs from the forest to the coast and is essential salmon habitat. After years of resource extraction and a changing climate, the creek needs care. Pick a role, work the land, and decide — together — how to share the water.</p>
+</div>
+
+<!-- ── 1. The goal ───────────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">1</span> Your goal</div>
+  <div class="goal">
+    <div class="goal-title">Help the whole watershed thrive — not just your own patch.</div>
+    <p>Each of you has a role with its own needs, and you each want to do well. But the creek is one connected system: what you do upstream lands on whoever is downstream. You win together when the community <em>and</em> the creek are both healthy at the end of the game. The hard part is that the cheap, easy choice for you is often the costly one for someone else.</p>
+  </div>
+</div>
+
+<!-- ── 2. Choose your role ───────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">2</span> Choose your role</div>
+  <p class="body">Four players, four jobs along the creek. Each role sees the watershed differently, has its own tools, and brings <strong>one special skill no other player can use.</strong></p>
+  <div class="grid grid-4">
+    <div class="card role role-farmer">
+      <div class="ct">Farmer</div>
+      <div class="cs">Grows crops and needs to draw water from the creek to irrigate fields. Can build water infrastructure like channels and storage ponds.</div>
+      <div class="role-goal">reliable water for the fields</div>
+      <div class="skill">
+        <div class="skill-label">Special skill</div>
+        <div class="skill-name">Build a storage pond</div>
+        <div class="skill-desc">Only the Farmer can bank wet-season water in a pond — easing the dry-season choice between irrigating and leaving enough flow for fish. The stored water can even be shared as a bargaining chip.</div>
+      </div>
+    </div>
+    <div class="card role role-eco">
+      <div class="ct">Ecologist</div>
+      <div class="cs">Restores the creek's health. Wants big logs left in the water, healthy plant buffers along the banks, and enough flow for salmon to pass.</div>
+      <div class="role-goal">fish &amp; wildlife to recover</div>
+      <div class="skill">
+        <div class="skill-label">Special skill</div>
+        <div class="skill-name">Anchor logs to the bank</div>
+        <div class="skill-desc">Only the Ecologist can stake a log to the bank so it holds its position — upgrading a so-so log into prime salmon habitat. Everyone downstream benefits from the steadier, healthier creek.</div>
+      </div>
+    </div>
+    <div class="card role role-road">
+      <div class="ct">Road Manager</div>
+      <div class="cs">Keeps roads, bridges, and culverts working. Threatened by debris that jams up under bridges and blocks culverts during storms.</div>
+      <div class="role-goal">infrastructure to stay intact</div>
+      <div class="skill">
+        <div class="skill-label">Special skill</div>
+        <div class="skill-name">Install a debris deflector</div>
+        <div class="skill-desc">Only the Road Manager can fit a culvert or bridge with a deflector that catches drifting logs before they jam — the key defense against cut-and-sent wood arriving from upstream.</div>
+      </div>
+    </div>
+    <div class="card role role-land">
+      <div class="ct">Land Manager</div>
+      <div class="cs">Protects property from flooding, fire, and erosion. Pays the price when upstream choices speed up and worsen flood pulses.</div>
+      <div class="role-goal">to prevent flooding &amp; damage</div>
+      <div class="skill">
+        <div class="skill-label">Special skill</div>
+        <div class="skill-name">Open a floodplain</div>
+        <div class="skill-desc">Only the Land Manager can set the banks back and free up floodplain, giving a flood pulse room to spread out and slow down — the one move that actively lowers flood risk instead of just bracing for it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 3. How a turn works ───────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">3</span> How a turn works</div>
+  <p class="body">The game is <strong>turn-based</strong>. Players take turns one at a time, and the watershed updates as the seasons pass.</p>
+  <div class="flow">
+    <div class="step"><span class="step-num">1</span><span class="step-body"><b>Events happen.</b> Logs may fall into the creek, and storms or droughts can strike — more often in the season you're in.</span></div>
+    <div class="step"><span class="step-num">2</span><span class="step-body"><b>The active player takes their turn.</b> This is the only time you can take a <em>major action</em> (see below).</span></div>
+    <div class="step"><span class="step-num">3</span><span class="step-body"><b>Anyone can take minor actions.</b> Small upkeep tasks can be done at any time, on or off your turn.</span></div>
+    <div class="step"><span class="step-num">4</span><span class="step-body"><b>The creek responds.</b> Water flow, habitat, and flood risk shift based on everyone's choices — including ones made turns ago.</span></div>
+  </div>
+</div>
+
+<!-- ── 4. What you can do ────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">4</span> What you can do — major vs. minor</div>
+  <p class="body">Your actions fall into two kinds. The difference is <strong>when</strong> you're allowed to do them.</p>
+  <div class="grid grid-2">
+    <div class="card action-card action-major">
+      <div class="when when-major">Only on your turn</div>
+      <div class="ct">Major actions</div>
+      <div class="cs">Big moves that change the state of the watershed.</div>
+      <ul class="examples">
+        <li>Removing a log from the creek</li>
+        <li>Building a well or a storage pond</li>
+        <li>Building or removing a channel, culvert, or bridge</li>
+        <li>Adding logs back in to build fish habitat</li>
+      </ul>
+    </div>
+    <div class="card action-card action-minor">
+      <div class="when when-minor">Anytime</div>
+      <div class="ct">Minor actions</div>
+      <div class="cs">Small upkeep and observation — no need to wait for your turn.</div>
+      <ul class="examples">
+        <li>Repairing roads or buildings</li>
+        <li>Watering plants</li>
+        <li>Measuring water quality</li>
+        <li>Clearing small debris</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ── 5. The big decision: fallen wood ──────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">5</span> The big decision — fallen wood</div>
+  <p class="body">Logs fall into the creek on their own, and more fall after storms. Every fallen log is a choice, and it's the heart of the game. When a log lands in your reach, you decide what to do with it.</p>
+  <div class="wood">
+    <div class="card">
+      <div class="ct" style="color:#96d4ae;">Leave it in place</div>
+      <div class="cs">A large log lying across the current carves out deep pools where salmon rest and spawn. Best for the creek.</div>
+      <div class="verdict v-good">Great for habitat</div>
+    </div>
+    <div class="card">
+      <div class="ct" style="color:#e0a85a;">Cut it &amp; send it downstream</div>
+      <div class="cs">Clears your own reach — but the pieces collect downstream and can jam under bridges and culverts.</div>
+      <div class="verdict v-warn">Your problem becomes theirs</div>
+    </div>
+    <div class="card">
+      <div class="ct" style="color:#e08870;">Remove it entirely</div>
+      <div class="cs">Opens the channel for water flow, but strips away habitat. Pools fade over the seasons that follow.</div>
+      <div class="verdict v-bad">Slow cost to the creek</div>
+    </div>
+  </div>
+  <details class="facilitator">
+    <summary>Facilitator notes <span class="fac-tag">research-grounded</span></summary>
+    <div class="fac-body">
+      <p>Not all logs are equal, and the game classifies each one when it arrives by <strong>size</strong> and <strong>orientation</strong>. Large logs lying across the flow are the high-value ones — in coastal field studies, roughly <strong>43% of logs over ~60&nbsp;cm diameter formed pools</strong>, versus about <strong>6% of medium (15–30&nbsp;cm) logs</strong>. A log lying parallel to the current does little regardless of size.</p>
+      <p>Channel width changes the math. Fellows Creek runs <strong>~4&nbsp;m wide in the headwaters, 8–10&nbsp;m mid-watershed, and 18–20&nbsp;m near the estuary</strong>. A medium log can span a narrow headwater channel (acting like a large one) but can't reach across the lower reach. A useful threshold: a 20&nbsp;cm log becomes meaningful at roughly <strong>5–6&nbsp;m channel width</strong>. For this watershed's logging history, treat <strong>&gt;30–40&nbsp;cm as "large,"</strong> with &gt;60&nbsp;cm as a rare keystone-log event.</p>
+      <p>The key tension to surface in play: <strong>removal costs hit fast, recovery comes slow.</strong> A stripped reach loses pool structure within a few high-flow seasons, but rebuilding it after logs return takes <strong>3–10 years</strong>. The cheap short-term choice carries a delayed price.</p>
+      <p class="src">Sources: Open Research Questions (sections 3–4, 7); logic map v3 woody-debris chain. Habitat-score deltas still flagged for expert calibration.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ── 6. Sharing the water ──────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">6</span> Sharing the water</div>
+  <p class="body">The creek is one shared resource, and different pressures pull on it differently:</p>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="ct" style="color:#9ed07e;">Drawing water to irrigate</div>
+      <div class="cs">The Farmer needs flow for crops. In wet months there's plenty to go around. In a dry season, drawing too much can leave salmon stranded.</div>
+    </div>
+    <div class="card">
+      <div class="ct" style="color:#a8ccec;">Straightening the channel</div>
+      <div class="cs">Channeling a reach drains your own land faster — but sends a bigger, faster flood pulse to everyone downstream.</div>
+    </div>
+    <div class="card">
+      <div class="ct" style="color:#96d4ae;">Keeping plants along the banks</div>
+      <div class="cs">A wide strip of plants beside the creek (a "buffer") filters farm runoff, shades the water, and stabilizes banks.</div>
+    </div>
+    <div class="card">
+      <div class="ct" style="color:#e0a85a;">Protecting culverts &amp; bridges</div>
+      <div class="cs">Debris sent downstream piles up at culverts and bridges. Stronger infrastructure resists it; storms test it.</div>
+    </div>
+  </div>
+  <details class="facilitator">
+    <summary>Facilitator notes <span class="fac-tag">research-grounded</span></summary>
+    <div class="fac-body">
+      <p><strong>Irrigation &amp; fish passage.</strong> This is a dry-season problem, not a year-round one. A working threshold for calibration: drawing more than about <strong>20% of low-season (summer) flow</strong> starts to break pool connectivity for fish. In a drought year even a 10% draw can strand fish; in a normal year a farm might draw 30% with little impact. A <strong>storage pond (1–5 acre-feet)</strong> lets the Farmer carry through 6–8 dry weeks and can become a bargaining chip with other players.</p>
+      <p><strong>Riparian buffers — two tiers.</strong> A narrow buffer of <strong>10&nbsp;m</strong> earns partial credit (sediment capture, some shade); a wide buffer of <strong>20&nbsp;m+</strong> gives full credit (nutrient filtering and canopy closure too). Note the cross-role link: if the Farmer clears the bank to the creek's edge, the Ecologist loses the source material to add logs in that reach.</p>
+      <p><strong>Channelizing.</strong> Straightened reaches can advance flood-peak timing by hours and raise peak discharge <strong>20–40%</strong> versus a meandering reach. Upstream channelizing is paid for by the Road and Land Managers downstream.</p>
+      <p><strong>Culverts.</strong> Most common failure is inlet blockage by debris, then capacity exceedance in storms. The Road Manager's upgrade ladder: cheap debris clearing → mid-cost inlet deflectors → expensive oversized replacement. A storm failure realistically costs <strong>$50k–$150k</strong> to repair — painful but survivable; two failures at once can be catastrophic.</p>
+      <p class="src">Sources: Open Research Questions (sections 8–9). Specific thresholds are starting values pending expert interviews.</p>
+    </div>
+  </details>
+</div>
+
+<!-- ── 7. Wet & dry seasons ──────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">7</span> The seasons change the stakes</div>
+  <p class="body">Turns cycle between two seasons. The same action can be safe in one and risky in the other, so plan ahead — you'll know the dry season is coming.</p>
+  <div class="seasons">
+    <div class="season season-wet">
+      <div class="st">Wet season</div>
+      <p>Water is plentiful, so irrigation is no problem. The real threat is storms: heavy rain drops more logs and pushes flood risk up. Wood decisions matter most now.</p>
+    </div>
+    <div class="season season-dry">
+      <div class="st">Dry season</div>
+      <p>Flow drops low. Now the Farmer's water draw competes directly with the salmon's need to pass, and drought events can hit. The Farmer's pond investment pays off here.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── 8. How you're doing ───────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">8</span> How you're doing — the meters</div>
+  <p class="body">Two sets of meters track the game. Watch both: doing well personally while the creek collapses isn't winning.</p>
+  <div class="metric-block">
+    <div class="card">
+      <div class="metric-head">Your meters (per player)</div>
+      <div class="chip-row">
+        <span class="chip">Energy</span>
+        <span class="chip">Health</span>
+        <span class="chip">Money</span>
+        <span class="chip">Morale</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="metric-head">The environment's meters (shared)</div>
+      <div class="chip-row">
+        <span class="chip env">Habitat Score</span>
+        <span class="chip env">Flood Risk</span>
+        <span class="chip env">Fire Risk</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 9. Getting around ─────────────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">9</span> Getting around the world</div>
+  <p class="body">The world is built from tiles, each with its own terrain — <strong>forest, field, town, creek</strong>, and more — and each can be in different states like <em>thriving, degraded, flooded,</em> or <em>dry</em>. Your character walks the land and sees only the part of the world around them at any moment.</p>
+  <p class="body">To see the whole watershed at once — and how your reach connects to everyone else's — open the <strong>map from the main menu</strong>. It's the best way to spot trouble heading downstream before it arrives.</p>
+</div>
+
+<!-- ── 10. One thing to remember ──────────────────────────────── -->
+<div class="section">
+  <div class="section-label"><span class="num">10</span> The one thing to remember</div>
+  <div class="goal">
+    <div class="goal-title">You're all on the same creek.</div>
+    <p>Every reach flows into the next. The log you send downstream, the water you draw in a drought, the channel you straighten — each one shows up on someone else's land. Talk to each other. The watershed only thrives if you solve it together.</p>
+  </div>
+</div>
+
+<div class="foot">
+  Fellows Creek — a collaborative watershed game<br>
+  Facilitator notes are grounded in the project's research; numbers marked for calibration are starting values for playtesting and expert review.
+</div>
+
+</body>
+</html>
