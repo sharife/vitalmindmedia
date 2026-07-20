@@ -8,26 +8,29 @@
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Dark mode palette ─────────────────────────────────────────
-   Background:  #141c1f  (near-black with a blue-green tint)
-   Surface:     #1e2a2e  (card background)
-   Border base: #2e3f44  (subtle structural lines)
+/* ── Light mode palette ─────────────────────────────────────────
+   Background:  #f7f4ea  (warm paper)
+   Surface:     #ffffff  (card background)
+   Border base: #ddd6c0  (subtle structural lines)
 
-   Accent colours — muted, desaturated, easy to distinguish:
-     slate-blue  #3d5a80  / text #8ab4d4   (classification, decision)
-     sage-green  #2d5a3d  / text #7bbf93   (teal: habitat, ecologist, leave)
-     ochre       #5a3e1b  / text #c9934a   (amber: cut, road mgr, jam-check)
-     rust        #5a2a1e  / text #c97a62   (coral: remove, flood, infra)
-     steel       #2e3f44  / text #7a9aa8   (gray: trigger, small, parallel)
-     ocean       #1e3a5a  / text #6aaed6   (blue: water system)
-     moss        #2a4020  / text #8ab86a   (green: farmer)
+   Accent colours — tinted background + saturated border + dark readable text:
+     slate-blue  #eef0fa  / text #4b3fa0   (classification, decision)
+     sage-green  #eaf6ee  / text #1f7a4d   (teal: habitat, leave)
+     ochre       #fbf1de  / text #8a5c1c   (amber: cut, jam-check)
+     rust        #fbeae6  / text #9c3f2b   (coral: remove, flood, infra)
+     steel       #f0f0ec  / text #223138   (gray: trigger, small, parallel)
+     ocean       #e8f3fb  / text #1c6488   (blue: water system)
+
+   Role colours — dedicated, not shared with the token system above:
+     Farmer  #2097d3 / text #0d6a96   Ecologist  #e2d242 / text #6f5f14
+     Land Mgr #6db75e / text #337a2a  Road Mgr   #f48f4a / text #a85419
    ──────────────────────────────────────────────────────────── */
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 16px; /* rem anchor */
-  background: #121212;
-  color: #333;
+  background: #f7f4ea;
+  color: #33393c;
   min-width: 780px;
 }
 .wrap {
@@ -35,32 +38,42 @@ body {
   margin: 0 auto;
   padding: 2rem;
 }
-h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4f7; }
-.subtitle { font-size: 1.0rem; color: #7fa8b8; margin-bottom: 2rem; line-height: 1.6; }
+h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #16211f; }
+.subtitle { font-size: 1.0rem; color: #5c6f78; margin-bottom: 2rem; line-height: 1.6; }
 
 /* ── Colour tokens ─────────────────────────────────────────── */
 /* Border is the PRIMARY colour cue; background tint reinforces it.
-   .nt = title (bright accent)  .ns = subtitle (readable mid-contrast) */
-.c-gray   { background:#1c2529; border-color:#5e8090; }
-.c-gray   .nt { color:#c2dce6; } .c-gray   .ns { color:#8aaab8; }
+   .nt = title (dark readable accent)  .ns = subtitle (readable mid-contrast) */
+.c-gray   { background:#f0f0ec; border-color:#5e7480; }
+.c-gray   .nt { color:#223138; } .c-gray   .ns { color:#5c6f78; }
 
-.c-purple { background:#1a1e32; border-color:#7a6ed0; }
-.c-purple .nt { color:#a8ccec; } .c-purple .ns { color:#7aa8d0; }
+.c-purple { background:#eef0fa; border-color:#7a6ed0; }
+.c-purple .nt { color:#4b3fa0; } .c-purple .ns { color:#6a60b8; }
 
-.c-teal   { background:#162419; border-color:#3da874; }
-.c-teal   .nt { color:#96d4ae; } .c-teal   .ns { color:#68aa82; }
+.c-teal   { background:#eaf6ee; border-color:#2f9463; }
+.c-teal   .nt { color:#1f7a4d; } .c-teal   .ns { color:#3f8f64; }
 
-.c-amber  { background:#231a0d; border-color:#c9883a; }
-.c-amber  .nt { color:#e0a85a; } .c-amber  .ns { color:#b07c38; }
+.c-amber  { background:#fbf1de; border-color:#c9883a; }
+.c-amber  .nt { color:#8a5c1c; } .c-amber  .ns { color:#a06b23; }
 
-.c-coral  { background:#231110; border-color:#c0604a; }
-.c-coral  .nt { color:#e08870; } .c-coral  .ns { color:#b05e48; }
+.c-coral  { background:#fbeae6; border-color:#c0604a; }
+.c-coral  .nt { color:#9c3f2b; } .c-coral  .ns { color:#b0523c; }
 
-.c-blue   { background:#111c2a; border-color:#4a9ec8; }
-.c-blue   .nt { color:#80c4e8; } .c-blue   .ns { color:#5096c0; }
+.c-blue   { background:#e8f3fb; border-color:#3f93bd; }
+.c-blue   .nt { color:#1c6488; } .c-blue   .ns { color:#2f7ea3; }
 
-.c-green  { background:#141c10; border-color:#6aaa44; }
-.c-green  .nt { color:#9ed07e; } .c-green  .ns { color:#6ea050; }
+/* ── Player-role colours (dedicated — match How to Play) ────── */
+.c-role-farmer { background:#e8f4fb; border-color:#2097d3; }
+.c-role-farmer .nt { color:#0d6a96; } .c-role-farmer .ns { color:#155f85; }
+
+.c-role-eco { background:#fbf8e0; border-color:#e2d242; }
+.c-role-eco .nt { color:#6f5f14; } .c-role-eco .ns { color:#8a7a1a; }
+
+.c-role-road { background:#fdf0e6; border-color:#f48f4a; }
+.c-role-road .nt { color:#a85419; } .c-role-road .ns { color:#b8621f; }
+
+.c-role-land { background:#eef7ec; border-color:#6db75e; }
+.c-role-land .nt { color:#337a2a; } .c-role-land .ns { color:#428f36; }
 
 /* ── Node card ─────────────────────────────────────────────── */
 .node {
@@ -73,7 +86,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   position: relative;
   flex: 1;
 }
-.node:hover { filter: brightness(1.14); transform: translateY(-1px); }
+.node:hover { filter: saturate(1.15) brightness(0.98); transform: translateY(-1px); }
 .nt { font-size: 1.0rem; font-weight: 600; margin-bottom: 0.25rem; }
 .ns { font-size: 0.86rem; line-height: 1.55; }
 
@@ -86,7 +99,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
 .gap { flex-shrink: 0; }
 
 .section-lbl {
-  text-align: center; font-size: 0.79rem; color: #555;
+  text-align: center; font-size: 0.79rem; color: #736c50;
   letter-spacing: .06em; padding: 2px 0;
 }
 
@@ -100,74 +113,77 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
 
 /* ── Core tension ─────────────────────────────────────────── */
 .tension {
-  border: 2px solid #5e8090; background: #1c2529;
+  border: 2px solid #5e7480; background: #ffffff;
   border-radius: 8px; padding: 13px 20px;
   text-align: center; cursor: pointer; transition: filter .15s;
 }
-.tension:hover { filter: brightness(1.14); }
-.tension .nt { color:#c2dce6; font-size:1.0rem; font-weight:600; margin-bottom:0.3rem; }
-.tension .ns { color:#8aaab8; font-size:0.86rem; line-height:1.6; }
+.tension:hover { filter: saturate(1.15) brightness(0.98); }
+.tension .nt { color:#223138; font-size:1.0rem; font-weight:600; margin-bottom:0.3rem; }
+.tension .ns { color:#5c6f78; font-size:0.86rem; line-height:1.6; }
 
 /* ── Legend ───────────────────────────────────────────────── */
 .legend {
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem;
-  margin-top: 1.5rem; font-size: 0.8rem; color: #999;
+  margin-top: 1.5rem; font-size: 0.8rem; color: #5c6f78;
   align-items: flex-start;
 }
 .legend-group { display: flex; flex-direction: column; gap: 0.3rem; }
 .legend-group-label {
   font-size: 0.65rem; font-weight: 600; letter-spacing: .07em;
-  text-transform: uppercase; color: #555; margin-bottom: 0.15rem;
+  text-transform: uppercase; color: #736c50; margin-bottom: 0.15rem;
 }
-.legend-item { display: flex; align-items: center; gap: 0.55rem; color: #aaa; }
-/* Swatch: dark chip with thick left border in the class colour */
+.legend-item { display: flex; align-items: center; gap: 0.55rem; color: #46545c; }
+/* Swatch: light tinted chip with thick left border in the class colour */
 .ls {
   width: 2rem; height: 1.1rem;
   border-radius: 3px; flex-shrink: 0;
   border: 1.5px solid transparent;
   border-left-width: 4px;
 }
-.ls-gray   { background:#1c2529; border-color:#5e8090; }
-.ls-purple { background:#1a1e32; border-color:#7a6ed0; }
-.ls-teal   { background:#162419; border-color:#3da874; }
-.ls-amber  { background:#231a0d; border-color:#c9883a; }
-.ls-coral  { background:#231110; border-color:#c0604a; }
-.ls-blue   { background:#111c2a; border-color:#4a9ec8; }
-.ls-green  { background:#141c10; border-color:#6aaa44; }
-.ls-dash   { background:transparent; border:1.5px dashed #555; border-left-width:1.5px; }
+.ls-gray   { background:#f0f0ec; border-color:#5e7480; }
+.ls-purple { background:#eef0fa; border-color:#7a6ed0; }
+.ls-teal   { background:#eaf6ee; border-color:#2f9463; }
+.ls-amber  { background:#fbf1de; border-color:#c9883a; }
+.ls-coral  { background:#fbeae6; border-color:#c0604a; }
+.ls-blue   { background:#e8f3fb; border-color:#3f93bd; }
+.ls-role-farmer { background:#e8f4fb; border-color:#2097d3; }
+.ls-role-eco    { background:#fbf8e0; border-color:#e2d242; }
+.ls-role-road   { background:#fdf0e6; border-color:#f48f4a; }
+.ls-role-land   { background:#eef7ec; border-color:#6db75e; }
+.ls-dash   { background:transparent; border:1.5px dashed #736c50; border-left-width:1.5px; }
 
-.footnote { font-size:0.75rem; color:#555; font-style:italic; margin-top:0.875rem; line-height:1.6; }
+.footnote { font-size:0.75rem; color:#736c50; font-style:italic; margin-top:0.875rem; line-height:1.6; }
 
 /* ── Modal ────────────────────────────────────────────────── */
 .modal-backdrop {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.7); z-index: 100;
+  background: rgba(30,25,10,.45); z-index: 100;
   align-items: center; justify-content: center; padding: 2rem;
 }
 .modal-backdrop.open { display: flex; }
 .modal {
-  background: #1a1e22; border: 1px solid #333;
+  background: #ffffff; border: 1px solid #ddd6c0;
   border-radius: 12px; padding: 28px 32px;
   max-width: 520px; width: 100%; max-height: 80vh;
   overflow-y: auto; position: relative;
-  box-shadow: 0 8px 40px rgba(0,0,0,.5);
+  box-shadow: 0 12px 40px rgba(60,50,20,.18);
 }
 .modal-close {
   position: absolute; top:16px; right:18px;
   background:none; border:none; font-size:1.44rem;
-  cursor:pointer; color:#888; line-height:1;
+  cursor:pointer; color:#5c6f78; line-height:1;
 }
-.modal-close:hover { color:#d4dfe3; }
+.modal-close:hover { color:#223138; }
 .modal-tag {
   display:inline-block; font-size:0.72rem; font-weight:500;
   letter-spacing:.06em; text-transform:uppercase;
   padding:2px 8px; border-radius:10px; margin-bottom:10px;
 }
-.modal h2 { font-size:1.22rem; font-weight:600; margin-bottom:0.5rem; color:#eef4f7; }
-.modal-desc { font-size:1.0rem; color:#b8d0da; line-height:1.65; margin-bottom:1.125rem; }
-.modal h3 { font-size:0.79rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#5a7a88; margin-bottom:0.5rem; }
+.modal h2 { font-size:1.22rem; font-weight:600; margin-bottom:0.5rem; color:#16211f; }
+.modal-desc { font-size:1.0rem; color:#46545c; line-height:1.65; margin-bottom:1.125rem; }
+.modal h3 { font-size:0.79rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#5e7480; margin-bottom:0.5rem; }
 .modal ul { padding-left:18px; }
-.modal ul li { font-size:0.93rem; color:#b8d0da; line-height:1.65; margin-bottom:0.3rem; }
+.modal ul li { font-size:0.93rem; color:#46545c; line-height:1.65; margin-bottom:0.3rem; }
 .modal-section { margin-bottom:18px; }
 </style>
 </head>
@@ -184,10 +200,10 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   <!-- D3 draws arrows into this SVG overlay -->
   <svg id="arrow-layer">
     <defs>
-      <marker id="ah-gray"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#5e8090" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
-      <marker id="ah-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#5a82a8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
-      <marker id="ah-teal"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#4d8f65" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
-      <marker id="ah-coral"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#8f4f3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-gray"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#5e7480" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-purple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#6a60b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-teal"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#3f8f64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+      <marker id="ah-coral"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#a8503a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
     </defs>
   </svg>
 
@@ -313,19 +329,19 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
 
     <!-- R8: Player roles -->
     <div class="row">
-      <div class="node c-green"  id="n-farmer"   onclick="openModal('farmer')">
+      <div class="node c-role-farmer"  id="n-farmer"   onclick="openModal('farmer')">
         <div class="nt">Farmer</div>
         <div class="ns">Irrigation access affected by flow rate and availability.</div>
       </div>
-      <div class="node c-teal"   id="n-ecologist" onclick="openModal('ecologist')">
+      <div class="node c-role-eco"   id="n-ecologist" onclick="openModal('ecologist')">
         <div class="nt">Ecologist</div>
         <div class="ns">Fish score rises or falls with wood choice and habitat condition.</div>
       </div>
-      <div class="node c-amber"  id="n-road-mgr"  onclick="openModal('road-mgr')">
+      <div class="node c-role-road"  id="n-road-mgr"  onclick="openModal('road-mgr')">
         <div class="nt">Road manager</div>
         <div class="ns">Log jams cause bridge damage and repair costs.</div>
       </div>
-      <div class="node c-purple" id="n-land-mgr"  onclick="openModal('land-mgr')">
+      <div class="node c-role-land" id="n-land-mgr"  onclick="openModal('land-mgr')">
         <div class="nt">Land manager</div>
         <div class="ns">Storm amplification if flood risk track is elevated.</div>
       </div>
@@ -363,10 +379,10 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   </div>
   <div class="legend-group">
     <div class="legend-group-label">Player roles</div>
-    <div class="legend-item"><div class="ls ls-green"></div>Farmer</div>
-    <div class="legend-item"><div class="ls ls-teal"></div>Ecologist</div>
-    <div class="legend-item"><div class="ls ls-amber"></div>Road manager</div>
-    <div class="legend-item"><div class="ls ls-purple"></div>Land manager</div>
+    <div class="legend-item"><div class="ls ls-role-farmer"></div>Farmer</div>
+    <div class="legend-item"><div class="ls ls-role-eco"></div>Ecologist</div>
+    <div class="legend-item"><div class="ls ls-role-road"></div>Road manager</div>
+    <div class="legend-item"><div class="ls ls-role-land"></div>Land manager</div>
   </div>
   <div class="legend-group">
     <div class="legend-group-label">Arrow style</div>
@@ -526,7 +542,7 @@ function drawEdges() {
     }
 
     const d = `M${x1},${y1} C${cp1x},${cp1y} ${cp2x},${cp2y} ${x2},${y2}`;
-    const color = { gray:'#5e8090', purple:'#5a82a8', teal:'#4d8f65', coral:'#8f4f3a' }[edge.color] || '#9c9a92';
+    const color = { gray:'#5e7480', purple:'#6a60b8', teal:'#3f8f64', coral:'#a8503a' }[edge.color] || '#928a6e';
     const markerId = `ah-${edge.color}`;
 
     svg.append('path')
@@ -549,7 +565,7 @@ window.addEventListener('resize', drawEdges);
 // ─────────────────────────────────────────────────────────────
 const NODES = {
   'jam-check': {
-    tag:'Structural threshold', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    tag:'Structural threshold', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#8a5c1c',
     title:'Jam structure check',
     desc:'When a log is left in place, the game checks whether the accumulation has crossed from passive habitat roughness into active hydraulic control. The transition is not about log count — it\'s about geometry: does the jam now span the channel and form a step or backwater? If yes, flood risk rises even though the original decision was "Leave."',
     details:[
@@ -569,7 +585,7 @@ const NODES = {
   },
 
   trigger: {
-    tag:'Event trigger', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    tag:'Event trigger', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#223138',
     title:'Log falls in the creek',
     desc:'Logs enter the creek randomly each turn and with increased probability after storm events. Any player\'s reach can receive a log. The type, size, and orientation are determined on arrival.',
     details:[
@@ -584,7 +600,7 @@ const NODES = {
     ]
   },
   classify: {
-    tag:'Classification', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    tag:'Classification', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#4b3fa0',
     title:'Log classified on arrival',
     desc:'Each log is assessed on two axes: (1) its size class by diameter, and (2) its orientation relative to flow. The combination determines its baseline habitat value before the player decides what to do.',
     details:[
@@ -599,7 +615,7 @@ const NODES = {
     ]
   },
   small: {
-    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#223138',
     title:'Small log (<10 cm diameter)',
     desc:'Below the meaningful hydraulic threshold. These logs, and any short or unanchored pieces regardless of diameter, act as simple debris. They contribute little to pool formation or habitat value.',
     details:[
@@ -613,7 +629,7 @@ const NODES = {
     ]
   },
   medium: {
-    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Medium log (15–30 cm diameter)',
     desc:'Pool-forming potential is low but non-zero (~6% of pieces in this range formed pools in coastal BC field studies). Habitat value is orientation-dependent — a perpendicular, bank-anchored medium log in a small channel can punch above its weight class.',
     details:[
@@ -628,7 +644,7 @@ const NODES = {
     ]
   },
   large: {
-    tag:'Size class', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Large log (>60 cm diameter)',
     desc:'High pool-forming potential (~43% of pieces at this diameter formed pools in field studies). Any log that is channel-spanning or bank-anchored, regardless of its diameter, should be treated in this category.',
     details:[
@@ -644,7 +660,7 @@ const NODES = {
     ]
   },
   parallel: {
-    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    tag:'Orientation', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#223138',
     title:'Parallel to flow',
     desc:'A log aligned with the current direction creates minimal flow deflection and does not form scour pools. Its habitat value is negligible regardless of diameter — treat it as a small log for scoring purposes.',
     details:[
@@ -658,7 +674,7 @@ const NODES = {
     ]
   },
   'blocking-med': {
-    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Orientation', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Blocking / partial — medium log',
     desc:'A medium log oriented perpendicular or at an angle to flow creates some deflection and may form a shallow pool. Habitat value is moderate. Leaving it is recommended but not as strongly as for large logs.',
     details:[
@@ -672,7 +688,7 @@ const NODES = {
     ]
   },
   'blocking-large': {
-    tag:'Orientation', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Orientation', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Blocking / partial — large log',
     desc:'The highest-value configuration in the system. A large log perpendicular to flow forces significant scour, creates deep pools, and provides critical salmon resting and spawning habitat. Leaving it is strongly recommended.',
     details:[
@@ -686,7 +702,7 @@ const NODES = {
     ]
   },
   decision: {
-    tag:'Player decision', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    tag:'Player decision', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#4b3fa0',
     title:'Player decision point',
     desc:'After classification, the active player chooses one of three actions. The choice is binding for that log and triggers downstream consequences in the shared systems.',
     details:[
@@ -701,7 +717,7 @@ const NODES = {
     ]
   },
   leave: {
-    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Action', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Leave in place',
     desc:'The log stays where it fell. No budget cost. If the log qualifies (size and orientation), the Habitat system gains points. Flow is altered at that tile.',
     details:[
@@ -715,7 +731,7 @@ const NODES = {
     ]
   },
   cut: {
-    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    tag:'Action', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#8a5c1c',
     title:'Cut & send downstream',
     desc:'The log is cut into smaller pieces and allowed to float downstream. Low budget cost to the acting player, but the debris risk is transferred to the next reach downstream.',
     details:[
@@ -730,7 +746,7 @@ const NODES = {
     ]
   },
   remove: {
-    tag:'Action', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    tag:'Action', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#9c3f2b',
     title:'Remove entirely',
     desc:'The log is removed from the creek and disposed of on land. Higher budget cost. The reach is cleared, removing both the habitat benefit and any flow obstruction — but the Flood risk track increases by 1.',
     details:[
@@ -745,7 +761,7 @@ const NODES = {
     ]
   },
   'flood-track': {
-    tag:'Accumulating effect', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    tag:'Accumulating effect', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#9c3f2b',
     title:'Flood risk track',
     desc:'A shared counter that increases by 1 each time any player removes a log entirely. When a storm event fires, the damage multiplier scales with the current flood risk track value.',
     details:[
@@ -761,7 +777,7 @@ const NODES = {
     ]
   },
   water: {
-    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#6aaed6',
+    tag:'Shared system', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1c6488',
     title:'Water system',
     desc:'Governs flow rate, flood risk, and irrigation availability across all reaches. Affected by wood decisions, infrastructure placement, and climate events.',
     details:[
@@ -776,7 +792,7 @@ const NODES = {
     ]
   },
   habitat: {
-    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Shared system', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
     title:'Habitat system',
     desc:'Tracks fish & wildlife score and bank stability across the watershed. Primarily driven by large woody debris decisions and riparian buffer health.',
     details:[
@@ -791,7 +807,7 @@ const NODES = {
     ]
   },
   infra: {
-    tag:'Shared system', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c97a62',
+    tag:'Shared system', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#9c3f2b',
     title:'Infrastructure',
     desc:'Tracks bridge and road damage risk and culvert blockage probability. Driven primarily by log jam formation from cut-and-sent debris.',
     details:[
@@ -806,7 +822,7 @@ const NODES = {
     ]
   },
   farmer: {
-    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab86a',
+    tag:'Player role', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#0d6a96',
     title:'Farmer',
     desc:'Primary concern: irrigation access. Wants consistent flow rate and water availability. Threatened by drought events and by flow reductions from log jams or upstream diversions.',
     details:[
@@ -821,7 +837,7 @@ const NODES = {
     ]
   },
   ecologist: {
-    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7bbf93',
+    tag:'Player role', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#6f5f14',
     title:'Ecologist',
     desc:'Primary concern: fish and wildlife score. Wants large blocking logs left in place, riparian buffers maintained, and flow rates sufficient for salmon passage.',
     details:[
@@ -836,7 +852,7 @@ const NODES = {
     ]
   },
   'road-mgr': {
-    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#c9934a',
+    tag:'Player role', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#a85419',
     title:'Road manager',
     desc:'Primary concern: infrastructure integrity. Wants debris managed to prevent culvert blockage and bridge damage. Threatened by log jams from cut-and-sent debris.',
     details:[
@@ -851,7 +867,7 @@ const NODES = {
     ]
   },
   'land-mgr': {
-    tag:'Player role', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#8ab4d4',
+    tag:'Player role', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#337a2a',
     title:'Land manager',
     desc:'Primary concern: flood and fire risk on managed land. Threatened by high flood risk track values. Benefits from maintained riparian buffers and upstream LWD that attenuates peak flow.',
     details:[
@@ -866,7 +882,7 @@ const NODES = {
     ]
   },
   tension: {
-    tag:'Design principle', tagColor:'#1a1a1a', tagBorder:'#333', tagText:'#7a9aa8',
+    tag:'Design principle', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#5e7480',
     title:'Core design tension',
     desc:'The fundamental dilemma driving player interaction: individual rationality conflicts with collective outcomes.',
     details:[

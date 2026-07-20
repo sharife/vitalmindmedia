@@ -8,17 +8,18 @@
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Palette (matches dev plan v5 + logic map v3) ─────────────
-   bg #121212 · surface #1c2529 · border #333
-   slate-blue  text #a8ccec  · sage #96d4ae · ochre #e0a85a
-   coral #e08870 · steel #c2dce6 · ocean #80c4e8 · moss #9ed07e
+/* ── Palette — light "field notebook" theme (matches dev plan v5 + logic map v3) ─
+   page #f7f4ea · surface #ffffff · inset #efe8d4 · border #ddd6c0
+   ink (headings) #16211f · strong #223138 · body #46545c · muted #5c6f78 · label #5e7480
+   sage/teal #1f7a4d · ochre #8a5c1c · rust #9c3f2b · ocean #1c6488 · moss #3f6b1f
+   Role colors — Farmer #2097d3 · Ecologist #e2d242 · Land Mgr #6db75e · Road Mgr #f48f4a
    ──────────────────────────────────────────────────────────── */
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 16px;
-  background: #121212;
-  color: #8aaab8;
+  background: #f7f4ea;
+  color: #5c6f78;
   padding: 2rem 1.5rem 4rem;
   max-width: 880px;
   margin: 0 auto;
@@ -27,168 +28,168 @@ body {
 
 /* ── Masthead ──────────────────────────────────────────────── */
 .masthead {
-  border: 1px solid #5e8090;
+  border: 1px solid #5e7480;
   border-radius: 10px;
-  background: linear-gradient(160deg, #16242c 0%, #121b13 100%);
+  background: linear-gradient(160deg, #faf6e6 0%, #edf5ee 100%);
   padding: 26px 28px 24px;
   margin-bottom: 2rem;
 }
 .eyebrow {
   font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em;
-  text-transform: uppercase; color: #68aa82; margin-bottom: 0.6rem;
+  text-transform: uppercase; color: #2f8f5f; margin-bottom: 0.6rem;
 }
-h1 { font-size: 1.7rem; font-weight: 700; color: #eef4f7; margin-bottom: 0.45rem; letter-spacing: -0.01em; }
-.tagline { font-size: 1.04rem; color: #96d4ae; font-weight: 500; margin-bottom: 0.5rem; }
-.lede { font-size: 0.95rem; color: #8aaab8; max-width: 60ch; }
+h1 { font-size: 1.7rem; font-weight: 700; color: #16211f; margin-bottom: 0.45rem; letter-spacing: -0.01em; }
+.tagline { font-size: 1.04rem; color: #1f7a4d; font-weight: 500; margin-bottom: 0.5rem; }
+.lede { font-size: 0.95rem; color: #5c6f78; max-width: 60ch; }
 
 /* ── Section scaffold ──────────────────────────────────────── */
 .section { margin-bottom: 2.25rem; }
 .section-label {
   font-size: 0.74rem; font-weight: 600; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #5e8090;
+  text-transform: uppercase; color: #5e7480;
   margin-bottom: 0.9rem; padding-bottom: 0.4rem;
-  border-bottom: 1px solid #2a3338;
+  border-bottom: 1px solid #ddd6c0;
   display: flex; align-items: baseline; gap: 0.6rem;
 }
 .section-label .num {
-  font-size: 0.7rem; color: #3da874; font-weight: 700;
-  border: 1px solid #2a4a36; border-radius: 4px;
-  padding: 1px 6px; background: #14201a;
+  font-size: 0.7rem; color: #1f7a4d; font-weight: 700;
+  border: 1px solid #2f9463; border-radius: 4px;
+  padding: 1px 6px; background: #eaf6ee;
 }
-p.body { font-size: 0.95rem; color: #a8bcc6; margin-bottom: 0.75rem; }
+p.body { font-size: 0.95rem; color: #46545c; margin-bottom: 0.75rem; }
 p.body:last-child { margin-bottom: 0; }
-.body strong { color: #c2dce6; font-weight: 600; }
-em { color: #96d4ae; font-style: italic; }
+.body strong { color: #223138; font-weight: 600; }
+em { color: #1f7a4d; font-style: italic; }
 
 /* ── Goal callout ──────────────────────────────────────────── */
 .goal {
-  border: 1px solid #3da874; border-left-width: 4px;
-  border-radius: 8px; background: #14201a;
+  border: 1px solid #2f9463; border-left-width: 4px;
+  border-radius: 8px; background: #eaf6ee;
   padding: 16px 18px;
 }
-.goal .goal-title { font-size: 1.0rem; font-weight: 700; color: #96d4ae; margin-bottom: 0.4rem; }
-.goal p { font-size: 0.95rem; color: #a8bcc6; }
+.goal .goal-title { font-size: 1.0rem; font-weight: 700; color: #1f7a4d; margin-bottom: 0.4rem; }
+.goal p { font-size: 0.95rem; color: #46545c; }
 
 /* ── Card grid ─────────────────────────────────────────────── */
 .grid { display: grid; gap: 12px; }
 .grid-2 { grid-template-columns: 1fr 1fr; }
 .grid-4 { grid-template-columns: repeat(2, 1fr); }
 .card {
-  background: #1c2529; border: 1px solid #2e3b41;
+  background: #ffffff; border: 1px solid #ddd6c0;
   border-radius: 8px; padding: 14px 16px;
 }
 .card .ct { font-size: 0.98rem; font-weight: 600; margin-bottom: 0.3rem; }
-.card .cs { font-size: 0.88rem; color: #8aaab8; }
+.card .cs { font-size: 0.88rem; color: #5c6f78; }
 .card .cs + .cs { margin-top: 0.5rem; }
 
 /* ── Role cards (accent per role) ──────────────────────────── */
 .role { border-left: 4px solid; }
-.role-farmer   { border-left-color: #62c2c2; } .role-farmer .ct   { color: #62c2c2; }
-.role-eco      { border-left-color: #f2c869; } .role-eco .ct      { color: #f2c869; }
-.role-road     { border-left-color: #e08d3c; } .role-road .ct     { color: #e08d3c; }
-.role-land     { border-left-color: #8eae36; } .role-land .ct     { color: #8eae36; }
-.role-goal { font-size: 0.84rem; color: #c2dce6; margin-top: 0.55rem; }
-.role-goal::before { content: "Wants: "; color: #5e8090; font-weight: 600; }
+.role-farmer   { border-left-color: #2097d3; } .role-farmer .ct   { color: #0d6a96; }
+.role-eco      { border-left-color: #e2d242; } .role-eco .ct      { color: #6f5f14; }
+.role-road     { border-left-color: #f48f4a; } .role-road .ct     { color: #a85419; }
+.role-land     { border-left-color: #6db75e; } .role-land .ct     { color: #337a2a; }
+.role-goal { font-size: 0.84rem; color: #223138; margin-top: 0.55rem; }
+.role-goal::before { content: "Wants: "; color: #5e7480; font-weight: 600; }
 .skill {
   margin-top: 0.7rem; padding-top: 0.65rem;
-  border-top: 1px solid #2a3338;
+  border-top: 1px solid #ddd6c0;
 }
 .skill-label {
   font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #5e8090;
+  text-transform: uppercase; color: #5e7480;
   display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.25rem;
 }
 .skill-label::before { content: "★"; font-size: 0.7rem; }
 .skill-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
-.skill-desc { font-size: 0.84rem; color: #8aaab8; }
-.role-farmer .skill-name { color: #62c2c2; }
-.role-eco    .skill-name { color: #f2c869; }
-.role-road   .skill-name { color: #e08d3c; }
-.role-land   .skill-name { color: #8eae36; }
+.skill-desc { font-size: 0.84rem; color: #5c6f78; }
+.role-farmer .skill-name { color: #0d6a96; }
+.role-eco    .skill-name { color: #6f5f14; }
+.role-road   .skill-name { color: #a85419; }
+.role-land   .skill-name { color: #337a2a; }
 
 /* ── Action split (major / minor) ──────────────────────────── */
 .action-card { border-top: 4px solid; }
-.action-major { border-top-color: #e08870; }
-.action-major .ct { color: #e08870; }
-.action-minor { border-top-color: #80c4e8; }
-.action-minor .ct { color: #80c4e8; }
+.action-major { border-top-color: #c0604a; }
+.action-major .ct { color: #9c3f2b; }
+.action-minor { border-top-color: #3f93bd; }
+.action-minor .ct { color: #1c6488; }
 .when { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.5rem; }
-.when-major { color: #b05e48; }
-.when-minor { color: #5096c0; }
+.when-major { color: #b0523c; }
+.when-minor { color: #2f7ea3; }
 .examples { list-style: none; }
-.examples li { font-size: 0.88rem; color: #a8bcc6; padding: 3px 0 3px 18px; position: relative; }
-.examples li::before { content: "›"; position: absolute; left: 4px; color: #5e8090; }
+.examples li { font-size: 0.88rem; color: #46545c; padding: 3px 0 3px 18px; position: relative; }
+.examples li::before { content: "›"; position: absolute; left: 4px; color: #5e7480; }
 
 /* ── Wood decision row ─────────────────────────────────────── */
 .wood { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .wood .card { text-align: left; }
 .wood .verdict { font-size: 0.78rem; font-weight: 600; margin-top: 0.5rem; }
-.v-good { color: #96d4ae; } .v-warn { color: #e0a85a; } .v-bad { color: #e08870; }
+.v-good { color: #1f7a4d; } .v-warn { color: #8a5c1c; } .v-bad { color: #9c3f2b; }
 
 /* ── Metrics ───────────────────────────────────────────────── */
 .metric-block { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.metric-head { font-size: 0.84rem; font-weight: 600; color: #c2dce6; margin-bottom: 0.5rem; }
+.metric-head { font-size: 0.84rem; font-weight: 600; color: #223138; margin-bottom: 0.5rem; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   font-size: 0.82rem; padding: 3px 10px; border-radius: 12px;
-  background: #121212; border: 1px solid #333; color: #a8bcc6;
+  background: #efe8d4; border: 1px solid #ddd6c0; color: #46545c;
 }
-.chip.env { border-color: #2a4a36; color: #96d4ae; }
+.chip.env { border-color: #2f9463; color: #1f7a4d; }
 
 /* ── Turn flow ─────────────────────────────────────────────── */
 .flow { display: flex; flex-direction: column; gap: 8px; }
 .step { display: flex; gap: 12px; align-items: flex-start; }
 .step-num {
   flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
-  background: #14201a; border: 1px solid #3da874; color: #96d4ae;
+  background: #eaf6ee; border: 1px solid #2f9463; color: #1f7a4d;
   font-size: 0.78rem; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
-.step-body { font-size: 0.92rem; color: #a8bcc6; padding-top: 1px; }
-.step-body b { color: #c2dce6; }
+.step-body { font-size: 0.92rem; color: #46545c; padding-top: 1px; }
+.step-body b { color: #223138; }
 
 /* ── Season banner ─────────────────────────────────────────── */
 .seasons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .season { border-radius: 8px; padding: 14px 16px; border: 1px solid; }
-.season-wet { background: #111c2a; border-color: #4a9ec8; }
-.season-wet .st { color: #80c4e8; }
-.season-dry { background: #231a0d; border-color: #c9883a; }
-.season-dry .st { color: #e0a85a; }
+.season-wet { background: #e8f3fb; border-color: #3f93bd; }
+.season-wet .st { color: #1c6488; }
+.season-dry { background: #fbf1de; border-color: #c9883a; }
+.season-dry .st { color: #8a5c1c; }
 .st { font-size: 0.98rem; font-weight: 700; margin-bottom: 0.35rem; }
-.season p { font-size: 0.87rem; color: #a8bcc6; }
+.season p { font-size: 0.87rem; color: #46545c; }
 
 /* ── Facilitator notes (collapsible) ───────────────────────── */
 details.facilitator {
-  border: 1px dashed #5e8090; border-radius: 8px;
-  background: #161d21; margin-top: 0.75rem; overflow: hidden;
+  border: 1px dashed #5e7480; border-radius: 8px;
+  background: #f7f2e2; margin-top: 0.75rem; overflow: hidden;
 }
 details.facilitator > summary {
   cursor: pointer; list-style: none;
   padding: 12px 16px; font-size: 0.82rem; font-weight: 600;
-  letter-spacing: 0.04em; text-transform: uppercase; color: #8aaab8;
+  letter-spacing: 0.04em; text-transform: uppercase; color: #5c6f78;
   display: flex; align-items: center; gap: 0.5rem;
 }
 details.facilitator > summary::-webkit-details-marker { display: none; }
 details.facilitator > summary::before {
-  content: "▸"; color: #5e8090; transition: transform .15s;
+  content: "▸"; color: #5e7480; transition: transform .15s;
 }
 details.facilitator[open] > summary::before { transform: rotate(90deg); }
-details.facilitator > summary:hover { color: #c2dce6; }
+details.facilitator > summary:hover { color: #223138; }
 .fac-tag {
   font-size: 0.66rem; padding: 1px 7px; border-radius: 10px;
-  background: #1a1e32; color: #a8ccec; border: 1px solid #7a6ed0;
+  background: #eef0fa; color: #4b3fa0; border: 1px solid #7a6ed0;
   letter-spacing: 0.06em;
 }
-.fac-body { padding: 4px 16px 16px; border-top: 1px solid #2a3338; }
-.fac-body p { font-size: 0.88rem; color: #93a7b1; margin-bottom: 0.6rem; }
+.fac-body { padding: 4px 16px 16px; border-top: 1px solid #ddd6c0; }
+.fac-body p { font-size: 0.88rem; color: #5c6f78; margin-bottom: 0.6rem; }
 .fac-body p:last-child { margin-bottom: 0; }
-.fac-body strong { color: #b8cdd6; }
-.fac-body .src { font-size: 0.78rem; color: #5e8090; font-style: italic; }
+.fac-body strong { color: #223138; }
+.fac-body .src { font-size: 0.78rem; color: #5e7480; font-style: italic; }
 
 /* ── Footer ────────────────────────────────────────────────── */
 .foot {
-  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #2a3338;
-  font-size: 0.78rem; color: #5e8090; text-align: center; line-height: 1.7;
+  margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #ddd6c0;
+  font-size: 0.78rem; color: #5e7480; text-align: center; line-height: 1.7;
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
@@ -314,17 +315,17 @@ details.facilitator > summary:hover { color: #c2dce6; }
   <p class="body">Logs fall into the creek on their own, and more fall after storms. Every fallen log is a choice, and it's the heart of the game. When a log lands in your reach, you decide what to do with it.</p>
   <div class="wood">
     <div class="card">
-      <div class="ct" style="color:#96d4ae;">Leave it in place</div>
+      <div class="ct" style="color:#1f7a4d;">Leave it in place</div>
       <div class="cs">A large log lying across the current carves out deep pools where salmon rest and spawn. Best for the creek.</div>
       <div class="verdict v-good">Great for habitat</div>
     </div>
     <div class="card">
-      <div class="ct" style="color:#e0a85a;">Cut it &amp; send it downstream</div>
+      <div class="ct" style="color:#8a5c1c;">Cut it &amp; send it downstream</div>
       <div class="cs">Clears your own reach — but the pieces collect downstream and can jam under bridges and culverts.</div>
       <div class="verdict v-warn">Your problem becomes theirs</div>
     </div>
     <div class="card">
-      <div class="ct" style="color:#e08870;">Remove it entirely</div>
+      <div class="ct" style="color:#9c3f2b;">Remove it entirely</div>
       <div class="cs">Opens the channel for water flow, but strips away habitat. Pools fade over the seasons that follow.</div>
       <div class="verdict v-bad">Slow cost to the creek</div>
     </div>
@@ -346,19 +347,19 @@ details.facilitator > summary:hover { color: #c2dce6; }
   <p class="body">The creek is one shared resource, and different pressures pull on it differently:</p>
   <div class="grid grid-2">
     <div class="card">
-      <div class="ct" style="color:#9ed07e;">Drawing water to irrigate</div>
+      <div class="ct" style="color:#337a2a;">Drawing water to irrigate</div>
       <div class="cs">The Farmer needs flow for crops. In wet months there's plenty to go around. In a dry season, drawing too much can leave salmon stranded.</div>
     </div>
     <div class="card">
-      <div class="ct" style="color:#a8ccec;">Straightening the channel</div>
+      <div class="ct" style="color:#4b3fa0;">Straightening the channel</div>
       <div class="cs">Channeling a reach drains your own land faster — but sends a bigger, faster flood pulse to everyone downstream.</div>
     </div>
     <div class="card">
-      <div class="ct" style="color:#96d4ae;">Keeping plants along the banks</div>
+      <div class="ct" style="color:#1f7a4d;">Keeping plants along the banks</div>
       <div class="cs">A wide strip of plants beside the creek (a "buffer") filters farm runoff, shades the water, and stabilizes banks.</div>
     </div>
     <div class="card">
-      <div class="ct" style="color:#e0a85a;">Protecting culverts &amp; bridges</div>
+      <div class="ct" style="color:#8a5c1c;">Protecting culverts &amp; bridges</div>
       <div class="cs">Debris sent downstream piles up at culverts and bridges. Stronger infrastructure resists it; storms test it.</div>
     </div>
   </div>

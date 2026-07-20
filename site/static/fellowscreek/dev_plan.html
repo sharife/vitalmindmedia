@@ -8,78 +8,79 @@
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Dark mode palette (matching logic map v3) ─────────────────
-   Background:  #121212
-   Surface:     #1c2529  (card background)
-   Border base: #333     (subtle structural lines)
+/* ── Light mode palette (matching logic map v3) ─────────────────
+   Background:  #f7f4ea
+   Surface:     #ffffff  (card background)
+   Inset:       #efe8d4  (recessed chip / sub-box background)
+   Border base: #ddd6c0  (subtle structural lines)
 
-   Accent colours:
-     slate-blue  #1a1e32  / text #a8ccec / sub #7aa8d0
-     sage-green  #162419  / text #96d4ae / sub #68aa82
-     ochre       #231a0d  / text #e0a85a / sub #b07c38
-     rust/coral  #231110  / text #e08870 / sub #b05e48
-     steel/gray  #1c2529  / text #c2dce6 / sub #8aaab8
-     ocean-blue  #111c2a  / text #80c4e8 / sub #5096c0
-     moss-green  #141c10  / text #9ed07e / sub #6ea050
+   Accent colours — tinted background + saturated border + dark readable text:
+     slate-blue  #eef0fa  / text #4b3fa0 / sub #6a60b8
+     sage-green  #eaf6ee  / text #1f7a4d / sub #3f8f64
+     ochre       #fbf1de  / text #8a5c1c / sub #a06b23
+     rust/coral  #fbeae6  / text #9c3f2b / sub #b0523c
+     steel/gray  #f0f0ec  / text #223138 / sub #5c6f78
+     ocean-blue  #e8f3fb  / text #1c6488 / sub #2f7ea3
+     moss-green  #f0f7e8  / text #3f6b1f / sub #557a2f
    ──────────────────────────────────────────────────────────── */
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 16px; /* rem anchor */
-  background: #121212;
-  color: #8aaab8;
+  background: #f7f4ea;
+  color: #5c6f78;
   padding: 2rem;
   min-width: 780px;
   max-width: 960px;
   margin: 0 auto;
 }
 
-h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4f7; }
-.subtitle { font-size: 1.0rem; color: #7fa8b8; margin-bottom: 2rem; line-height: 1.6; }
+h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #16211f; }
+.subtitle { font-size: 1.0rem; color: #5c6f78; margin-bottom: 2rem; line-height: 1.6; }
 
 /* ── Section labels ────────────────────────────────────────── */
 .section { margin-bottom: 2.5rem; }
 .section-label {
   font-size: 0.79rem; font-weight: 500; letter-spacing: 0.08em;
-  text-transform: uppercase; color: #555;
+  text-transform: uppercase; color: #736c50;
   margin-bottom: 0.75rem;
 }
 
 /* ── Scope dividers ────────────────────────────────────────── */
 .scope-divider {
   font-size: 0.79rem; font-weight: 500; letter-spacing: 0.06em;
-  text-transform: uppercase; color: #555;
-  padding: 0.5rem 0; border-top: 0.5px solid #333;
+  text-transform: uppercase; color: #736c50;
+  padding: 0.5rem 0; border-top: 0.5px solid #ddd6c0;
   margin-top: 0.25rem; margin-bottom: 0.5rem;
   display: flex; justify-content: space-between; align-items: center;
 }
 .scope-total { font-size: 0.86rem; font-weight: 500; }
-.scope-total-blue  { color: #7aa8d0; }
-.scope-total-purple { color: #a8ccec; }
-.scope-total-amber { color: #e0a85a; }
+.scope-total-blue  { color: #1c6488; }
+.scope-total-purple { color: #4b3fa0; }
+.scope-total-amber { color: #8a5c1c; }
 
 /* ── Colour token classes ──────────────────────────────────── */
-.c-gray   { background:#1c2529; border-color:#5e8090; }
-.c-gray   .nt { color:#c2dce6; } .c-gray   .ns { color:#8aaab8; }
-.c-purple { background:#1a1e32; border-color:#7a6ed0; }
-.c-purple .nt { color:#a8ccec; } .c-purple .ns { color:#7aa8d0; }
-.c-teal   { background:#162419; border-color:#3da874; }
-.c-teal   .nt { color:#96d4ae; } .c-teal   .ns { color:#68aa82; }
-.c-amber  { background:#231a0d; border-color:#c9883a; }
-.c-amber  .nt { color:#e0a85a; } .c-amber  .ns { color:#b07c38; }
-.c-coral  { background:#231110; border-color:#c0604a; }
-.c-coral  .nt { color:#e08870; } .c-coral  .ns { color:#b05e48; }
-.c-blue   { background:#111c2a; border-color:#4a9ec8; }
-.c-blue   .nt { color:#80c4e8; } .c-blue   .ns { color:#5096c0; }
-.c-green  { background:#141c10; border-color:#6aaa44; }
-.c-green  .nt { color:#9ed07e; } .c-green  .ns { color:#6ea050; }
+.c-gray   { background:#f0f0ec; border-color:#5e7480; }
+.c-gray   .nt { color:#223138; } .c-gray   .ns { color:#5c6f78; }
+.c-purple { background:#eef0fa; border-color:#7a6ed0; }
+.c-purple .nt { color:#4b3fa0; } .c-purple .ns { color:#6a60b8; }
+.c-teal   { background:#eaf6ee; border-color:#2f9463; }
+.c-teal   .nt { color:#1f7a4d; } .c-teal   .ns { color:#3f8f64; }
+.c-amber  { background:#fbf1de; border-color:#c9883a; }
+.c-amber  .nt { color:#8a5c1c; } .c-amber  .ns { color:#a06b23; }
+.c-coral  { background:#fbeae6; border-color:#c0604a; }
+.c-coral  .nt { color:#9c3f2b; } .c-coral  .ns { color:#b0523c; }
+.c-blue   { background:#e8f3fb; border-color:#3f93bd; }
+.c-blue   .nt { color:#1c6488; } .c-blue   .ns { color:#2f7ea3; }
+.c-green  { background:#f0f7e8; border-color:#5c9a3a; }
+.c-green  .nt { color:#3f6b1f; } .c-green  .ns { color:#557a2f; }
 
 /* ── Base card ─────────────────────────────────────────────── */
 .card {
-  border: 1px solid #5e8090;
+  border: 1px solid #5e7480;
   border-radius: 8px;
   padding: 13px 15px;
-  background: #1c2529;
+  background: #ffffff;
   margin-bottom: 0.75rem;
 }
 
@@ -90,29 +91,29 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   gap: 10px;
 }
 .stat-card {
-  background: #1c2529;
+  background: #ffffff;
   border: 1px solid;
   border-radius: 8px;
   padding: 14px 16px;
   text-align: center;
 }
-.stat-val { font-size: 1.44rem; font-weight: 600; color: #eef4f7; margin-bottom: 2px; }
-.stat-sub { font-size: 0.86rem; color: #8aaab8; }
+.stat-val { font-size: 1.44rem; font-weight: 600; color: #16211f; margin-bottom: 2px; }
+.stat-sub { font-size: 0.86rem; color: #5c6f78; }
 
 /* ── Stack grid (tech stack, AI tools) ────────────────────── */
 .stack-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .stack-card {
-  background: #1c2529;
+  background: #ffffff;
   border: 1px solid;
   border-radius: 8px;
   padding: 11px 15px 13px;
 }
 .stack-layer {
   font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em;
-  text-transform: uppercase; color: #555; margin-bottom: 6px;
+  text-transform: uppercase; color: #736c50; margin-bottom: 6px;
 }
-.stack-name { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 3px; }
-.stack-reason { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+.stack-name { font-size: 1.0rem; font-weight: 600; color: #223138; margin-bottom: 3px; }
+.stack-reason { font-size: 0.86rem; color: #5c6f78; line-height: 1.55; }
 
 /* ── Phase cards ───────────────────────────────────────────── */
 .phase-card {
@@ -122,7 +123,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   margin-bottom: 0.75rem;
   transition: filter .15s;
 }
-.phase-card:hover { filter: brightness(1.08); }
+.phase-card:hover { filter: saturate(1.15) brightness(0.98); }
 .phase-card.changed { border-left-width: 4px; padding-left: 13px; }
 
 .phase-header {
@@ -135,100 +136,100 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 0.79rem; font-weight: 600; flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.08);
 }
 /* Phase number colour variants */
-.p1 { background:#162419; color:#96d4ae; border-color:#3da874; }
-.p2 { background:#111c2a; color:#80c4e8; border-color:#4a9ec8; }
-.p3 { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
-.p4 { background:#1a1e32; color:#a8ccec; border-color:#7a6ed0; }
-.p5 { background:#231110; color:#e08870; border-color:#c0604a; }
-.p6 { background:#141c10; color:#9ed07e; border-color:#6aaa44; }
-.p7 { background:#1c2529; color:#c2dce6; border-color:#5e8090; }
-.pS { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+.p1 { background:#eaf6ee; color:#1f7a4d; border-color:#2f9463; }
+.p2 { background:#e8f3fb; color:#1c6488; border-color:#3f93bd; }
+.p3 { background:#fbf1de; color:#8a5c1c; border-color:#c9883a; }
+.p4 { background:#eef0fa; color:#4b3fa0; border-color:#7a6ed0; }
+.p5 { background:#fbeae6; color:#9c3f2b; border-color:#c0604a; }
+.p6 { background:#f0f7e8; color:#3f6b1f; border-color:#5c9a3a; }
+.p7 { background:#f0f0ec; color:#223138; border-color:#5e7480; }
+.pS { background:#fbf1de; color:#8a5c1c; border-color:#c9883a; }
 
-.phase-title { font-size: 1.0rem; font-weight: 600; color: #c2dce6; }
-.phase-subtitle { font-size: 0.86rem; color: #8aaab8; margin-top: 2px; line-height: 1.5; }
+.phase-title { font-size: 1.0rem; font-weight: 600; color: #223138; }
+.phase-subtitle { font-size: 0.86rem; color: #5c6f78; margin-top: 2px; line-height: 1.5; }
 
 .phase-meta { text-align: right; flex-shrink: 0; }
-.phase-weeks { font-size: 0.93rem; font-weight: 500; color: #c2dce6; }
-.phase-cost  { font-size: 0.86rem; color: #8aaab8; }
+.phase-weeks { font-size: 0.93rem; font-weight: 500; color: #223138; }
+.phase-cost  { font-size: 0.86rem; color: #5c6f78; }
 
 /* ── New badge ─────────────────────────────────────────────── */
 .new-badge {
   font-size: 0.72rem; font-weight: 500; padding: 1px 7px;
   border-radius: 10px; margin-left: 6px; vertical-align: middle;
-  background: #162419; color: #96d4ae; border: 1px solid #3da874;
+  background: #eaf6ee; color: #1f7a4d; border: 1px solid #2f9463;
 }
 
 /* ── Scope tags ────────────────────────────────────────────── */
 .scope-tag {
   font-size: 0.72rem; font-weight: 500; padding: 2px 7px;
   border-radius: 10px; margin-left: 5px; vertical-align: middle;
-  border: 1px solid #333;
+  border: 1px solid #ddd6c0;
 }
-.scope1-tag { background:#111c2a; color:#7aa8d0; border-color:#4a9ec8; }
-.scope2-tag { background:#1a1e32; color:#a8ccec; border-color:#7a6ed0; }
-.scopeS-tag { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
+.scope1-tag { background:#e8f3fb; color:#1c6488; border-color:#3f93bd; }
+.scope2-tag { background:#eef0fa; color:#4b3fa0; border-color:#7a6ed0; }
+.scopeS-tag { background:#fbf1de; color:#8a5c1c; border-color:#c9883a; }
 
 /* ── Deliverable chips ─────────────────────────────────────── */
 .deliverables { display: flex; flex-wrap: wrap; gap: 6px; }
 .deliverable {
   font-size: 0.79rem; padding: 3px 8px;
-  background: #121212; border: 1px solid #333;
-  border-radius: 4px; color: #8aaab8;
+  background: #efe8d4; border: 1px solid #ddd6c0;
+  border-radius: 4px; color: #5c6f78;
 }
 
 /* ── Budget bars ───────────────────────────────────────────── */
 .budget-section-label {
   font-size: 0.79rem; font-weight: 500; letter-spacing: 0.06em;
-  text-transform: uppercase; color: #555;
+  text-transform: uppercase; color: #736c50;
   margin: 16px 0 10px;
 }
 .budget-section-label:first-child { margin-top: 0; }
 .budget-bar-wrap { margin-bottom: 10px; }
 .budget-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-.budget-label { font-size: 0.93rem; color: #c2dce6; }
-.budget-val   { font-size: 0.93rem; font-weight: 500; color: #8aaab8; }
-.bar-bg { height: 5px; background: #1c2529; border-radius: 3px; overflow: hidden; border: 1px solid #333; }
+.budget-label { font-size: 0.93rem; color: #223138; }
+.budget-val   { font-size: 0.93rem; font-weight: 500; color: #5c6f78; }
+.bar-bg { height: 5px; background: #efe8d4; border-radius: 3px; overflow: hidden; border: 1px solid #ddd6c0; }
 .bar-fill { height: 100%; border-radius: 3px; }
 .total-row {
   display: flex; justify-content: space-between;
-  padding-top: 12px; border-top: 0.5px solid #333; margin-top: 8px;
+  padding-top: 12px; border-top: 0.5px solid #ddd6c0; margin-top: 8px;
 }
-.total-label { font-size: 1.0rem; font-weight: 600; color: #eef4f7; }
-.total-val   { font-size: 1.0rem; font-weight: 600; color: #96d4ae; }
+.total-label { font-size: 1.0rem; font-weight: 600; color: #16211f; }
+.total-val   { font-size: 1.0rem; font-weight: 600; color: #1f7a4d; }
 
 /* ── Risk rows ─────────────────────────────────────────────── */
 .risk-row {
   display: flex; gap: 10px; align-items: flex-start;
-  padding: 9px 0; border-bottom: 0.5px solid #333;
+  padding: 9px 0; border-bottom: 0.5px solid #ddd6c0;
 }
 .risk-row:last-child { border-bottom: none; }
 .risk-pill {
   font-size: 0.72rem; font-weight: 500; padding: 2px 7px;
   border-radius: 10px; flex-shrink: 0; margin-top: 2px;
-  border: 1px solid #333;
+  border: 1px solid #ddd6c0;
 }
-.risk-high { background:#231110; color:#e08870; border-color:#c0604a; }
-.risk-med  { background:#231a0d; color:#e0a85a; border-color:#c9883a; }
-.risk-low  { background:#141c10; color:#9ed07e; border-color:#6aaa44; }
-.risk-label { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 2px; }
-.risk-mitigation { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+.risk-high { background:#fbeae6; color:#9c3f2b; border-color:#c0604a; }
+.risk-med  { background:#fbf1de; color:#8a5c1c; border-color:#c9883a; }
+.risk-low  { background:#f0f7e8; color:#3f6b1f; border-color:#5c9a3a; }
+.risk-label { font-size: 1.0rem; font-weight: 600; color: #223138; margin-bottom: 2px; }
+.risk-mitigation { font-size: 0.86rem; color: #5c6f78; line-height: 1.55; }
 
 /* ── Decision cards (2-col grid) ───────────────────────────── */
 .decision-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .decision-card {
-  background: #1c2529; border: 1px solid; border-radius: 8px;
+  background: #ffffff; border: 1px solid; border-radius: 8px;
   padding: 13px 15px;
 }
-.decision-title { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 4px; }
-.decision-body  { font-size: 0.86rem; color: #8aaab8; line-height: 1.6; }
+.decision-title { font-size: 1.0rem; font-weight: 600; color: #223138; margin-bottom: 4px; }
+.decision-body  { font-size: 0.86rem; color: #5c6f78; line-height: 1.6; }
 
 /* ── AI tool cards ─────────────────────────────────────────── */
-.ai-cat  { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #555; margin-bottom: 6px; }
-.ai-tool { font-size: 1.0rem; font-weight: 600; color: #c2dce6; margin-bottom: 2px; }
-.ai-use  { font-size: 0.86rem; color: #8aaab8; line-height: 1.55; }
+.ai-cat  { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: #736c50; margin-bottom: 6px; }
+.ai-tool { font-size: 1.0rem; font-weight: 600; color: #223138; margin-bottom: 2px; }
+.ai-use  { font-size: 0.86rem; color: #5c6f78; line-height: 1.55; }
 
 /* ── nt / ns shorthands (match logic map) ──────────────────── */
 .nt { font-size: 1.0rem; font-weight: 600; margin-bottom: 0.25rem; }
@@ -236,14 +237,14 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
 
 /* ── Mechanics cards ───────────────────────────────────────── */
 .mech-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-.mech-card { background:#1c2529; border:1px solid; border-radius:8px; padding:13px 15px; }
-.mech-title { font-size:1.0rem; font-weight:600; color:#c2dce6; margin-bottom:6px; }
-.mech-body { font-size:0.86rem; color:#8aaab8; line-height:1.6; margin-bottom:10px; }
+.mech-card { background:#ffffff; border:1px solid; border-radius:8px; padding:13px 15px; }
+.mech-title { font-size:1.0rem; font-weight:600; color:#223138; margin-bottom:6px; }
+.mech-body { font-size:0.86rem; color:#5c6f78; line-height:1.6; margin-bottom:10px; }
 .mech-body:last-child { margin-bottom:0; }
 .mech-split { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.mech-sub { background:#121212; border:1px solid #333; border-radius:6px; padding:10px 12px; }
-.mech-sub-label { font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:#555; margin-bottom:5px; }
-.mech-sub-body { font-size:0.82rem; color:#8aaab8; line-height:1.55; }
+.mech-sub { background:#efe8d4; border:1px solid #ddd6c0; border-radius:6px; padding:10px 12px; }
+.mech-sub-label { font-size:0.72rem; font-weight:500; letter-spacing:0.06em; text-transform:uppercase; color:#736c50; margin-bottom:5px; }
+.mech-sub-body { font-size:0.82rem; color:#5c6f78; line-height:1.55; }
 </style>
 </head>
 <body>
@@ -516,7 +517,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #eef4
   <div class="phase-card c-gray changed">
     <div class="phase-header">
       <div class="phase-left">
-        <div class="phase-num p4" style="background:#162419;color:#96d4ae;border-color:#3da874;">4B</div>
+        <div class="phase-num p4" style="background:#eaf6ee;color:#1f7a4d;border-color:#2f9463;">4B</div>
         <div>
           <div class="phase-title">Mid-project playtesting &amp; iteration <span class="new-badge">New</span></div>
           <div class="phase-subtitle">Dedicated 8-week buffer between Scope 1 and Scope 2 — fix physics, rebalance simulation, incorporate expert feedback before full production begins</div>
