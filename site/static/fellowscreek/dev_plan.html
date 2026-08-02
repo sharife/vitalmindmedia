@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fellows Creek — Development Plan</title>
+<title>Fellows Creek — Development Plan (No Budget)</title>
 <style>
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -87,7 +87,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
 /* ── Summary stat cards ────────────────────────────────────── */
 .stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
 }
 .stat-card {
@@ -263,14 +263,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       <div class="stat-val">+8</div>
       <div class="stat-sub">weeks Spanish</div>
     </div>
-    <div class="stat-card c-teal">
-      <div class="stat-val">$148.9k</div>
-      <div class="stat-sub">core budget</div>
-    </div>
-    <div class="stat-card c-amber">
-      <div class="stat-val">+$7.5k</div>
-      <div class="stat-sub">Spanish budget</div>
-    </div>
   </div>
 </div>
 
@@ -399,7 +391,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
   <!-- Scope 1 -->
   <div class="scope-divider">
     <span>Scope 1 — prototype <span class="scope-tag scope1-tag">Weeks 1–24</span></span>
-    <span class="scope-total scope-total-blue">$76,410</span>
   </div>
 
   <div class="phase-card c-teal changed">
@@ -413,7 +404,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 1–6</div>
-        <div class="phase-cost">$7,000</div>
       </div>
     </div>
     <div class="deliverables">
@@ -437,7 +427,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 7–12</div>
-        <div class="phase-cost">incl. in $30k</div>
       </div>
     </div>
     <div class="deliverables">
@@ -464,7 +453,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 13–22</div>
-        <div class="phase-cost">$20,000</div>
       </div>
     </div>
     <div class="deliverables">
@@ -495,7 +483,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 23–24</div>
-        <div class="phase-cost">$1,910</div>
       </div>
     </div>
     <div class="deliverables">
@@ -511,13 +498,12 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
   <!-- Mid-project buffer -->
   <div class="scope-divider" style="margin-top:1.5rem;">
     <span>Mid-project buffer — playtesting &amp; iteration <span class="scope-tag scope1-tag">Weeks 25–32</span></span>
-    <span class="scope-total scope-total-blue">incl. in Scope 1</span>
   </div>
 
   <div class="phase-card c-gray changed">
     <div class="phase-header">
       <div class="phase-left">
-        <div class="phase-num p4" style="background:#eaf6ee;color:#1f7a4d;border-color:#2f9463;">4B</div>
+        <div class="phase-num p4" style="background:#162419;color:#96d4ae;border-color:#3da874;">4B</div>
         <div>
           <div class="phase-title">Mid-project playtesting &amp; iteration <span class="new-badge">New</span></div>
           <div class="phase-subtitle">Dedicated 8-week buffer between Scope 1 and Scope 2 — fix physics, rebalance simulation, incorporate expert feedback before full production begins</div>
@@ -525,7 +511,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 25–32</div>
-        <div class="phase-cost">incl. in $77k</div>
       </div>
     </div>
     <div class="deliverables">
@@ -542,7 +527,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
   <!-- Scope 2 -->
   <div class="scope-divider" style="margin-top:1.5rem;">
     <span>Scope 2 — full production <span class="scope-tag scope2-tag">Weeks 33–50</span></span>
-    <span class="scope-total scope-total-purple">$72,500</span>
   </div>
 
   <div class="phase-card c-coral">
@@ -556,7 +540,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 33–42</div>
-        <div class="phase-cost">$43k + $15k</div>
       </div>
     </div>
     <div class="deliverables">
@@ -584,7 +567,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 43–47</div>
-        <div class="phase-cost">$2,000 + $5k</div>
       </div>
     </div>
     <div class="deliverables">
@@ -608,7 +590,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Weeks 48–50</div>
-        <div class="phase-cost">incl. in $7.5k</div>
       </div>
     </div>
     <div class="deliverables">
@@ -623,7 +604,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
   <!-- Spanish -->
   <div class="scope-divider" style="margin-top:1.5rem;">
     <span>Spanish localization — post-launch <span class="scope-tag scopeS-tag">+6–8 weeks</span></span>
-    <span class="scope-total scope-total-amber">$7,500</span>
   </div>
 
   <div class="phase-card c-amber changed">
@@ -637,7 +617,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       </div>
       <div class="phase-meta">
         <div class="phase-weeks">Post-launch</div>
-        <div class="phase-cost">$7,500</div>
       </div>
     </div>
     <div class="deliverables">
@@ -647,84 +626,6 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       <span class="deliverable">Native LQA review</span>
       <span class="deliverable">Language toggle UI</span>
       <span class="deliverable">Multiplayer cross-language QA</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── Budget ───────────────────────────────────────────────── -->
-<div class="section">
-  <div class="section-label">Budget allocation — full project</div>
-  <div class="card c-gray" style="padding:16px 18px;">
-
-    <div class="budget-section-label">Scope 1 (incl. mid-project buffer) — $76,410</div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Programming (core app + multiplayer)</span><span class="budget-val">$30,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#1D9E75;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Mechanics &amp; simulation</span><span class="budget-val">$20,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:33%;background:#5096c0;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">UI design &amp; custom art</span><span class="budget-val">$10,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:17%;background:#b05e48;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Infrastructure (8 months, incl. mid-project buffer)</span><span class="budget-val">$7,500</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#8aaab8;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Scientific research &amp; expert interviews</span><span class="budget-val">$7,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:11%;background:#7aa8d0;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Prototype playtesting workshops</span><span class="budget-val">$1,910</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:3%;background:#6ea050;"></div></div>
-    </div>
-
-    <div class="budget-section-label">Scope 2 — $72,500</div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Programming (remaining roles + climate events)</span><span class="budget-val">$43,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:71%;background:#1D9E75;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Final art &amp; audio</span><span class="budget-val">$15,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:25%;background:#b05e48;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Infrastructure (launch + 3 months)</span><span class="budget-val">$7,500</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#8aaab8;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Economy balancing &amp; QA</span><span class="budget-val">$5,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:8%;background:#b07c38;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Full-scale playtesting</span><span class="budget-val">$2,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:3%;background:#6ea050;"></div></div>
-    </div>
-
-    <div class="budget-section-label">Spanish localization — $7,500</div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Technical &amp; scientific translation</span><span class="budget-val">$1,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:7%;background:#e0a85a;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">UI/UX layout adjustment</span><span class="budget-val">$3,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:21%;background:#e0a85a;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Linguistic quality assurance (LQA)</span><span class="budget-val">$2,000</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:14%;background:#e0a85a;"></div></div>
-    </div>
-    <div class="budget-bar-wrap">
-      <div class="budget-row"><span class="budget-label">Deployment &amp; final polish</span><span class="budget-val">$1,500</span></div>
-      <div class="bar-bg"><div class="bar-fill" style="width:10%;background:#e0a85a;"></div></div>
-    </div>
-
-    <div class="total-row">
-      <span class="total-label">Total (core + Spanish)</span>
-      <span class="total-val">$156,410</span>
     </div>
   </div>
 </div>
@@ -772,7 +673,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
       <span class="risk-pill risk-low">Low</span>
       <div>
         <div class="risk-label">Post-launch server costs</div>
-        <div class="risk-mitigation">~$170/month. Fly.io auto-scales down during off-hours. Budget a 6-month hosting reserve (~$1,020) into the Scope 2 infrastructure allocation.</div>
+        <div class="risk-mitigation">Fly.io auto-scales down during off-hours to keep ongoing hosting costs low. Set aside a hosting reserve covering the first several months post-launch as part of the Scope 2 infrastructure allocation.</div>
       </div>
     </div>
   </div>
