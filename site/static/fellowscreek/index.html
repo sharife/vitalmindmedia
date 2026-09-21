@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fellows Creek — Project Index</title>
+<style>
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Light "field notebook" palette ───────────────────────────────────────
+   page #f7f4ea · surface #ffffff · rule #ddd6c0 · strong rule #3f4f56
+   ink #16211f · body #5c6f78 · muted #8a9499
+   Typographic layout — no colour coding; hierarchy carries the structure.
+   ──────────────────────────────────────────────────────────── */
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px; /* rem anchor */
+  background: #f7f4ea;
+  color: #5c6f78;
+}
+.wrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 3rem 2rem 4rem;
+}
+
+/* ── Masthead ──────────────────────────────────────────────── */
+h1 {
+  font-size: 1.62rem; font-weight: 600; letter-spacing: -0.01em;
+  color: #16211f; margin-bottom: 0.5rem;
+}
+.subtitle {
+  font-size: 1.0rem; color: #5c6f78; line-height: 1.65;
+  max-width: 62ch;
+}
+
+/* ── Section label ─────────────────────────────────────────── */
+.sec-h {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: #8a9499;
+  margin: 3.25rem 0 1.25rem;
+}
+.sec-note {
+  font-size: 0.82rem; color: #8a9499; line-height: 1.6;
+  margin: 3rem 0 1.25rem;
+}
+
+/* ── Typographic columns ───────────────────────────────────── */
+.cols { display: grid; gap: 2rem 2.25rem; }
+.cols-3 { grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.col {
+  border-top: 2px solid #3f4f56; padding-top: 0.8rem;
+}
+.col-h {
+  font-size: 0.98rem; font-weight: 600; color: #16211f;
+  margin-bottom: 0.4rem; letter-spacing: -0.005em;
+}
+
+/* ── Player-role accents (roles only) ──────────────────────── */
+.col-farmer { border-top-color: #2097d3; }
+.col-farmer .col-h { color: #0d6a96; }
+.col-eco    { border-top-color: #e2d242; }
+.col-eco    .col-h { color: #6f5f14; }
+.col-road   { border-top-color: #f48f4a; }
+.col-road   .col-h { color: #a85419; }
+.col-land   { border-top-color: #6db75e; }
+.col-land   .col-h { color: #337a2a; }
+.col-b { font-size: 0.88rem; line-height: 1.6; color: #5c6f78; }
+.col-b strong { color: #16211f; font-weight: 600; }
+.col-skill {
+  font-size: 0.82rem; line-height: 1.55; margin-top: 0.85rem;
+}
+.col-skill .lbl {
+  display: block;
+  font-size: 0.65rem; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: #8a9499; margin-bottom: 0.2rem;
+}
+.col-skill .txt { color: #5c6f78; }
+
+/* ── Pull quote (core tension) ─────────────────────────────── */
+.pull {
+  margin: 2.75rem 0 0;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid #ddd6c0;
+  max-width: 72ch;
+}
+.pull-lbl {
+  font-size: 0.65rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: #8a9499; margin-bottom: 0.5rem;
+}
+.pull-b { font-size: 1.05rem; line-height: 1.6; color: #16211f; font-weight: 400; }
+
+/* ── Material list ────────────────────────────────────────── */
+.mat-list { display: flex; flex-direction: column; }
+.mat-row {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  column-gap: 1.25rem;
+  align-items: start;
+  padding: 1rem 0.5rem 1.05rem 0;
+  border-top: 1px solid #ddd6c0;
+  text-decoration: none;
+  transition: background .15s, padding .15s;
+}
+.mat-row:last-child { border-bottom: 1px solid #ddd6c0; }
+.mat-row:hover, .mat-row:focus-visible { background: rgba(255,255,255,.75); padding-left: 0.5rem; outline: none; }
+.mat-num {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: .08em;
+  color: #8a9499; padding-top: 0.22rem;
+}
+.mat-h {
+  display: block; font-size: 1.0rem; font-weight: 600;
+  color: #16211f; margin-bottom: 0.2rem;
+}
+.mat-b { display: block; font-size: 0.87rem; line-height: 1.55; color: #5c6f78; max-width: 82ch; }
+.mat-go {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .1em; color: #8a9499; white-space: nowrap; padding-top: 0.3rem;
+}
+.mat-row:hover .mat-go { color: #16211f; }
+@media (max-width: 640px) {
+  .wrap { padding: 2rem 1rem 3rem; }
+  .mat-row { grid-template-columns: 2rem minmax(0, 1fr); column-gap: 0.75rem; }
+  .mat-go { grid-column: 2; padding-top: 0.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Fellows Creek — Project Index</h1>
+<p class="subtitle">
+  A browser-based, collaborative watershed game developed with the San Mateo Resource Conservation District (SMRCD).
+  This page summarises the game and links to every design document produced so far.
+</p>
+
+<!-- ── Overview ─────────────────────────────────────────────── -->
+<div class="sec-h">Overview</div>
+
+<div class="cols cols-3">
+  <div class="col">
+    <div class="col-h">The setting</div>
+    <div class="col-b">A small coastal California creek system modelled on Pescadero Creek in San Mateo County — headwaters, a farm valley, and a floodplain town at the estuary, laid out as a square-tile board where every tile knows what lies downstream.</div>
+  </div>
+  <div class="col">
+    <div class="col-h">The format</div>
+    <div class="col-b">A facilitated stakeholder workshop of 60–90 minutes, and online synchronous. Four players take turns; major actions happen on your turn, minor actions any time. Wet and dry seasons shift the pressures on the creek. Playable in English and Spanish.</div>
+  </div>
+  <div class="col">
+    <div class="col-h">The core decision</div>
+    <div class="col-b">When a log falls in the creek, the player whose reach it lands in chooses to <strong>leave it</strong>, <strong>cut it and send it downstream</strong>, or <strong>remove it entirely</strong>. Each choice cascades into shared water, habitat, and infrastructure systems — and onto the other players.</div>
+  </div>
+</div>
+
+<div class="sec-note">Four asymmetric roles, each with one skill no one else has.</div>
+
+<div class="cols cols-4">
+  <div class="col col-farmer">
+    <div class="col-h">Farmer</div>
+    <div class="col-b">Needs reliable irrigation through wet and dry seasons without drawing the creek below fish-passage levels.</div>
+    <div class="col-skill"><span class="lbl">Skill</span><span class="txt">Build a storage pond to bank wet-season water.</span></div>
+  </div>
+  <div class="col col-eco">
+    <div class="col-h">Ecologist</div>
+    <div class="col-b">Wants large blocking logs left in place, healthy riparian buffers, and enough flow for salmon.</div>
+    <div class="col-skill"><span class="lbl">Skill</span><span class="txt">Anchor logs to the bank.</span></div>
+  </div>
+  <div class="col col-road">
+    <div class="col-h">Road Manager</div>
+    <div class="col-b">Keeps culverts and bridges intact — and pays when drifting debris from upstream jams them.</div>
+    <div class="col-skill"><span class="lbl">Skill</span><span class="txt">Install a debris deflector at a crossing.</span></div>
+  </div>
+  <div class="col col-land">
+    <div class="col-h">Land Manager</div>
+    <div class="col-b">Protects managed land and the town from storms made worse by an elevated flood-risk track.</div>
+    <div class="col-skill"><span class="lbl">Skill</span><span class="txt">Open a floodplain to slow flood pulses.</span></div>
+  </div>
+</div>
+
+<div class="pull">
+  <div class="pull-lbl">Core design tension</div>
+  <div class="pull-b">The cheap short-term fix — cutting or removing wood, drawing more water — helps the acting player and harms others now or later. The best collective outcome depends on trust, coordination, and reading the creek correctly.</div>
+</div>
+
+<!-- ── Materials ────────────────────────────────────────────── -->
+<div class="sec-h">Materials</div>
+
+<div class="mat-list">
+  <a class="mat-row" href="dev_plan.html">
+    <span class="mat-num">01</span>
+    <span>
+      <span class="mat-h">Development plan</span>
+      <span class="mat-b">Project summary, core game mechanics, tech stack, phased timeline and deliverables, and risk mitigation.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+
+  <a class="mat-row" href="logic_map.html">
+    <span class="mat-num">02</span>
+    <span>
+      <span class="mat-h">Logic map</span>
+      <span class="mat-b">Interactive flow of the fallen-wood mechanic: log classification, the three player decisions, cascades to shared systems, and the flood-risk track. Click any box for detail.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+
+  <a class="mat-row" href="how_to_play.html">
+    <span class="mat-num">03</span>
+    <span>
+      <span class="mat-h">How to play</span>
+      <span class="mat-b">Player-facing rules: goals, roles and special skills, turn structure, major and minor actions, water sharing, seasons, and metrics. Collapsible facilitator notes.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+
+  <a class="mat-row" href="game_map.png">
+    <span class="mat-num">04</span>
+    <span>
+      <span class="mat-h">Game map</span>
+      <span class="mat-b">The initial state of the game world — the creek's headwaters and tributaries, the farm valley, and the town on the floodplain.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+
+  <a class="mat-row" href="https://docs.google.com/presentation/d/18-H9f1gXDG3Sha83kZH4HWGCupGyMDNmxrmrv18mtuo/edit?usp=sharing">
+    <span class="mat-num">05</span>
+    <span>
+      <span class="mat-h">Character designs</span>
+      <span class="mat-b">Visual designs for the four player characters in the game's retro pixel-art style.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+
+  <a class="mat-row" href="https://docs.google.com/document/d/14ORflcxOOghNoLhrbyjEcngKtoC_PluRkDteBoZ3G04/edit?usp=sharing">
+    <span class="mat-num">06</span>
+    <span>
+      <span class="mat-h">Open research questions</span>
+      <span class="mat-b">Literature-review findings on hydrology, habitat, infrastructure, and agriculture that ground the simulation's numbers, with the questions still awaiting expert calibration.</span>
+    </span>
+    <span class="mat-go">Open &rarr;</span>
+  </a>
+</div>
+
+</div><!-- /wrap -->
+</body>
+</html>
