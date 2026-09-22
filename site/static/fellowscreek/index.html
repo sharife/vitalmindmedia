@@ -20,6 +20,7 @@ body {
   background: #f7f4ea;
   color: #5c6f78;
 }
+body.modal-open { overflow: hidden; }
 .wrap {
   max-width: 1180px;
   margin: 0 auto;
@@ -121,10 +122,91 @@ h1 {
   letter-spacing: .1em; color: #8a9499; white-space: nowrap; padding-top: 0.3rem;
 }
 .mat-row:hover .mat-go { color: #16211f; }
+
+/* ── Map modal ─────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 2rem;
+  background: rgba(22, 33, 31, .78);
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  display: flex; flex-direction: column;
+  width: 100%; max-width: 1400px; max-height: 100%;
+  background: #f7f4ea;
+  border: 1px solid #ddd6c0;
+  border-radius: 8px;
+  box-shadow: 0 18px 50px rgba(22, 33, 31, .35);
+  overflow: hidden;
+}
+.modal-head {
+  display: flex; align-items: baseline; gap: 1rem;
+  padding: 0.9rem 1.1rem 0.85rem;
+  border-bottom: 1px solid #ddd6c0;
+  flex-shrink: 0;
+}
+.modal-title {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: #16211f;
+}
+.modal-hint {
+  font-size: 0.75rem; color: #8a9499; flex: 1;
+}
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.1rem; line-height: 1; color: #8a9499;
+  padding: 0.2rem 0.35rem; border-radius: 4px;
+  align-self: center;
+  transition: color .15s, background .15s;
+}
+.modal-close:hover, .modal-close:focus-visible {
+  color: #16211f; background: rgba(255,255,255,.8); outline: none;
+}
+.modal-body {
+  flex: 1; min-height: 0;
+  overflow: auto;
+  /* Grid, not flex: a flex item keeps min-width/min-height auto and so refuses
+     to shrink below the image's intrinsic 2200px, which defeats max-width. */
+  display: grid; place-items: center;
+  padding: 1rem;
+  background: #efe9da;
+}
+.modal-img {
+  display: block;
+  /* Viewport-based, not a percentage: the modal body's height depends on this
+     image, so a percentage max-height has nothing definite to resolve against.
+     10rem covers the backdrop padding, the header, and the body padding. */
+  min-width: 0; min-height: 0;
+  max-width: 100%; max-height: calc(100vh - 10rem);
+  object-fit: contain;
+  cursor: zoom-in;
+  background: #fff;
+  border: 1px solid #ddd6c0;
+}
+.modal-body.zoomed { place-items: start; }
+.modal-body.zoomed .modal-img {
+  max-width: none; max-height: none;
+  width: auto; height: auto;
+  cursor: zoom-out;
+}
+.modal-fallback {
+  display: none;
+  font-size: 0.87rem; line-height: 1.6; color: #5c6f78;
+  text-align: center; padding: 3rem 1rem; max-width: 46ch;
+}
+.modal-fallback a { color: #16211f; }
+.modal-body.failed .modal-img { display: none; }
+.modal-body.failed .modal-fallback { display: block; }
+
 @media (max-width: 640px) {
   .wrap { padding: 2rem 1rem 3rem; }
   .mat-row { grid-template-columns: 2rem minmax(0, 1fr); column-gap: 0.75rem; }
   .mat-go { grid-column: 2; padding-top: 0.5rem; }
+  .modal-backdrop { padding: 0.75rem; }
+  .modal-hint { display: none; }
+  .modal-img { max-height: calc(100vh - 7rem); }
 }
 </style>
 </head>
@@ -216,7 +298,7 @@ h1 {
     <span class="mat-go">Open &rarr;</span>
   </a>
 
-  <a class="mat-row" href="game_map.png">
+  <a class="mat-row" id="map-link" href="game_map.png">
     <span class="mat-num">04</span>
     <span>
       <span class="mat-h">Game map</span>
@@ -245,5 +327,80 @@ h1 {
 </div>
 
 </div><!-- /wrap -->
+
+<!-- ── Game map modal ───────────────────────────────────────── -->
+<div class="modal-backdrop" id="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-modal-title" hidden>
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="map-modal-title">Game map</span>
+      <span class="modal-hint" id="map-modal-hint">Click the map to zoom · Esc to close</span>
+      <button class="modal-close" type="button" id="map-modal-close" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="modal-body" id="map-modal-body">
+      <img class="modal-img" id="map-modal-img" alt="Fellows Creek game map — headwaters and tributaries, the farm valley, and the town on the floodplain.">
+      <p class="modal-fallback">The map image couldn&rsquo;t be loaded. Check that <code>game_map.png</code> sits in the same folder as this page.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var link     = document.getElementById('map-link');
+  var backdrop = document.getElementById('map-modal');
+  var body     = document.getElementById('map-modal-body');
+  var img      = document.getElementById('map-modal-img');
+  var hint     = document.getElementById('map-modal-hint');
+  var closeBtn = document.getElementById('map-modal-close');
+  var lastFocus = null;
+
+  // Load the image only on first open, from the link's own href.
+  function ensureLoaded() {
+    if (img.getAttribute('src')) return;
+    img.onerror = function () { body.classList.add('failed'); hint.textContent = ''; };
+    img.setAttribute('src', link.getAttribute('href'));
+  }
+
+  function open() {
+    lastFocus = document.activeElement;
+    ensureLoaded();
+    backdrop.hidden = false;
+    backdrop.classList.add('open');
+    document.body.classList.add('modal-open');
+    closeBtn.focus();
+  }
+
+  function close() {
+    backdrop.classList.remove('open');
+    backdrop.hidden = true;
+    document.body.classList.remove('modal-open');
+    body.classList.remove('zoomed');
+    // Deferred so a backdrop click doesn't hand focus back to <body> after us.
+    setTimeout(function () { if (lastFocus && lastFocus.focus) lastFocus.focus(); }, 0);
+  }
+
+  // Let modified clicks (new tab/window, download) fall through to the href.
+  link.addEventListener('click', function (e) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    open();
+  });
+
+  closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('mousedown', function (e) { if (e.target === backdrop) close(); });
+
+  // Toggle fit-to-window / actual size.
+  img.addEventListener('click', function () {
+    body.classList.toggle('zoomed');
+    if (!body.classList.contains('zoomed')) { body.scrollTop = 0; body.scrollLeft = 0; }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (backdrop.hidden) return;
+    if (e.key === 'Escape') { close(); return; }
+    // Keep focus inside the dialog.
+    if (e.key === 'Tab') { e.preventDefault(); closeBtn.focus(); }
+  });
+})();
+</script>
 </body>
 </html>
