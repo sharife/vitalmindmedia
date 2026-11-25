@@ -8,7 +8,7 @@
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Palette — light "field notebook" theme (matches dev plan v5 + logic map v3) ─
+/* ── Palette — light "field notebook" theme (matches dev plan v5 + logic map v4) ─
    page #f7f4ea · surface #ffffff · inset #efe8d4 · border #ddd6c0
    ink (headings) #16211f · strong #223138 · body #46545c · muted #5c6f78 · label #5e7480
    sage/teal #1f7a4d · ochre #8a5c1c · rust #9c3f2b · ocean #1c6488 · moss #3f6b1f
@@ -333,10 +333,10 @@ details.facilitator > summary:hover { color: #223138; }
   <details class="facilitator">
     <summary>Facilitator notes <span class="fac-tag">research-grounded</span></summary>
     <div class="fac-body">
-      <p>Not all logs are equal, and the game classifies each one when it arrives by <strong>size</strong> and <strong>orientation</strong>. Large logs lying across the flow are the high-value ones — in coastal field studies, roughly <strong>43% of logs over ~60&nbsp;cm diameter formed pools</strong>, versus about <strong>6% of medium (15–30&nbsp;cm) logs</strong>. A log lying parallel to the current does little regardless of size.</p>
-      <p>Channel width changes the math. Fellows Creek runs <strong>~4&nbsp;m wide in the headwaters, 8–10&nbsp;m mid-watershed, and 18–20&nbsp;m near the estuary</strong>. A medium log can span a narrow headwater channel (acting like a large one) but can't reach across the lower reach. A useful threshold: a 20&nbsp;cm log becomes meaningful at roughly <strong>5–6&nbsp;m channel width</strong>. For this watershed's logging history, treat <strong>&gt;30–40&nbsp;cm as "large,"</strong> with &gt;60&nbsp;cm as a rare keystone-log event.</p>
+      <p>Not all logs are equal, and the game classifies each one when it arrives — first by <strong>length compared with the channel's width</strong>, then by <strong>orientation</strong>. A log shorter than half the channel width is <strong>small</strong> (debris); one between half and the full width is <strong>medium</strong>; one long enough to span the channel is <strong>large</strong>. A medium log the Ecologist anchors to the bank counts as large. Large logs lying across the flow are the high-value ones: they stay put through high water and carve the deepest pools. A log lying parallel to the current does little regardless of length.</p>
+      <p>Because size is measured against channel width, the same log changes class from reach to reach. Fellows Creek runs <strong>~160&nbsp;in wide in the headwaters, ~315–395&nbsp;in mid-watershed, and ~710–790&nbsp;in near the estuary</strong>. A 300&nbsp;in (25&nbsp;ft) log is <strong>large</strong> in the headwaters, <strong>medium</strong> mid-watershed, and <strong>small</strong> near the estuary — which is why single logs matter most upstream and jams dominate the lower reach. The 50% / 100% breakpoints are starting values for playtesting, not literature-derived.</p>
       <p>The key tension to surface in play: <strong>removal costs hit fast, recovery comes slow.</strong> A stripped reach loses pool structure within a few high-flow seasons, but rebuilding it after logs return takes <strong>3–10 years</strong>. The cheap short-term choice carries a delayed price.</p>
-      <p class="src">Sources: Open Research Questions (sections 3–4, 7); logic map v3 woody-debris chain. Habitat-score deltas still flagged for expert calibration.</p>
+      <p class="src">Sources: Open Research Questions (sections 3–4, 7); logic map v4 woody-debris chain. Habitat-score deltas still flagged for expert calibration.</p>
     </div>
   </details>
 </div>
@@ -367,7 +367,7 @@ details.facilitator > summary:hover { color: #223138; }
     <summary>Facilitator notes <span class="fac-tag">research-grounded</span></summary>
     <div class="fac-body">
       <p><strong>Irrigation &amp; fish passage.</strong> This is a dry-season problem, not a year-round one. A working threshold for calibration: drawing more than about <strong>20% of low-season (summer) flow</strong> starts to break pool connectivity for fish. In a drought year even a 10% draw can strand fish; in a normal year a farm might draw 30% with little impact. A <strong>storage pond (1–5 acre-feet)</strong> lets the Farmer carry through 6–8 dry weeks and can become a bargaining chip with other players.</p>
-      <p><strong>Riparian buffers — two tiers.</strong> A narrow buffer of <strong>10&nbsp;m</strong> earns partial credit (sediment capture, some shade); a wide buffer of <strong>20&nbsp;m+</strong> gives full credit (nutrient filtering and canopy closure too). Note the cross-role link: if the Farmer clears the bank to the creek's edge, the Ecologist loses the source material to add logs in that reach.</p>
+      <p><strong>Riparian buffers — two tiers.</strong> A narrow buffer of <strong>~395&nbsp;in (33&nbsp;ft)</strong> earns partial credit (sediment capture, some shade); a wide buffer of <strong>~790&nbsp;in (66&nbsp;ft)+</strong> gives full credit (nutrient filtering and canopy closure too). Note the cross-role link: if the Farmer clears the bank to the creek's edge, the Ecologist loses the source material to add logs in that reach.</p>
       <p><strong>Channelizing.</strong> Straightened reaches can advance flood-peak timing by hours and raise peak discharge <strong>20–40%</strong> versus a meandering reach. Upstream channelizing is paid for by the Road and Land Managers downstream.</p>
       <p><strong>Culverts.</strong> Most common failure is inlet blockage by debris, then capacity exceedance in storms. The Road Manager's upgrade ladder: cheap debris clearing → mid-cost inlet deflectors → expensive oversized replacement. A storm failure realistically costs <strong>$50k–$150k</strong> to repair — painful but survivable; two failures at once can be catastrophic.</p>
       <p class="src">Sources: Open Research Questions (sections 8–9). Specific thresholds are starting values pending expert interviews.</p>

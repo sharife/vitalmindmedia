@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fellows Creek — Fallen Wood Logic Map v3</title>
+<title>Fellows Creek — Fallen Wood Logic Map v4</title>
 <style>
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -190,10 +190,10 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
 <body>
 <div class="wrap">
 
-<h1>Fellows Creek — Fallen Wood Logic Map v3</h1>
+<h1>Fellows Creek — Fallen Wood Logic Map v4</h1>
 <p class="subtitle">
-  Log classification by size and orientation, three player decisions, cascading system effects, and the long-term flood risk accumulation track.<br>
-  Click any box for detail and open research questions. Diameter thresholds from Phase 1 literature review (Elicit scan).
+  Log classification by length (as a percentage of channel width) and orientation, three player decisions, cascading system effects, and the long-term flood risk accumulation track.<br>
+  Click any box for detail and open research questions. Length thresholds are starting values pending calibration; all measurements in inches.
 </p>
 
 <div id="diagram-wrap">
@@ -223,25 +223,25 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
     <div class="row">
       <div class="node c-purple" id="n-classify" style="text-align:center;" onclick="openModal('classify')">
         <div class="nt">Log classified on arrival</div>
-        <div class="ns">Diameter &amp; length vs. channel width &times; orientation (blocking / partial / parallel)</div>
+        <div class="ns">Length as % of channel width &rarr; then orientation (blocking / partial / parallel)</div>
       </div>
     </div>
 
     <div style="height:56px;"></div>
 
-    <!-- R3: Size buckets -->
+    <!-- R3: Size buckets (by length relative to channel width) -->
     <div class="row">
       <div class="node c-gray"  id="n-small"  onclick="openModal('small')">
-        <div class="nt">Small (&lt;10 cm dia.)</div>
-        <div class="ns">Short or unanchored pieces also qualify. Debris only — low habitat value regardless of angle.</div>
+        <div class="nt">Small (&lt;50% of channel width)</div>
+        <div class="ns">Too short to lodge against a bank. Debris only — low habitat value regardless of angle.</div>
       </div>
       <div class="node c-teal"  id="n-medium" onclick="openModal('medium')">
-        <div class="nt">Medium (15–30 cm dia.)</div>
-        <div class="ns">Only ~6% form pools at this size — habitat value depends on orientation &amp; channel width.</div>
+        <div class="nt">Medium (50–100% of channel width)</div>
+        <div class="ns">Can reach one bank and partly obstruct flow — habitat value depends on orientation &amp; anchoring.</div>
       </div>
       <div class="node c-teal"  id="n-large"  onclick="openModal('large')">
-        <div class="nt">Large (&gt;60 cm dia.)</div>
-        <div class="ns">OR channel-spanning / bank-anchored at any size. ~43% of pieces form pools — check orientation.</div>
+        <div class="nt">Large (&ge;100% of channel width)</div>
+        <div class="ns">Long enough to span the channel. OR bank-anchored medium log. Most stable — check orientation.</div>
       </div>
     </div>
 
@@ -251,7 +251,7 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
     <div class="row">
       <div class="node c-gray"  id="n-parallel"       onclick="openModal('parallel')">
         <div class="nt">Parallel to flow</div>
-        <div class="ns">Habitat value: none. Treat as small log regardless of size.</div>
+        <div class="ns">Habitat value: none. Treat as small log regardless of length.</div>
       </div>
       <div class="node c-teal"  id="n-blocking-med"   onclick="openModal('blocking-med')">
         <div class="nt">Blocking / partial — medium</div>
@@ -390,8 +390,8 @@ h1 { font-size: 1.44rem; font-weight: 600; margin-bottom: 0.375rem; color: #1621
   </div>
 </div>
 <p class="footnote">
-  * Diameter thresholds from Phase 1 Elicit scan (coastal BC field studies). Pool-formation rates: ~6% at 15–30 cm dia., ~43% at &gt;60 cm dia.<br>
-  Length is secondary to diameter — a short, thick, bank-anchored log outperforms a long thin one. Calibrate to Fellows Creek channel width in expert interviews.
+  * Size class = log length &divide; bankfull channel width of the reach where it lands. Reach widths: headwaters ~160&nbsp;in, mid-watershed ~315–395&nbsp;in, lower reach ~710–790&nbsp;in. The same log can be Large in the headwaters and Small near the estuary.<br>
+  Thresholds (50% / 100%) are starting values for calibration, not literature-derived. Phase 1 pool-formation rates (~6% at 6–12&nbsp;in dia., ~43% at &gt;24&nbsp;in dia.) were measured by diameter and no longer map directly to these classes.
 </p>
 
 </div><!-- /wrap -->
@@ -570,16 +570,16 @@ const NODES = {
     desc:'When a log is left in place, the game checks whether the accumulation has crossed from passive habitat roughness into active hydraulic control. The transition is not about log count — it\'s about geometry: does the jam now span the channel and form a step or backwater? If yes, flood risk rises even though the original decision was "Leave."',
     details:[
       'Key variable: blockage ratio — the proportion of the channel cross-section obstructed by wood.',
-      'In one case-study/model, a 75% blockage produced only ~0.3 m of backwater rise at low flow. Effect is larger at flood stage.',
+      'In one case-study/model, a 75% blockage produced only ~12 in of backwater rise at low flow. Effect is larger at flood stage.',
       'The inflection point is structural: a channel-spanning, step-forming jam behaves like a hydraulic control, not just roughness.',
       'In game terms: leaving a single qualifying log = habitat benefit only. But if that reach already holds several large blocking logs, the jam-check fires and may also raise the flood risk track.',
       'Practical simplification: trigger the jam-check when ≥2 large blocking logs occupy the same reach tile.',
     ],
     questions:[
-      'What is the channel width of Fellows Creek? This determines the blockage ratio for a given log diameter.',
+      'What is the channel width of Fellows Creek? Together with log length, this determines how much of the cross-section a jam can block.',
       'Expert calibration: at what number of large logs in a single reach should the game trigger a jam-structure penalty?',
       'Should the jam-check be transparent to players (shown as a warning) or a hidden mechanic they have to discover?',
-      'Is the 75% blockage / 0.3 m backwater figure from the Elicit study applicable to Fellows Creek\'s slope and discharge regime?',
+      'Is the 75% blockage / 12 in backwater figure from the Elicit study applicable to Fellows Creek\'s slope and discharge regime?',
       'Should log jams that form naturally (player chose Leave multiple times) be treated differently from engineered log jams placed by the Ecologist?',
     ]
   },
@@ -602,25 +602,28 @@ const NODES = {
   classify: {
     tag:'Classification', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#4b3fa0',
     title:'Log classified on arrival',
-    desc:'Each log is assessed on two axes: (1) its size class by diameter, and (2) its orientation relative to flow. The combination determines its baseline habitat value before the player decides what to do.',
+    desc:'Each log is assessed in two steps: (1) its size class, set by its length as a percentage of the bankfull channel width where it lands, and (2) its orientation relative to flow. The combination determines its baseline habitat value before the player decides what to do.',
     details:[
-      'Diameter is the primary proxy for pool-forming potential (field studies confirm this over length).',
-      'Orientation is the secondary filter — even a large log loses most habitat value if it lies parallel to flow.',
-      'Bank-anchoring and channel-spanning override the diameter threshold for small or medium logs.',
+      'Size classes: Small <50% of channel width · Medium 50–100% · Large ≥100% (channel-spanning).',
+      'Because the class is relative to channel width, the same log changes class by reach. A 300 in (25 ft) log is Large in the headwaters (~160 in wide), Medium mid-watershed (~315–395 in), and Small near the estuary (~710–790 in).',
+      'Orientation is the second filter — even a channel-spanning log loses most habitat value if it lies parallel to flow.',
+      'Bank-anchoring can promote a Medium log to Large.',
+      'Minimum to count as large wood at all: roughly >4 in diameter. Below that, treat as Small regardless of length.',
     ],
     questions:[
-      'What is the actual channel width of Fellows Creek? This determines whether a "medium" log can span it.',
+      'Are 50% and 100% of channel width the right breakpoints? These are starting values, not literature-derived — Elicit search on pool formation and log stability vs. length-to-width ratio needed.',
+      'Phase 1 pool-formation rates (~6% / ~43%) were measured by diameter. Is there an equivalent figure by length-to-width ratio?',
       'Should the game show players the classification, or require them to infer it?',
       'How much uncertainty to build in — should orientation be ambiguous sometimes?',
     ]
   },
   small: {
     tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#223138',
-    title:'Small log (<10 cm diameter)',
-    desc:'Below the meaningful hydraulic threshold. These logs, and any short or unanchored pieces regardless of diameter, act as simple debris. They contribute little to pool formation or habitat value.',
+    title:'Small log (<50% of channel width)',
+    desc:'Too short to lodge against a bank or obstruct a meaningful share of the channel. These logs, and any unanchored pieces that move freely in flow, act as simple debris. They contribute little to pool formation or habitat value.',
     details:[
-      'Inventory threshold in the literature: >10 cm dia. and >2 m long to count as LWD at all.',
-      'Unanchored pieces — even if large — behave like small logs in flow.',
+      'Inventory threshold in the literature: >4 in dia. and >79 in (6.5 ft) long to count as large wood at all.',
+      'Short logs are the most mobile — they move in moderate flows rather than staying put.',
       'In game terms: small logs are low-stakes. The decision still matters at scale (accumulation effects).',
     ],
     questions:[
@@ -630,31 +633,31 @@ const NODES = {
   },
   medium: {
     tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
-    title:'Medium log (15–30 cm diameter)',
-    desc:'Pool-forming potential is low but non-zero (~6% of pieces in this range formed pools in coastal BC field studies). Habitat value is orientation-dependent — a perpendicular, bank-anchored medium log in a small channel can punch above its weight class.',
+    title:'Medium log (50–100% of channel width)',
+    desc:'Long enough to reach one bank and partly obstruct flow, but not to span the channel. Habitat value is orientation-dependent — a perpendicular, bank-anchored medium log can punch above its weight class and is promoted to Large.',
     details:[
-      '~6% pool-formation rate at this diameter range (coastal BC study).',
-      'Orientation and channel width are the decisive variables at this size.',
-      'In narrow channels, a medium log spanning the full width behaves like a large log.',
+      'Orientation and anchoring are the decisive variables at this size.',
+      'Without anchoring, a medium log is more likely to shift or be carried off in the next high-flow event.',
+      'In the mid-watershed reaches (~315–395 in wide), many logs fall in this class — this is where the classification decision is hardest.',
     ],
     questions:[
-      'What is the typical channel width of Fellows Creek reaches — narrow enough that medium logs can span it?',
       'Should orientation be shown to the player, or hidden to create uncertainty?',
-      'Expert calibration needed: at what channel width does a 20 cm log "become" meaningful?',
+      'Expert calibration needed: at what length-to-width ratio does a partially spanning log start forming pools reliably?',
+      'Should a bank-anchored medium log be promoted to Large automatically, or only after a turn or season in place?',
     ]
   },
   large: {
     tag:'Size class', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#1f7a4d',
-    title:'Large log (>60 cm diameter)',
-    desc:'High pool-forming potential (~43% of pieces at this diameter formed pools in field studies). Any log that is channel-spanning or bank-anchored, regardless of its diameter, should be treated in this category.',
+    title:'Large log (≥100% of channel width)',
+    desc:'Long enough to span the channel bank to bank. Logs longer than the channel is wide are the most stable in flow and have the highest pool-forming potential. Bank-anchored medium logs are also treated in this category.',
     details:[
-      '~43% pool-formation rate at >60 cm diameter (coastal BC study).',
-      'Bank-anchored and channel-spanning logs at any size override the diameter rule.',
+      'Channel-spanning logs tend to stay in place through high-flow events; shorter logs move more readily.',
+      'Bank-anchored logs at 50–100% of channel width are promoted to this class.',
       'Multi-piece aggregates (log jams) should also be classified here for habitat scoring.',
       'Perpendicular + large = highest habitat value in the system.',
     ],
     questions:[
-      'Are logs >60 cm dia. realistic in Fellows Creek\'s riparian zone, or should the threshold be lower?',
+      'In the lower reach (~710–790 in wide), are single channel-spanning logs realistic, or will Large there almost always mean a jam?',
       'Should log jams be treated as a separate class from single large pieces?',
       'What is a realistic salmon habitat score delta from a single large blocking log?',
     ]
@@ -662,7 +665,7 @@ const NODES = {
   parallel: {
     tag:'Orientation', tagColor:'#f1ede0', tagBorder:'#ddd6c0', tagText:'#223138',
     title:'Parallel to flow',
-    desc:'A log aligned with the current direction creates minimal flow deflection and does not form scour pools. Its habitat value is negligible regardless of diameter — treat it as a small log for scoring purposes.',
+    desc:'A log aligned with the current direction creates minimal flow deflection and does not form scour pools. Its habitat value is negligible regardless of length — treat it as a small log for scoring purposes.',
     details:[
       'Parallel logs still contribute to bank stabilisation marginally over long timescales.',
       'They can still become part of a log jam if they collect other debris.',
@@ -697,7 +700,7 @@ const NODES = {
       'Multi-piece jams anchored by a large log are even more valuable ecologically.',
     ],
     questions:[
-      'Expert calibration: if a player removes all large blocking logs from a 1 km reach, what is a realistic salmon habitat score change over 1 season? Over 5 years?',
+      'Expert calibration: if a player removes all large blocking logs from a ~39,400 in (0.6 mi) reach, what is a realistic salmon habitat score change over 1 season? Over 5 years?',
       'Should the game model the gradual habitat recovery if a reach is later allowed to re-accumulate debris?',
     ]
   },
@@ -735,7 +738,7 @@ const NODES = {
     title:'Cut & send downstream',
     desc:'The log is cut into smaller pieces and allowed to float downstream. Low budget cost to the acting player, but the debris risk is transferred to the next reach downstream.',
     details:[
-      'The receiving player gets a log (now fragmented — smaller effective size class).',
+      'The receiving player gets a log (now fragmented — shorter, so a smaller size class).',
       'Fragmented pieces are less likely to form pools but more likely to jam culverts.',
       'In aggregate, many cut-and-sent logs sharply raise Infrastructure damage risk downstream.',
     ],
@@ -773,7 +776,7 @@ const NODES = {
       'How does upstream land use (cleared vs. forested) compound the flood risk track effect?',
       'What is a realistic lag time between removal and flood peak change in a small coastal watershed?',
       'Should the track be visible to all players, or hidden until a storm event reveals the consequence?',
-      'Expert calibration: if 10 large logs are removed from a 1 km reach, what is the realistic change in flood peak timing?',
+      'Expert calibration: if 10 large logs are removed from a ~39,400 in (0.6 mi) reach, what is the realistic change in flood peak timing?',
     ]
   },
   water: {
@@ -802,7 +805,7 @@ const NODES = {
     ],
     questions:[
       'What are measurable differences in salmon habitat quality between a reach with LWD vs. one that has been cleared?',
-      'What is the minimum riparian buffer an ecologist would consider meaningful — 5m? 20m?',
+      'What is the minimum riparian buffer an ecologist would consider meaningful — ~200 in (16 ft)? ~790 in (66 ft)?',
       'Should wildlife score be separate from fish score, or combined?',
     ]
   },
@@ -846,7 +849,7 @@ const NODES = {
       'May have tools to plant riparian vegetation or add engineered log jams.',
     ],
     questions:[
-      'If a player removes all LWD from a 1 km reach, what is a realistic change in salmon habitat score over one season? Over five years?',
+      'If a player removes all LWD from a ~39,400 in (0.6 mi) reach, what is a realistic change in salmon habitat score over one season? Over five years?',
       'What is the minimum viable riparian buffer that an ecologist would consider "meaningful"?',
       'Should the ecologist be able to add logs (from the riparian zone) as a positive action?',
     ]
